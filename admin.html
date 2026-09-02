@@ -116,6 +116,12 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
 .field.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .check-row{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;}
 .check-row input{width:16px;height:16px;accent-color:var(--rose);}
+.tag-group{margin-bottom:10px;}
+.tag-group-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--rose);margin-bottom:6px;}
+.tag-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.tag-chip{display:flex;align-items:center;gap:5px;padding:6px 11px;border:1.5px solid var(--line-strong);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;}
+.tag-chip input{width:13px;height:13px;accent-color:var(--rose);margin:0;}
+.tag-chip.checked{border-color:var(--rose);background:rgba(183,40,46,0.06);}
 .upload-box{border:1.5px dashed var(--line-strong);border-radius:11px;padding:16px;text-align:center;font-size:12px;color:var(--muted);cursor:pointer;background:var(--surface);transition:border-color .15s;}
 .upload-box:hover{border-color:var(--rose);}
 .upload-box img{max-width:100%;max-height:120px;border-radius:8px;}
@@ -304,6 +310,7 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
           <option value="Mug">Mug</option>
           <option value="Tote Bag">Tote Bag</option>
           <option value="T-Shirt">T-Shirt</option>
+          <option value="Fridge Magnet">Fridge Magnet</option>
           <option value="Hamper">Hamper</option>
         </select>
       </div>
@@ -327,8 +334,8 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <div class="check-row"><input type="checkbox" id="pf-highlight"> Show on Highlight (Customised / Category tab ke top pe dikhega — new arrivals, occasion picks)</div>
     </div>
     <div class="field">
-      <label>Occasion tags (comma se separate — e.g. rakhi, birthday, anniversary)</label>
-      <input type="text" id="pf-occasions" placeholder="rakhi, birthday">
+      <label>Tags — Occasion / Person / Mood (jitne apply hote hain sab tick karo — ek product multiple occasions/persons/moods mein dikh sakta hai)</label>
+      <div id="pfTagGroups"></div>
     </div>
     <div class="field">
       <div class="check-row"><input type="checkbox" id="pf-active" checked> Active (storefront pe dikhega)</div>
@@ -422,6 +429,35 @@ const SITE_IMAGE_GROUPS = [
   ]},
 ];
 let siteImagesCache = {};
+
+/* Product tags — derived from the same groups above so keys always stay in
+   sync with the Person/Feeling/Occasion cards on the storefront home page.
+   Ek product multiple tags le sakta hai (e.g. 'rakhi' + 'brother' + 'love'). */
+const TAG_GROUPS = [
+  { title:'Person', tags: GIFT_RECIPIENTS },
+  { title:'Mood / Feeling', tags: SITE_IMAGE_GROUPS.find(g => g.title === 'Gifts for Every Feeling').items.map(i => ({key:i.key.replace('feeling_',''), label:i.label})) },
+  { title:'Occasion', tags: SITE_IMAGE_GROUPS.find(g => g.title === 'Gifts for Every Occasion').items.map(i => ({key:i.key.replace('occasion_',''), label:i.label})) },
+];
+function renderTagGroups(selectedKeys){
+  const sel = new Set(selectedKeys || []);
+  document.getElementById('pfTagGroups').innerHTML = TAG_GROUPS.map(g => `
+    <div class="tag-group">
+      <div class="tag-group-title">${g.title}</div>
+      <div class="tag-chips">
+        ${g.tags.map(t => `
+          <label class="tag-chip ${sel.has(t.key) ? 'checked' : ''}">
+            <input type="checkbox" value="${t.key}" onchange="this.closest('.tag-chip').classList.toggle('checked', this.checked)">
+            ${t.label}
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+function getCheckedTags(){
+  return [...document.querySelectorAll('#pfTagGroups input:checked')].map(i => i.value)
+    .filter((v, i, arr) => arr.indexOf(v) === i); // dedupe (e.g. 'congrats' overlaps Feeling + Occasion)
+}
 
 /* Shared inline icons */
 const ICON_PHOTO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>`;
@@ -584,7 +620,7 @@ function openProductModal(id){
     document.getElementById('pf-customisable').checked = p.customisable;
     document.getElementById('pf-custfee').value = p.customisation_fee || 0;
     document.getElementById('pf-highlight').checked = !!p.highlight;
-    document.getElementById('pf-occasions').value = (p.occasion_tags || []).join(', ');
+    renderTagGroups(p.tags || []);
     document.getElementById('pf-active').checked = p.active;
     if(p.image_url) document.getElementById('pf-photo-box').innerHTML = `<img src="${p.image_url}">`;
   }else{
@@ -597,7 +633,7 @@ function openProductModal(id){
     document.getElementById('pf-customisable').checked = false;
     document.getElementById('pf-custfee').value = '';
     document.getElementById('pf-highlight').checked = false;
-    document.getElementById('pf-occasions').value = '';
+    renderTagGroups([]);
     document.getElementById('pf-active').checked = true;
   }
   document.getElementById('productOverlay').classList.add('show');
@@ -643,7 +679,7 @@ async function saveProduct(){
     customisable: document.getElementById('pf-customisable').checked,
     customisation_fee: parseFloat(document.getElementById('pf-custfee').value) || 0,
     highlight: document.getElementById('pf-highlight').checked,
-    occasion_tags: document.getElementById('pf-occasions').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+    tags: getCheckedTags(),
     active: document.getElementById('pf-active').checked,
   };
 
