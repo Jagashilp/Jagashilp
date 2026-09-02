@@ -71,8 +71,8 @@
   .hero-tagline{font-family:'Dobidoo'; font-style:normal; font-size:18px; color:var(--marigold); margin:6px 0 12px;}
   .hero-content p{font-size:13px; color:rgba(255,255,255,0.82); max-width:320px; margin-bottom:18px; line-height:1.5;}
   .hero-cta{background:var(--c-black); color:var(--c-yellow); padding:14px 28px; border-radius:999px; font-weight:700; font-size:13.5px; display:inline-flex; align-items:center; gap:8px;}
-  .occ-filter-chip{display:inline-flex; align-items:center; gap:7px; margin:14px 18px 0; background:var(--c-red); color:#fff; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:999px;}
-  .occ-filter-chip svg{width:12px; height:12px;}
+  .tag-filter-chip{display:inline-flex; align-items:center; gap:7px; margin:14px 18px 0; background:var(--c-red); color:#fff; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:999px;}
+  .tag-filter-chip svg{width:12px; height:12px;}
 
   /* ============ QUICK LINKS ============ */
   .quicklinks{display:flex; gap:18px; padding:22px 18px 6px; overflow-x:auto; scrollbar-width:none;}
@@ -400,13 +400,7 @@
   <div class="search-row">
     <div class="search-box" id="searchBox"></div>
   </div>
-  <div class="pill-tabs" id="typeTabs">
-    <button class="pill active" data-type="All">All</button>
-    <button class="pill" data-type="Keychain">Keychains</button>
-    <button class="pill" data-type="Mug">Mugs</button>
-    <button class="pill" data-type="Tote Bag">Tote Bags</button>
-    <button class="pill" data-type="T-Shirt">T-Shirts</button>
-  </div>
+  <div class="pill-tabs" id="typeTabs"></div>
 </div>
 
 <div id="homeView">
@@ -478,14 +472,8 @@
 
 <!-- ============ FULL SHOP GRID ============ -->
 <div class="section-head" id="shopGrid"><div><div class="eyebrow">Full Catalog</div><h2>Shop All Products</h2></div></div>
-<div id="occasionFilterChip"></div>
-<div class="cat-strip" id="catStrip">
-  <button class="cat-chip active" data-type="All">All</button>
-  <button class="cat-chip" data-type="Keychain">Keychains</button>
-  <button class="cat-chip" data-type="Mug">Mugs</button>
-  <button class="cat-chip" data-type="Tote Bag">Tote Bags</button>
-  <button class="cat-chip" data-type="T-Shirt">T-Shirts</button>
-</div>
+<div id="tagFilterChip"></div>
+<div class="cat-strip" id="catStrip"></div>
 <div class="grid" id="productGrid"></div>
 
 <footer>
@@ -507,13 +495,7 @@
   <div class="section-head"><div><div class="eyebrow">Fresh Picks</div><h2>Highlighted</h2></div></div>
   <div class="hl-carousel" id="customisedHighlightRow"></div>
 
-  <div class="cat-strip" id="customisedCatStrip">
-    <button class="cat-chip active" data-type="All">All</button>
-    <button class="cat-chip" data-type="Keychain">Keychains</button>
-    <button class="cat-chip" data-type="Mug">Mugs</button>
-    <button class="cat-chip" data-type="Tote Bag">Tote Bags</button>
-    <button class="cat-chip" data-type="T-Shirt">T-Shirts</button>
-  </div>
+  <div class="cat-strip" id="customisedCatStrip"></div>
   <div class="grid" id="customisedGrid"></div>
 </div>
 
@@ -522,13 +504,7 @@
   <div class="section-head"><div><div class="eyebrow">Fresh Picks</div><h2>Highlighted</h2></div></div>
   <div class="hl-carousel" id="categoryHighlightRow"></div>
 
-  <div class="cat-strip" id="categoryCatStrip">
-    <button class="cat-chip active" data-type="All">All</button>
-    <button class="cat-chip" data-type="Keychain">Keychains</button>
-    <button class="cat-chip" data-type="Mug">Mugs</button>
-    <button class="cat-chip" data-type="Tote Bag">Tote Bags</button>
-    <button class="cat-chip" data-type="T-Shirt">T-Shirts</button>
-  </div>
+  <div class="cat-strip" id="categoryCatStrip"></div>
   <div class="grid" id="categoryGrid"></div>
 </div>
 
@@ -766,7 +742,27 @@ const I = {
 function phBox(label){ return `<div class="img-ph">${I.image}<span>${label}</span></div>`; }
 function phCircle(){ return `<div class="img-ph sm">${I.imageSm}</div>`; }
 
-const TYPE_ICON = {Keychain:I.key, Mug:I.mug, "Tote Bag":I.tote, "T-Shirt":I.shirt, Hamper:I.gift};
+const TYPE_ICON = {Keychain:I.key, Mug:I.mug, "Tote Bag":I.tote, "T-Shirt":I.shirt, "Fridge Magnet":I.gift, Hamper:I.gift};
+
+/* CATEGORIES — actual product categories (Keychain, Mug, etc.). Ye category
+   filter chips (typeTabs / catStrip / customisedCatStrip / categoryCatStrip)
+   sab yahin se ek jagah generate hote hain — naya category (e.g. "Fridge
+   Magnet") add karna ho to bas neeche is ek list mein add karo. */
+const CATEGORIES = [
+  {type:'Keychain', label:'Keychains'},
+  {type:'Mug', label:'Mugs'},
+  {type:'Tote Bag', label:'Tote Bags'},
+  {type:'T-Shirt', label:'T-Shirts'},
+  {type:'Fridge Magnet', label:'Fridge Magnets'},
+];
+function catChipsHtml(cls){
+  return `<button class="${cls} active" data-type="All">All</button>`
+    + CATEGORIES.map(c => `<button class="${cls}" data-type="${c.type}">${c.label}</button>`).join('');
+}
+document.getElementById('typeTabs').innerHTML = catChipsHtml('pill');
+document.getElementById('catStrip').innerHTML = catChipsHtml('cat-chip');
+document.getElementById('customisedCatStrip').innerHTML = catChipsHtml('cat-chip');
+document.getElementById('categoryCatStrip').innerHTML = catChipsHtml('cat-chip');
 const CUSTOMISATION_FEE = 150;
 const MAKE_HAMPER_PRICE = 499;
 const CUSTOM_HAMPER_PRICE = 999;
@@ -808,18 +804,21 @@ async function uploadCustomerPhoto(dataUrl){
   return path;
 }
 
-/* Fallback data - Supabase configure hone tak ya connection fail hone par yehi dikhta hai */
+/* Fallback data - Supabase configure hone tak ya connection fail hone par yehi dikhta hai.
+   'tags' ek hi array mein Occasion + Person + Mood — jaise index.html ke
+   home page keys (rakhi, birthday, him, her, love, congrats, etc). */
 const PRODUCTS_FALLBACK = [
-  {id:'k1', name:'Mandala Doodle Keychain', type:'Keychain', price:149, mrp:199, best:true, customisable:true, highlight:true, occasions:['rakhi','birthday']},
-  {id:'k2', name:'Peacock Feather Keychain', type:'Keychain', price:179, mrp:229, best:true, customisable:true, highlight:false, occasions:['rakhi']},
-  {id:'k3', name:'Ganesha Blessing Keychain', type:'Keychain', price:199, mrp:249, best:false, customisable:false, highlight:false, occasions:['rakhi','housewarming']},
-  {id:'k4', name:'Rangoli Charm Keychain', type:'Keychain', price:149, mrp:189, best:false, customisable:false, highlight:true, occasions:['birthday']},
-  {id:'m1', name:'Classic White Mug', type:'Mug', price:299, mrp:349, best:true, customisable:true, highlight:true, occasions:['rakhi','anniversary']},
-  {id:'m2', name:'Black Magic Mug', type:'Mug', price:349, mrp:399, best:false, customisable:false, highlight:false, occasions:['thankyou']},
-  {id:'t1', name:'Natural Canvas Tote', type:'Tote Bag', price:349, mrp:399, best:true, customisable:true, highlight:false, occasions:['congrats']},
-  {id:'t2', name:'Black Canvas Tote', type:'Tote Bag', price:399, mrp:449, best:false, customisable:false, highlight:false, occasions:[]},
-  {id:'s1', name:'White Round Neck Tee', type:'T-Shirt', price:499, mrp:599, best:true, customisable:true, highlight:true, occasions:['birthday','retirement']},
-  {id:'s2', name:'Black Round Neck Tee', type:'T-Shirt', price:549, mrp:649, best:false, customisable:false, highlight:false, occasions:['babyshower']},
+  {id:'k1', name:'Mandala Doodle Keychain', type:'Keychain', price:149, mrp:199, best:true, customisable:true, highlight:true, tags:['rakhi','birthday','sister']},
+  {id:'k2', name:'Peacock Feather Keychain', type:'Keychain', price:179, mrp:229, best:true, customisable:true, highlight:false, tags:['rakhi','brother']},
+  {id:'k3', name:'Ganesha Blessing Keychain', type:'Keychain', price:199, mrp:249, best:false, customisable:false, highlight:false, tags:['rakhi','housewarming']},
+  {id:'k4', name:'Rangoli Charm Keychain', type:'Keychain', price:149, mrp:189, best:false, customisable:false, highlight:true, tags:['birthday','friend']},
+  {id:'m1', name:'Classic White Mug', type:'Mug', price:299, mrp:349, best:true, customisable:true, highlight:true, tags:['rakhi','anniversary','him','love']},
+  {id:'m2', name:'Black Magic Mug', type:'Mug', price:349, mrp:399, best:false, customisable:false, highlight:false, tags:['thankyou']},
+  {id:'t1', name:'Natural Canvas Tote', type:'Tote Bag', price:349, mrp:399, best:true, customisable:true, highlight:false, tags:['congrats','her']},
+  {id:'t2', name:'Black Canvas Tote', type:'Tote Bag', price:399, mrp:449, best:false, customisable:false, highlight:false, tags:[]},
+  {id:'s1', name:'White Round Neck Tee', type:'T-Shirt', price:499, mrp:599, best:true, customisable:true, highlight:true, tags:['birthday','retirement','kids']},
+  {id:'s2', name:'Black Round Neck Tee', type:'T-Shirt', price:549, mrp:649, best:false, customisable:false, highlight:false, tags:['babyshower']},
+  {id:'f1', name:'Doodle Mandala Fridge Magnet', type:'Fridge Magnet', price:99, mrp:129, best:false, customisable:true, highlight:true, tags:['housewarming','thinking']},
 ];
 let PRODUCTS = PRODUCTS_FALLBACK;
 
@@ -834,7 +833,7 @@ async function loadProducts(){
         best:false, image_url:p.image_url,
         customisable:p.customisable, customisation_fee:p.customisation_fee,
         highlight: !!p.highlight,
-        occasions: p.occasion_tags || []
+        tags: p.tags || []
       }));
     }
   }catch(err){
@@ -891,11 +890,11 @@ function renderHeroOccasion(){
   if(CURRENT_OCCASION){
     eyebrowEl.innerHTML = I.sparkle + ` <span>${CURRENT_OCCASION.badge || (CURRENT_OCCASION.label + ' is coming')}</span>`;
     ctaEl.innerHTML = 'Shop Now ' + I.arrow;
-    ctaEl.onclick = (e) => { e.preventDefault(); applyOccasionFilter(CURRENT_OCCASION.key, CURRENT_OCCASION.label); };
+    ctaEl.onclick = (e) => { e.preventDefault(); applyTagFilter(CURRENT_OCCASION.key, CURRENT_OCCASION.label); };
   }else{
     eyebrowEl.innerHTML = I.sparkle + ' <span>India\'s First Personalised Gifts Brand</span>';
     ctaEl.innerHTML = 'Explore Collection ' + I.arrow;
-    ctaEl.onclick = (e) => { e.preventDefault(); clearOccasionFilter(); document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'}); };
+    ctaEl.onclick = (e) => { e.preventDefault(); clearTagFilter(); document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'}); };
   }
 }
 renderHeroOccasion();
@@ -958,7 +957,8 @@ function renderGiftsGrid(){
 }
 document.getElementById('giftsGrid').addEventListener('click', (e)=>{
   const c = e.target.closest('.gift-card'); if(!c) return;
-  document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'});
+  const g = GIFT_RECIPIENTS.find(x => x.key === c.dataset.key);
+  applyTagFilter(g.key, g.label);
 });
 
 /* ---------------- Gifts for Every Feeling ---------------- */
@@ -985,7 +985,8 @@ renderFeelings();
 [document.getElementById('feelingsRow2'), document.getElementById('feelingsRow3')].forEach(el=>{
   el.addEventListener('click', (e)=>{
     const c = e.target.closest('.feeling-card'); if(!c) return;
-    document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'});
+    const f = [...FEELINGS_ROW2, ...FEELINGS_ROW3].find(x => x.key === c.dataset.key);
+    applyTagFilter(f.key, f.label);
   });
 });
 
@@ -1019,30 +1020,30 @@ renderOccasions();
   el.addEventListener('click', (e)=>{
     const c = e.target.closest('.occasion-card'); if(!c) return;
     const o = [...OCCASIONS_ROW1, ...OCCASIONS_ROW2].find(x => x.key === c.dataset.key);
-    applyOccasionFilter(o.key, o.title);
+    applyTagFilter(o.key, o.title);
   });
 });
 
-/* ---------------- Occasion filter (hero "Shop Now" + occasion cards) ----------------
-   Products ko occasion tag lagane ke liye unke 'occasions' array mein
-   OCCASIONS_ROW1/ROW2 wali key daalo (e.g. 'rakhi'), ya admin panel ke
-   "Occasion tags" field se comma-separated likh do. */
-let activeOccasion = null; // {key, label}
-function applyOccasionFilter(key, label){
-  activeOccasion = { key, label };
+/* ---------------- Unified tag filter (hero "Shop Now" + person/mood/occasion cards) ----------------
+   Ek hi filter system Person + Mood + Occasion teeno sections ke liye —
+   products ke 'tags' array mein jo bhi key ho (e.g. 'rakhi', 'him', 'love'),
+   admin panel ke product form se checkbox se lagti hai. */
+let activeTag = null; // {key, label}
+function applyTagFilter(key, label){
+  activeTag = { key, label };
   renderProducts();
-  renderOccasionFilterChip();
+  renderTagFilterChip();
   document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'});
 }
-function clearOccasionFilter(){
-  activeOccasion = null;
+function clearTagFilter(){
+  activeTag = null;
   renderProducts();
-  renderOccasionFilterChip();
+  renderTagFilterChip();
 }
-function renderOccasionFilterChip(){
-  const el = document.getElementById('occasionFilterChip');
-  el.innerHTML = activeOccasion
-    ? `<button class="occ-filter-chip" onclick="clearOccasionFilter()">Showing: ${activeOccasion.label} ${I.close}</button>`
+function renderTagFilterChip(){
+  const el = document.getElementById('tagFilterChip');
+  el.innerHTML = activeTag
+    ? `<button class="tag-filter-chip" onclick="clearTagFilter()">Showing: ${activeTag.label} ${I.close}</button>`
     : '';
 }
 
@@ -1052,6 +1053,7 @@ const QUICKLINKS = [
   {type:'Mug', label:'Mugs'},
   {type:'Tote Bag', label:'Tote Bags'},
   {type:'T-Shirt', label:'T-Shirts'},
+  {type:'Fridge Magnet', label:'Fridge Magnets'},
   {type:'Hamper', label:'Hampers'},
 ];
 document.getElementById('quickLinks').innerHTML = QUICKLINKS.map(q => `
@@ -1089,6 +1091,7 @@ const TYPE_GRID_ITEMS = [
   {type:'Mug', label:'Mugs'},
   {type:'Tote Bag', label:'Tote Bags'},
   {type:'T-Shirt', label:'T-Shirts'},
+  {type:'Fridge Magnet', label:'Fridge Magnets'},
   {type:'Hamper', label:'Hampers'},
 ];
 function renderTypeGrid(){
@@ -1303,9 +1306,9 @@ function renderBestsellers(){
 function renderProducts(){
   const grid = document.getElementById('productGrid');
   let list = activeType === 'All' ? PRODUCTS : PRODUCTS.filter(p => p.type === activeType);
-  if(activeOccasion) list = list.filter(p => (p.occasions || []).includes(activeOccasion.key));
+  if(activeTag) list = list.filter(p => (p.tags || []).includes(activeTag.key));
   if(!list.length){
-    grid.innerHTML = `<div class="acct-empty-state" style="grid-column:1/-1;"><p>${activeOccasion ? activeOccasion.label + ' ke liye abhi koi product tag nahi hai — admin panel se occasion tag add karo.' : 'Is category mein abhi koi product nahi hai.'}</p></div>`;
+    grid.innerHTML = `<div class="acct-empty-state" style="grid-column:1/-1;"><p>${activeTag ? activeTag.label + ' ke liye abhi koi product tag nahi hai — admin panel se product edit karke ye tag lagao.' : 'Is category mein abhi koi product nahi hai.'}</p></div>`;
     return;
   }
   grid.innerHTML = list.map(p => `
