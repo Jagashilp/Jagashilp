@@ -343,20 +343,6 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <label>Customisation fee (₹, agar customisable hai)</label>
       <input type="number" id="pf-custfee" placeholder="150">
     </div>
-    <div class="field" style="border:1.5px dashed var(--line-strong);border-radius:11px;padding:12px;">
-      <div class="check-row"><input type="checkbox" id="pf-photo-enabled" onchange="togglePfPhotoRow()"> Photo Upload (customer khud photo/design upload kar sake)</div>
-      <div id="pf-photo-count-row" style="margin-top:10px;display:none;">
-        <label>Max kitni photos upload karne dein customer ko</label>
-        <input type="number" id="pf-photo-max" min="1" max="6" value="1">
-      </div>
-    </div>
-    <div class="field" style="border:1.5px dashed var(--line-strong);border-radius:11px;padding:12px;">
-      <div class="check-row"><input type="checkbox" id="pf-note-enabled" onchange="togglePfNoteRow()"> Text Note Panel (frontend par customer note likh sake)</div>
-      <div id="pf-note-title-row" style="margin-top:10px;display:none;">
-        <label>Panel ka title (frontend par yahi text dikhega)</label>
-        <input type="text" id="pf-note-title" placeholder="e.g. Name to print, colour preference...">
-      </div>
-    </div>
     <div class="field">
       <div class="check-row"><input type="checkbox" id="pf-highlight"> Show on Highlight (Customised / Category tab ke top pe dikhega — new arrivals, occasion picks)</div>
     </div>
@@ -647,16 +633,6 @@ function renderProductsGrid(){
   `).join('');
 }
 
-/* Photo-count row aur Note-title row tabhi dikhte hain jab unka apna
-   checkbox on ho — dono ek dusre se independent hain (koi bhi ek, dono,
-   ya koi bhi nahi ho sakta, customisable checkbox se bhi independent). */
-function togglePfPhotoRow(){
-  document.getElementById('pf-photo-count-row').style.display = document.getElementById('pf-photo-enabled').checked ? '' : 'none';
-}
-function togglePfNoteRow(){
-  document.getElementById('pf-note-title-row').style.display = document.getElementById('pf-note-enabled').checked ? '' : 'none';
-}
-
 function openProductModal(id){
   pendingProductPhotoFile = null;
   document.getElementById('pf-status').style.display = 'none';
@@ -671,10 +647,6 @@ function openProductModal(id){
     document.getElementById('pf-description').value = p.description || '';
     document.getElementById('pf-customisable').checked = p.customisable;
     document.getElementById('pf-custfee').value = p.customisation_fee || 0;
-    document.getElementById('pf-photo-enabled').checked = !!p.photo_upload_enabled;
-    document.getElementById('pf-photo-max').value = p.photo_upload_max || 1;
-    document.getElementById('pf-note-enabled').checked = !!p.note_enabled;
-    document.getElementById('pf-note-title').value = p.note_title || 'Customisation Notes (optional)';
     document.getElementById('pf-highlight').checked = !!p.highlight;
     renderTagGroups(p.tags || []);
     document.getElementById('pf-active').checked = p.active;
@@ -688,16 +660,10 @@ function openProductModal(id){
     document.getElementById('pf-description').value = '';
     document.getElementById('pf-customisable').checked = (productsSubTab === 'customised');
     document.getElementById('pf-custfee').value = '';
-    document.getElementById('pf-photo-enabled').checked = false;
-    document.getElementById('pf-photo-max').value = 1;
-    document.getElementById('pf-note-enabled').checked = false;
-    document.getElementById('pf-note-title').value = 'Customisation Notes (optional)';
     document.getElementById('pf-highlight').checked = false;
     renderTagGroups([]);
     document.getElementById('pf-active').checked = true;
   }
-  togglePfPhotoRow();
-  togglePfNoteRow();
   document.getElementById('productOverlay').classList.add('show');
 }
 function closeProductModal(){
@@ -740,10 +706,6 @@ async function saveProduct(){
     description: document.getElementById('pf-description').value.trim(),
     customisable: document.getElementById('pf-customisable').checked,
     customisation_fee: parseFloat(document.getElementById('pf-custfee').value) || 0,
-    photo_upload_enabled: document.getElementById('pf-photo-enabled').checked,
-    photo_upload_max: parseInt(document.getElementById('pf-photo-max').value) || 1,
-    note_enabled: document.getElementById('pf-note-enabled').checked,
-    note_title: document.getElementById('pf-note-title').value.trim() || 'Customisation Notes (optional)',
     highlight: document.getElementById('pf-highlight').checked,
     tags: getCheckedTags(),
     active: document.getElementById('pf-active').checked,
@@ -966,7 +928,7 @@ function renderOrders(){
       <div class="order-line">
         <span>${i.qty}× ${i.name} <span class="mono" style="color:var(--muted);">₹${i.price}</span></span>
         ${i.customNote ? `<div class="order-note">"${i.customNote}"</div>` : ''}
-        ${(i.customPhotoPaths && i.customPhotoPaths.length) ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">${i.customPhotoPaths.map((path,pi) => `<button class="btn ghost small" onclick="viewCustomerPhoto('${path}', this)">Photo ${pi+1}</button>`).join('')}</div>` : (i.customPhotoPath ? `<button class="btn ghost small" style="margin-top:5px;" onclick="viewCustomerPhoto('${i.customPhotoPath}', this)">View Photo</button>` : '')}
+        ${i.customPhotoPath ? `<button class="btn ghost small" style="margin-top:5px;" onclick="viewCustomerPhoto('${i.customPhotoPath}', this)">View Photo</button>` : ''}
       </div>
     `).join('');
     const date = new Date(o.created_at).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
