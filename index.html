@@ -55,15 +55,9 @@
   .pill.active{background:var(--ink); color:#fff;}
 
   /* ============ HERO BANNER ============ */
-  .hero{position:relative; margin:14px 18px 0; border-radius:26px; overflow:hidden; min-height:400px; display:flex; align-items:flex-end;}
+  .hero{position:relative; margin:14px 18px 0; border-radius:26px; overflow:hidden; min-height:400px; display:flex; align-items:flex-end; padding:26px 22px 28px;}
   .hero-photo{position:absolute; inset:0;}
-  .hero-scrim{position:absolute; inset:0; background:linear-gradient(0deg, rgba(20,14,10,0.88) 5%, rgba(20,14,10,0.45) 55%, rgba(20,14,10,0.15) 100%);}
-  .hero-content{position:relative; z-index:2; padding:26px 22px 28px; color:#fff; width:100%;}
-  .hero-content .eyebrow{color:var(--gold); display:flex; align-items:center; gap:6px; margin-bottom:10px;}
-  .hero-content h1{font-size:38px; color:#fff; line-height:1;}
-  .hero-tagline{font-family:'Fredoka'; font-weight:600; font-style:normal; font-size:18px; color:var(--marigold); margin:6px 0 12px;}
-  .hero-content p{font-size:13px; color:rgba(255,255,255,0.82); max-width:320px; margin-bottom:18px; line-height:1.5;}
-  .hero-cta{background:var(--c-red); color:#fff; padding:14px 28px; border-radius:999px; font-weight:700; font-size:13.5px; display:inline-flex; align-items:center; gap:8px;}
+  .hero-cta{position:relative; z-index:2; background:var(--c-red); color:#fff; padding:14px 28px; border-radius:999px; font-weight:700; font-size:13.5px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 6px 20px rgba(0,0,0,0.25);}
   .tag-filter-chip{display:inline-flex; align-items:center; gap:7px; margin:14px 18px 0; background:var(--c-red); color:#fff; font-size:12.5px; font-weight:700; padding:8px 14px; border-radius:999px;}
   .tag-filter-chip svg{width:12px; height:12px;}
 
@@ -425,14 +419,7 @@
 <!-- ============ HERO BANNER ============ -->
 <div class="hero">
   <div class="hero-photo"></div>
-  <div class="hero-scrim"></div>
-  <div class="hero-content">
-    <div class="eyebrow" id="heroEyebrow"></div>
-    <h1>Jagashilp</h1>
-    <div class="hero-tagline">Keep Blooming</div>
-    <p>India's first personalised gifts brand — keychains, mugs, totes, tees, all hand-crafted with heart.</p>
-    <a href="#shopGrid" class="hero-cta" id="heroCta"></a>
-  </div>
+  <a href="#" class="hero-cta" id="heroCta"></a>
 </div>
 
 <!-- ============ QUICK LINKS ============ -->
@@ -967,28 +954,36 @@ document.getElementById('custPlusBtn').innerHTML = I.plus;
 
 /* ---------------- Hero: current occasion ----------------
    Jab koi occasion aa raha ho / aa gaya ho, yahan CURRENT_OCCASION set kar do —
-   hero ka eyebrow text + "Shop Now" button apne aap us occasion ke tagged
-   products dikhayega (products ko 'occasions' tag admin panel se lagti hai).
-   Occasion khatam hone pe CURRENT_OCCASION = null kar do, banner phir se
-   normal "Explore Collection" mode mein chala jayega.
-   key OCCASIONS_ROW1 / OCCASIONS_ROW2 (niche defined) ke 'key' se match hona chahiye. */
+   "Shop Now" button apne aap us occasion ke tagged products dikhayega
+   (products ko 'occasions' tag admin panel se lagti hai). Occasion khatam
+   hone pe CURRENT_OCCASION = null kar do, button phir se normal "Shop Now"
+   (full catalog) mode mein chala jayega.
+   key OCCASIONS_ROW1 / OCCASIONS_ROW2 (niche defined) ke 'key' se match hona chahiye.
+
+   NOTE: Admin panel ke "Site Images" tab -> Hero & Banner group se agar
+   koi specific product "Shop Now" button ke saath link kiya gaya ho
+   (SITE_IMAGES.hero_link_product), toh wo sabse pehle priority leta hai —
+   button seedha us product ko Products tab mein spotlight kar dega. */
 let CURRENT_OCCASION = { key:'rakhi', label:'Rakhi Gifts', badge:"Rakhi is coming — shop the edit" };
 // let CURRENT_OCCASION = null; // occasion na ho to ye line use karo
 
-function renderHeroOccasion(){
-  const eyebrowEl = document.getElementById('heroEyebrow');
+function renderHeroCta(){
   const ctaEl = document.getElementById('heroCta');
-  if(CURRENT_OCCASION){
-    eyebrowEl.innerHTML = I.sparkle + ` <span>${CURRENT_OCCASION.badge || (CURRENT_OCCASION.label + ' is coming')}</span>`;
-    ctaEl.innerHTML = 'Shop Now ' + I.arrow;
-    ctaEl.onclick = (e) => { e.preventDefault(); applyTagFilter(CURRENT_OCCASION.key, CURRENT_OCCASION.label); };
-  }else{
-    eyebrowEl.innerHTML = I.sparkle + ' <span>India\'s First Personalised Gifts Brand</span>';
-    ctaEl.innerHTML = 'Explore Collection ' + I.arrow;
-    ctaEl.onclick = (e) => { e.preventDefault(); clearTagFilter(); showView('productsView'); };
-  }
+  ctaEl.innerHTML = 'Shop Now ' + I.arrow;
+  ctaEl.onclick = (e) => {
+    e.preventDefault();
+    const linkedProductId = SITE_IMAGES.hero_link_product;
+    if(linkedProductId){
+      showProductSpotlight(linkedProductId);
+    }else if(CURRENT_OCCASION){
+      applyTagFilter(CURRENT_OCCASION.key, CURRENT_OCCASION.label);
+    }else{
+      clearTagFilter();
+      showView('productsView');
+    }
+  };
 }
-renderHeroOccasion();
+renderHeroCta();
 
 /* SITE_IMAGES — har aur photo slot (hero, banner, feelings, occasions,
    avatar style samples, type grid, addons, customise sections) —
@@ -1141,6 +1136,7 @@ renderOccasions();
    admin panel ke product form se checkbox se lagti hai. */
 let activeTag = null; // {key, label}
 function applyTagFilter(key, label){
+  spotlightProduct = null;
   activeTag = { key, label };
   renderProducts();
   renderTagFilterChip();
@@ -1153,9 +1149,39 @@ function clearTagFilter(){
 }
 function renderTagFilterChip(){
   const el = document.getElementById('tagFilterChip');
-  el.innerHTML = activeTag
-    ? `<button class="tag-filter-chip" onclick="clearTagFilter()">Showing: ${activeTag.label} ${I.close}</button>`
-    : '';
+  if(spotlightProduct){
+    el.innerHTML = `<button class="tag-filter-chip" onclick="clearSpotlight()">Showing: ${spotlightProduct.name} ${I.close}</button>`;
+  }else{
+    el.innerHTML = activeTag
+      ? `<button class="tag-filter-chip" onclick="clearTagFilter()">Showing: ${activeTag.label} ${I.close}</button>`
+      : '';
+  }
+}
+
+/* ---------------- Hero "Shop Now" -> single product spotlight ----------------
+   Admin panel se hero button ko kisi specific product se link kiya ja sakta
+   hai (Site Images tab -> Hero & Banner group). Jab wo set ho, "Shop Now"
+   tap karne par Products tab khulta hai aur sirf wahi ek product dikhta hai
+   (poora catalog filter hue bina) — user chip ke cross (×) se wapas poore
+   catalog par laut sakta hai. */
+let spotlightProduct = null; // {id, name, ...} — poora product object
+function showProductSpotlight(productId){
+  const p = PRODUCTS.find(x => x.id === productId);
+  if(!p){
+    // Linked product mil nahi raha (delete ho gaya ho shayad) — poore catalog par le jao
+    clearSpotlight();
+    if(document.getElementById('productsView').style.display === 'none'){ showView('productsView'); }
+    return;
+  }
+  spotlightProduct = p;
+  renderProducts();
+  renderTagFilterChip();
+  if(document.getElementById('productsView').style.display === 'none'){ showView('productsView'); }
+}
+function clearSpotlight(){
+  spotlightProduct = null;
+  renderProducts();
+  renderTagFilterChip();
 }
 
 /* ---------------- Quick links ---------------- */
@@ -1402,8 +1428,13 @@ function renderBestsellers(){
 /* ---------------- Full grid ---------------- */
 function renderProducts(){
   const grid = document.getElementById('productGrid');
-  let list = activeType === 'All' ? PRODUCTS : PRODUCTS.filter(p => p.type === activeType);
-  if(activeTag) list = list.filter(p => (p.tags || []).includes(activeTag.key));
+  let list;
+  if(spotlightProduct){
+    list = [spotlightProduct];
+  }else{
+    list = activeType === 'All' ? PRODUCTS : PRODUCTS.filter(p => p.type === activeType);
+    if(activeTag) list = list.filter(p => (p.tags || []).includes(activeTag.key));
+  }
   if(!list.length){
     grid.innerHTML = `<div class="acct-empty-state" style="grid-column:1/-1;"><p>${activeTag ? 'There are no products tagged for ' + activeTag.label + ' yet — edit a product in the admin panel and add this tag.' : 'There are no products in this category yet.'}</p></div>`;
     return;
@@ -1427,10 +1458,12 @@ function renderProducts(){
 }
 
 function filterByType(type){
+  spotlightProduct = null;
   activeType = type;
   document.querySelectorAll('#catStrip .cat-chip').forEach(c=>c.classList.toggle('active', c.dataset.type===type));
   document.querySelectorAll('#typeTabs .pill').forEach(c=>c.classList.toggle('active', c.dataset.type===type));
   renderProducts();
+  renderTagFilterChip();
   if(document.getElementById('productsView').style.display === 'none'){ showView('productsView'); }
 }
 
