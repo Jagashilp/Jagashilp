@@ -162,14 +162,6 @@
   .hamper-btn{background:var(--ink); color:var(--paper); font-size:12px; font-weight:700; padding:10px; border-radius:9px; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;}
 
   /* ============ PRODUCT TYPE GRID (image tiles) ============ */
-  .type-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:14px 18px 6px;}
-  .type-card{border-radius:20px; overflow:hidden; position:relative; aspect-ratio:1/1.05; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.06);}
-  .type-card:nth-child(5n+1) .img-ph{background:var(--c-red); color:#fff;}
-  .type-card:nth-child(5n+2) .img-ph{background:var(--c-yellow); color:var(--ink);}
-  .type-card:nth-child(5n+3) .img-ph{background:var(--c-teal); color:#fff;}
-  .type-card:nth-child(5n+4) .img-ph{background:var(--c-black); color:var(--c-yellow);}
-  .type-card:nth-child(5n+5) .img-ph{background:var(--c-orange); color:#fff;}
-  .type-card .tlabel{position:absolute; bottom:0; left:0; right:0; padding:20px 8px 10px; background:linear-gradient(0deg, rgba(43,31,23,0.75), transparent); color:#fff; font-size:12px; font-weight:700; text-align:center; z-index:2;}
 
   /* ============ BESTSELLERS SCROLL ============ */
   .scroll-row{display:flex; gap:12px; padding:14px 18px 6px; overflow-x:auto; scrollbar-width:none;}
@@ -470,10 +462,6 @@
   <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
 </div>
 
-<!-- ============ PRODUCT TYPE GRID ============ -->
-<div class="section-head"><div><div class="eyebrow">Shop by Type</div><h2>Pick a Product</h2></div></div>
-<div class="type-grid" id="typeGrid"></div>
-
 <!-- ============ HAMPER SPOTLIGHT ============ -->
 <div class="hamper-section" id="hamperSection">
   <div class="eyebrow">Gift Sets</div>
@@ -494,12 +482,6 @@
   <div class="collection-title serif">Doodle Collections</div>
   <div class="collection-grid" id="collectionGrid"></div>
 </div>
-
-<!-- ============ FULL SHOP GRID ============ -->
-<div class="section-head" id="shopGrid"><div><div class="eyebrow">Full Catalog</div><h2>Shop All Products</h2></div></div>
-<div id="tagFilterChip"></div>
-<div class="cat-strip" id="catStrip"></div>
-<div class="grid" id="productGrid"></div>
 
 <footer>
   Made with care by Jagashilp — hand-doodled in India
@@ -531,6 +513,14 @@
 
   <div class="cat-strip" id="categoryCatStrip"></div>
   <div class="grid" id="categoryGrid"></div>
+</div>
+
+<!-- ============ PRODUCTS VIEW (Bottom Nav: Products) ============ -->
+<div id="productsView" style="display:none;">
+  <div class="section-head" id="shopGrid"><div><div class="eyebrow">Full Catalog</div><h2>All Products</h2></div></div>
+  <div id="tagFilterChip"></div>
+  <div class="cat-strip" id="catStrip"></div>
+  <div class="grid" id="productGrid"></div>
 </div>
 
 </div>
@@ -995,7 +985,7 @@ function renderHeroOccasion(){
   }else{
     eyebrowEl.innerHTML = I.sparkle + ' <span>India\'s First Personalised Gifts Brand</span>';
     ctaEl.innerHTML = 'Explore Collection ' + I.arrow;
-    ctaEl.onclick = (e) => { e.preventDefault(); clearTagFilter(); document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'}); };
+    ctaEl.onclick = (e) => { e.preventDefault(); clearTagFilter(); showView('productsView'); };
   }
 }
 renderHeroOccasion();
@@ -1154,7 +1144,7 @@ function applyTagFilter(key, label){
   activeTag = { key, label };
   renderProducts();
   renderTagFilterChip();
-  document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'});
+  if(document.getElementById('productsView').style.display === 'none'){ showView('productsView'); }
 }
 function clearTagFilter(){
   activeTag = null;
@@ -1209,25 +1199,6 @@ function renderBanner(){
 }
 renderBanner();
 
-/* ---------------- Type grid (image tiles) ---------------- */
-const TYPE_GRID_ITEMS = [
-  {type:'Keychain', label:'Keychains'},
-  {type:'Mug', label:'Mugs'},
-  {type:'Tote Bag', label:'Tote Bags'},
-  {type:'T-Shirt', label:'T-Shirts'},
-  {type:'Fridge Magnet', label:'Fridge Magnets'},
-  {type:'Hamper', label:'Hampers'},
-];
-function renderTypeGrid(){
-  document.getElementById('typeGrid').innerHTML = TYPE_GRID_ITEMS.map(t => `
-    <div class="type-card" data-type="${t.type}">
-      ${siteImg('typegrid_' + t.type.toLowerCase().replace(/[^a-z]/g,''), t.label + ' photo')}
-      <div class="tlabel">${t.label}</div>
-    </div>
-  `).join('');
-}
-renderTypeGrid();
-
 /* ---------------- Hamper cards ---------------- */
 document.getElementById('hamperGrid').innerHTML = `
   <div class="hamper-card">
@@ -1266,25 +1237,27 @@ renderCollection();
 /* ---------------- Bottom nav ---------------- */
 document.getElementById('bottomNav').innerHTML = `
   <div class="nav-item active" id="navHome">${I.home}<span>Home</span></div>
+  <div class="nav-item" id="navProducts">${I.package}<span>Products</span></div>
   <div class="nav-item" id="navCustomised">${I.sparkle}<span>Customised</span></div>
   <div class="nav-item" id="navCategory">${I.grid}<span>Category</span></div>
   <div class="nav-item" id="accountNavItem"><span id="accountNavIcon">${I.user}</span><span>Account</span></div>
 `;
 document.getElementById('accountNavItem').addEventListener('click', openAccountDrawer);
 
-/* ---------------- View switching (Home / Customised / Category) ---------------- */
+/* ---------------- View switching (Home / Products / Customised / Category) ---------------- */
 function showView(view){
-  ['homeView','customisedView','categoryView'].forEach(id=>{
+  ['homeView','productsView','customisedView','categoryView'].forEach(id=>{
     document.getElementById(id).style.display = (id === view) ? '' : 'none';
   });
   document.getElementById('typeTabs').style.display = (view === 'homeView') ? '' : 'none';
   document.querySelectorAll('#bottomNav .nav-item').forEach(x=>x.classList.remove('active'));
-  const navMap = {homeView:'navHome', customisedView:'navCustomised', categoryView:'navCategory'};
+  const navMap = {homeView:'navHome', productsView:'navProducts', customisedView:'navCustomised', categoryView:'navCategory'};
   const activeNav = document.getElementById(navMap[view]);
   if(activeNav) activeNav.classList.add('active');
   window.scrollTo({top:0, behavior:'instant'});
 }
 document.getElementById('navHome').addEventListener('click', ()=> showView('homeView'));
+document.getElementById('navProducts').addEventListener('click', ()=>{ showView('productsView'); renderProducts(); });
 document.getElementById('navCustomised').addEventListener('click', ()=>{ showView('customisedView'); renderCustomisedView(); });
 document.getElementById('navCategory').addEventListener('click', ()=>{ showView('categoryView'); renderCategoryView(); });
 
@@ -1458,7 +1431,7 @@ function filterByType(type){
   document.querySelectorAll('#catStrip .cat-chip').forEach(c=>c.classList.toggle('active', c.dataset.type===type));
   document.querySelectorAll('#typeTabs .pill').forEach(c=>c.classList.toggle('active', c.dataset.type===type));
   renderProducts();
-  document.getElementById('shopGrid').scrollIntoView({behavior:'smooth'});
+  if(document.getElementById('productsView').style.display === 'none'){ showView('productsView'); }
 }
 
 document.getElementById('catStrip').addEventListener('click', (e)=>{
@@ -1473,11 +1446,6 @@ document.getElementById('quickLinks').addEventListener('click', (e)=>{
   const q = e.target.closest('.qlink'); if(!q) return;
   if(q.dataset.type === 'Hamper'){ document.getElementById('hamperSection').scrollIntoView({behavior:'smooth'}); return; }
   filterByType(q.dataset.type);
-});
-document.getElementById('typeGrid').addEventListener('click', (e)=>{
-  const t = e.target.closest('.type-card'); if(!t) return;
-  if(t.dataset.type === 'Hamper'){ document.getElementById('hamperSection').scrollIntoView({behavior:'smooth'}); return; }
-  filterByType(t.dataset.type);
 });
 
 /* ---------------- Cart ---------------- */
@@ -2459,7 +2427,6 @@ function renderRestOfPage(){
   renderFeelings();
   renderOccasions();
   renderBanner();
-  renderTypeGrid();
   renderCollection();
   renderCustStylePicks();
   renderCustomiseItems();
