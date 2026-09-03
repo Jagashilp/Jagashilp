@@ -584,6 +584,7 @@ async function loadProducts(){
   if(error){ console.error(error); return; }
   productsCache = data || [];
   renderProductsGrid();
+  renderSiteImagesGroups(); // hero "Shop Now" product picker options refresh
 }
 
 function renderProductsGrid(){
@@ -782,7 +783,7 @@ async function loadSiteImages(){
 
 function renderSiteImagesGroups(){
   const el = document.getElementById('siteImagesGroups');
-  const uploaded = Object.keys(siteImagesCache).length;
+  const uploaded = Object.keys(siteImagesCache).filter(k => k !== 'hero_link_product').length;
   const total = SITE_IMAGE_GROUPS.reduce((n,g) => n + g.items.length, 0);
   el.innerHTML = `<div class="group-sub" style="margin-bottom:18px;">${uploaded} of ${total} photos uploaded</div>` +
   SITE_IMAGE_GROUPS.map(group => `
@@ -804,7 +805,47 @@ function renderSiteImagesGroups(){
         </div>
       `).join('')}
     </div>
+    ${group.title === 'Hero & Banner' ? heroLinkPickerHtml() : ''}
   `).join('');
+  const heroSelect = document.getElementById('heroLinkProductSelect');
+  if(heroSelect) heroSelect.addEventListener('change', handleHeroLinkChange);
+}
+
+/* ---------------- Hero "Shop Now" button -> product link ----------------
+   Ye koi photo nahi hai — ek chhota setting control hai jo Hero & Banner
+   group ke andar dikhta hai. Value 'site_images' table mein hi save hoti
+   hai (key = 'hero_link_product', image_url column mein product ki id) —
+   isse koi nayi Supabase table banane ki zaroorat nahi padi. */
+function heroLinkPickerHtml(){
+  const current = siteImagesCache['hero_link_product'] || '';
+  const options = productsCache.map(p => `<option value="${p.id}" ${p.id === current ? 'selected' : ''}>${p.name}</option>`).join('');
+  return `
+    <div class="pcard" style="padding:14px 14px 16px;margin-bottom:8px;">
+      <div class="pname" style="margin-bottom:4px;">"Shop Now" button — link to product</div>
+      <div class="group-sub" style="margin-bottom:10px;">Hero banner ke "Shop Now" button ko kisi ek existing product se link karo — tap karte hi user seedha usi product par pahunch jayega. Khaali chodo toh button pehle jaisa poora catalog kholega.</div>
+      <select id="heroLinkProductSelect" style="width:100%;padding:10px 12px;border:1.5px solid var(--line-strong);border-radius:9px;font-size:13px;background:#fff;color:var(--ink);">
+        <option value="">— No specific product (show full catalog) —</option>
+        ${options}
+      </select>
+    </div>
+  `;
+}
+
+async function handleHeroLinkChange(e){
+  const productId = e.target.value;
+  if(!sb){ alert('Supabase URL/key pehle daalo.'); return; }
+  try{
+    if(productId){
+      const { error } = await sb.from('site_images').upsert({ key:'hero_link_product', image_url: productId });
+      if(error) throw error;
+    }else{
+      const { error } = await sb.from('site_images').delete().eq('key', 'hero_link_product');
+      if(error) throw error;
+    }
+    await loadSiteImages();
+  }catch(err){
+    alert('Save fail: ' + err.message);
+  }
 }
 
 async function handleSiteImageUpload(key, event){
