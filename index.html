@@ -23,6 +23,8 @@
   body{background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:76px;}
   h1,h2,h3,.serif{font-family:'Fredoka', sans-serif; font-weight:600;}
   .eyebrow{font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; letter-spacing:.1em; text-transform:uppercase; font-size:11.5px;}
+  .pill-tabs, .quicklinks, .gifts-grid, .occasion-row2, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll{cursor:grab; -webkit-overflow-scrolling:touch;}
+  .pill-tabs.dragging, .quicklinks.dragging, .gifts-grid.dragging, .occasion-row2.dragging, .customise-scroll.dragging, .scroll-row.dragging, .cat-strip.dragging, .addon-scroll.dragging{cursor:grabbing; scroll-behavior:auto;}
   img{max-width:100%; display:block;}
   a{color:inherit; text-decoration:none;}
   button{font-family:inherit; cursor:pointer; border:none; background:none;}
@@ -1032,6 +1034,9 @@ async function loadSiteImages(){
 function siteImg(key, altLabel){
   return SITE_IMAGES[key] ? `<img src="${SITE_IMAGES[key]}" style="width:100%;height:100%;object-fit:cover;">` : phBox(altLabel);
 }
+function siteImgSm(key){
+  return SITE_IMAGES[key] ? `<img src="${SITE_IMAGES[key]}" style="width:100%;height:100%;object-fit:cover;">` : phCircle();
+}
 
 function renderHero(){ document.querySelector('.hero-photo').innerHTML = siteImg('hero', 'Hero banner photo — lifestyle shot of products / founder'); }
 renderHero();
@@ -1172,12 +1177,15 @@ const QUICKLINKS = [
   {type:'Fridge Magnet', label:'Fridge Magnets'},
   {type:'Hamper', label:'Hampers'},
 ];
-document.getElementById('quickLinks').innerHTML = QUICKLINKS.map(q => `
+function renderQuickLinks(){
+  document.getElementById('quickLinks').innerHTML = QUICKLINKS.map(q => `
   <div class="qlink" data-type="${q.type}">
-    <div class="qlink-icon">${phCircle()}</div>
+    <div class="qlink-icon">${siteImgSm('typegrid_' + q.type.toLowerCase().replace(/[^a-z]/g,''))}</div>
     <span>${q.label}</span>
   </div>
 `).join('');
+}
+renderQuickLinks();
 
 /* STYLES — used by the "Customise Now" style picker */
 const STYLES = [
@@ -2407,9 +2415,47 @@ function addHamperToCart(){
   addCustomLineItem({ key:'hamper-'+Date.now(), name:label, price, type:'Hamper', qty:1 });
 }
 
+/* ---------------- Horizontal scroll rows (category pills, quicklinks,
+   gift tiles etc.) — touch/swipe works out of the box on phones.
+   Ye extra JS sirf desktop/mouse users ke liye hai: mouse-wheel se bhi
+   scroll ho aur click-drag se bhi pan ho jaaye. */
+function enableHScroll(el){
+  if(!el || el._hScrollBound) return;
+  el._hScrollBound = true;
+  let isDown = false, moved = false, startX = 0, startScroll = 0;
+  el.addEventListener('wheel', (e) => {
+    if(el.scrollWidth <= el.clientWidth) return;
+    if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive:false });
+  el.addEventListener('mousedown', (e) => {
+    if(el.scrollWidth <= el.clientWidth) return;
+    isDown = true; moved = false;
+    startX = e.pageX; startScroll = el.scrollLeft;
+    el.classList.add('dragging');
+  });
+  window.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
+  el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
+  el.addEventListener('mousemove', (e) => {
+    if(!isDown) return;
+    const dx = e.pageX - startX;
+    if(Math.abs(dx) > 4) moved = true;
+    el.scrollLeft = startScroll - dx;
+  });
+  el.addEventListener('click', (e) => {
+    if(moved){ e.stopPropagation(); e.preventDefault(); moved = false; }
+  }, true);
+}
+function enableAllHScroll(){
+  document.querySelectorAll('.pill-tabs, .quicklinks, .gifts-grid, .occasion-row2, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll').forEach(enableHScroll);
+}
+
 /* ---------------- Init ---------------- */
 function renderRestOfPage(){
   renderHero();
+  renderQuickLinks();
   renderFeelings();
   renderOccasions();
   renderBanner();
@@ -2429,6 +2475,7 @@ function renderRestOfPage(){
   renderCustomisedView();
   renderCategoryView();
   checkCustomerAuth();
+  enableAllHScroll();
 })();
 
 </script>
