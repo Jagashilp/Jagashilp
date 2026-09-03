@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <style>
   :root{
     --paper:#FFFFFF; --paper-deep:#F0F0F0; --ink:#211922; --ink-soft:rgba(33,25,34,0.60);
@@ -178,6 +179,7 @@
   .hl-slide .img-ph{position:absolute; inset:0;}
   .hl-slide-scrim{position:absolute; inset:0; background:linear-gradient(0deg, rgba(23,19,19,0.85) 0%, rgba(23,19,19,0.3) 45%, rgba(23,19,19,0) 68%);}
   .hl-badge{position:absolute; top:12px; left:12px; background:var(--c-yellow); color:var(--ink); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:5px 11px; border-radius:20px; z-index:2;}
+  .custom-badge{position:absolute; top:8px; left:8px; background:var(--c-red); color:#fff; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; padding:4px 9px; border-radius:20px; z-index:2;}
   .hl-slide .wish-toggle{top:12px; right:12px;}
   .hl-dots{position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:5px; z-index:3;}
   .hl-dot{width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.5); border:none; padding:0; transition:all .3s;}
@@ -207,6 +209,9 @@
   .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; padding:16px 18px 10px;}
   .card{background:var(--card); border-radius:20px; overflow:hidden; border:none; box-shadow:0 3px 10px rgba(0,0,0,0.06); display:flex; flex-direction:column;}
   .card-img{aspect-ratio:1/1; overflow:hidden; position:relative;}
+  .pd-img{aspect-ratio:1/1; overflow:hidden; position:relative; border-radius:16px; margin-bottom:14px;}
+  .pd-off{font-size:11.5px; font-weight:700; color:var(--peacock);}
+  .pd-desc{font-size:13.5px; line-height:1.6; opacity:.85; margin-top:10px; white-space:pre-line;}
   .wish-toggle{position:absolute; top:8px; right:8px; width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; color:var(--ink); z-index:2;}
   .wish-toggle.active{color:var(--c-red);}
   .wish-toggle svg{width:16px; height:16px;}
@@ -464,12 +469,6 @@
 </div>
 <div class="scroll-row" id="bestsellerRow"></div>
 
-<!-- ============ COLLECTION 2-UP ============ -->
-<div class="collection-wrap">
-  <div class="collection-title serif">Doodle Collections</div>
-  <div class="collection-grid" id="collectionGrid"></div>
-</div>
-
 <footer>
   Made with care by Jagashilp — hand-doodled in India
   <div class="footer-links">
@@ -532,11 +531,17 @@
   <div class="drawer-body">
     <div class="field">
       <label>Full Name</label>
-      <input type="text" id="chk-name" placeholder="Your name">
+      <input type="text" id="chk-name" placeholder="Your name" autocomplete="name">
     </div>
-    <div class="field">
-      <label>Phone Number</label>
-      <input type="tel" id="chk-phone" placeholder="10-digit mobile number">
+    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <label>Phone Number</label>
+        <input type="tel" id="chk-phone" placeholder="10-digit mobile number" inputmode="numeric" autocomplete="tel">
+      </div>
+      <div>
+        <label>Email</label>
+        <input type="email" id="chk-email" placeholder="you@email.com" autocomplete="email">
+      </div>
     </div>
     <div id="chkSavedAddrRow" style="display:none;margin-bottom:14px;">
       <label style="display:block;font-size:12.5px;font-weight:700;margin-bottom:8px;">Use a saved address</label>
@@ -545,6 +550,10 @@
     <div class="field">
       <label>Delivery Address</label>
       <textarea id="chk-address" rows="2" placeholder="House no, street, area"></textarea>
+    </div>
+    <div class="field">
+      <label>Landmark <span style="font-weight:500;color:var(--ink-soft);">(optional)</span></label>
+      <input type="text" id="chk-landmark" placeholder="Nearby landmark">
     </div>
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div>
@@ -556,15 +565,21 @@
         <input type="text" id="chk-state" placeholder="State">
       </div>
     </div>
-    <div class="field">
-      <label>Pincode</label>
-      <input type="text" id="chk-pincode" placeholder="6-digit pincode" maxlength="6">
+    <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <label>Pincode</label>
+        <input type="text" id="chk-pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric">
+      </div>
+      <div>
+        <label>Country</label>
+        <input type="text" id="chk-country" value="India" disabled style="opacity:.65;">
+      </div>
     </div>
     <div id="chk-status" class="chk-status"></div>
   </div>
   <div class="drawer-foot">
     <div class="subtotal-row"><span>Total</span><span id="chk-total">₹0</span></div>
-    <button class="checkout-btn" id="chk-submit-btn" onclick="submitOrder()">Place Order</button>
+    <button class="checkout-btn" id="chk-submit-btn" onclick="submitOrder()">Continue to Payment</button>
   </div>
 </div>
 
@@ -574,10 +589,10 @@
     <div style="width:64px;height:64px;border-radius:50%;background:var(--marigold);display:flex;align-items:center;justify-content:center;">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <h3 style="font-size:19px;">Order Placed!</h3>
-    <p style="font-size:13px;color:var(--ink-soft);max-width:260px;line-height:1.6;">We've received your order and will reach out on your phone number to confirm details.</p>
+    <h3 style="font-size:19px;">Order Confirmed!</h3>
+    <p style="font-size:13px;color:var(--ink-soft);max-width:260px;line-height:1.6;">Payment received — we've got your order and will reach out on your phone number to confirm delivery.</p>
     <div style="font-size:12px;color:var(--ink-soft);" id="orderRefId"></div>
-    <button class="checkout-btn" style="max-width:200px;" onclick="closeAllPanels()">Continue Shopping</button>
+    <button class="checkout-btn" style="max-width:200px;" onclick="closeAllPanels(); showView('homeView');">Continue Shopping</button>
   </div>
 </div>
 
@@ -680,6 +695,14 @@
 </div>
 
 <!-- ============ WISHLIST DRAWER ============ -->
+<div class="drawer" id="productDetailDrawer">
+  <div class="drawer-head"><h3>Product Details</h3><button class="close-btn" onclick="closeAllPanels()" id="productDetailCloseBtn"></button></div>
+  <div class="drawer-body" id="pdBody"></div>
+  <div class="drawer-foot">
+    <button class="checkout-btn" id="pdAddBtn">Add to Cart</button>
+  </div>
+</div>
+
 <div class="drawer" id="wishlistDrawer">
   <div class="drawer-head"><h3>My Wishlist</h3><button class="close-btn" onclick="closeAllPanels()" id="wishlistCloseBtn"></button></div>
   <div class="drawer-body" id="wishlistBody"></div>
@@ -908,6 +931,8 @@ async function loadProducts(){
         id:p.id, name:p.name, type:p.category, price:p.price, mrp:p.price,
         best:false, image_url:p.image_url,
         customisable:p.customisable, customisation_fee:p.customisation_fee,
+        photo_upload_enabled: !!p.photo_upload_enabled, photo_upload_max: p.photo_upload_max || 1,
+        note_enabled: !!p.note_enabled, note_title: p.note_title || 'Customisation Notes (optional)',
         highlight: !!p.highlight,
         tags: p.tags || []
       }));
@@ -1243,23 +1268,6 @@ document.getElementById('hamperGrid').innerHTML = `
   </div>
 `;
 
-/* ---------------- Collection 2-up ---------------- */
-function renderCollection(){
-  document.getElementById('collectionGrid').innerHTML = `
-    <div class="collection-card">
-      <div class="cimg">${siteImg('collection_diya', 'Diya edit photo')}</div>
-      <h4>Diya Edit</h4>
-      <div class="order-btn">Order Now ${I.arrow}</div>
-    </div>
-    <div class="collection-card">
-      <div class="cimg">${siteImg('collection_lotus', 'Lotus edit photo')}</div>
-      <h4>Lotus Edit</h4>
-      <div class="order-btn">Order Now ${I.arrow}</div>
-    </div>
-  `;
-}
-renderCollection();
-
 /* ---------------- Bottom nav ---------------- */
 document.getElementById('bottomNav').innerHTML = `
   <div class="nav-item active" id="navHome">${I.home}<span>Home</span></div>
@@ -1290,17 +1298,18 @@ document.getElementById('navCategory').addEventListener('click', ()=>{ showView(
 /* ---------------- Product card (shared markup) ---------------- */
 function productCardHtml(p){
   return `
-    <div class="card">
+    <div class="card" onclick="openProductDetail('${p.id}')">
       <div class="card-img">
         ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}
-        <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}')">${I.heart}</button>
+        ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
+        <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
       </div>
       <div class="card-body">
         <div class="card-cat">${p.type}</div>
         <div class="card-name">${p.name}</div>
         <div class="price-row"><span class="price">₹${p.price}</span><span class="mrp">₹${p.mrp}</span></div>
         <div class="btn-row">
-          <button class="add-btn full" onclick="addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
+          <button class="add-btn full" onclick="event.stopPropagation(); addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
         </div>
       </div>
     </div>`;
@@ -1328,15 +1337,15 @@ function renderHighlightRow(containerId, predicate){
       ${list.map(p => {
         const off = p.mrp && p.mrp > p.price ? Math.round((1 - p.price/p.mrp) * 100) : 0;
         return `
-        <div class="hl-slide">
+        <div class="hl-slide" onclick="openProductDetail('${p.id}')">
           ${p.image_url ? `<img src="${p.image_url}" draggable="false">` : phBox(p.name + ' photo')}
           <div class="hl-slide-scrim"></div>
           <span class="hl-badge">Highlight</span>
-          <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}')">${I.heart}</button>
+          <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
           <div class="hl-slide-content">
             <div class="hl-name">${p.name}</div>
             <div class="hl-price-row"><span class="hl-now">₹${p.price}</span>${off ? `<span class="hl-was">₹${p.mrp}</span><span class="hl-off">${off}% OFF</span>` : ''}</div>
-            <button class="hl-add" onclick="addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
+            <button class="hl-add" onclick="event.stopPropagation(); addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
           </div>
         </div>`;
       }).join('')}
@@ -1417,8 +1426,8 @@ function renderBestsellers(){
   row.innerHTML = list.map(p => {
     const off = Math.round((1 - p.price/p.mrp) * 100);
     return `
-    <div class="scard">
-      <div class="scard-img"><span class="best-badge">Bestseller</span>${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}<button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}')">${I.heart}</button></div>
+    <div class="scard" onclick="openProductDetail('${p.id}')">
+      <div class="scard-img"><span class="best-badge">Bestseller</span>${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}<button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button></div>
       <div class="scard-name">${p.name}</div>
       <div class="scard-price"><span class="now">₹${p.price}</span><span class="was">₹${p.mrp}</span><span class="off">${off}% OFF</span></div>
     </div>`;
@@ -1440,17 +1449,18 @@ function renderProducts(){
     return;
   }
   grid.innerHTML = list.map(p => `
-    <div class="card">
+    <div class="card" onclick="openProductDetail('${p.id}')">
       <div class="card-img">
         ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}
-        <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}')">${I.heart}</button>
+        ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
+        <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
       </div>
       <div class="card-body">
         <div class="card-cat">${p.type}</div>
         <div class="card-name">${p.name}</div>
         <div class="price-row"><span class="price">₹${p.price}</span><span class="mrp">₹${p.mrp}</span></div>
         <div class="btn-row">
-          <button class="add-btn full" onclick="addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
+          <button class="add-btn full" onclick="event.stopPropagation(); addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
         </div>
       </div>
     </div>
@@ -1538,7 +1548,9 @@ function renderCart(){
 
   const itemsHtml = cart.map(i => `
     <div class="cart-item">
-      <div class="ci-img">${i.customPhotoDataUrl ? `<img src="${i.customPhotoDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : (TYPE_ICON[i.type] || I.gift).replace('width="20" height="20"','width="30" height="30"')}</div>
+      <div class="ci-img" style="position:relative;">${i.customPhotoDataUrl ? `<img src="${i.customPhotoDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : (TYPE_ICON[i.type] || I.gift).replace('width="20" height="20"','width="30" height="30"')}
+        ${i.customPhotoDataUrls && i.customPhotoDataUrls.length > 1 ? `<span style="position:absolute;bottom:-4px;right:-4px;background:var(--rose);color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;">+${i.customPhotoDataUrls.length - 1}</span>` : ''}
+      </div>
       <div class="ci-info">
         <div class="ci-name">${i.name}</div>
         ${i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : ''}
@@ -1585,900 +1597,29 @@ function renderCart(){
     <button class="checkout-btn" onclick="openCheckoutDrawer()">Proceed to Checkout</button>
   `;
 }
+/* ---------------- Checkout: login gate ----------------
+   "Proceed to Checkout" par agar customer login nahi hai, toh checkout
+   drawer ki jagah seedha Account drawer ka login (OTP) step khulta hai.
+   Login/verify ho jaane ke baad (aur agar naya customer hai toh naam
+   capture ke baad) — pendingCheckoutAfterLogin flag ke through user
+   automatically wapas Delivery Details (checkout) drawer par le jaya
+   jaata hai. Isse dobara "Proceed to Checkout" tap nahi karna padta. */
+let pendingCheckoutAfterLogin = false;
+
 function openCheckoutDrawer(){
   if(cart.length === 0) return;
-  document.getElementById('chk-status').style.display = 'none';
-  document.getElementById('chk-status').textContent = '';
-  if(currentCustomer && !document.getElementById('chk-name').value){
-    document.getElementById('chk-name').value = currentCustomer.user_metadata?.full_name || '';
-  }
-  if(currentCustomer && !document.getElementById('chk-phone').value){
-    document.getElementById('chk-phone').value = normalizePhone10(currentCustomer.phone);
-  }
-  if(currentCustomer){ loadMyAddresses(); } else { document.getElementById('chkSavedAddrRow').style.display = 'none'; }
-  const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
-  const total = Math.max(0, cartSubtotal() + addonTotal() - discount);
-  document.getElementById('chk-total').textContent = '₹' + total;
-  closeAllPanels();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('checkoutDrawer').classList.add('show');
-}
-
-async function submitOrder(){
-  const name = document.getElementById('chk-name').value.trim();
-  const phone = document.getElementById('chk-phone').value.trim();
-  const address = document.getElementById('chk-address').value.trim();
-  const city = document.getElementById('chk-city').value.trim();
-  const state = document.getElementById('chk-state').value.trim();
-  const pincode = document.getElementById('chk-pincode').value.trim();
-  const statusEl = document.getElementById('chk-status');
-  const btn = document.getElementById('chk-submit-btn');
-
-  if(!name || !phone || !address || !city || !state || !pincode){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'All fields are required (pincode is needed for the courier).';
-    return;
-  }
-  if(!/^\d{6}$/.test(pincode)){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Enter a valid 6-digit pincode.';
-    return;
-  }
-  if(!/^\d{10}$/.test(phone.replace(/\D/g,''))){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Enter a valid 10-digit phone number.';
-    return;
-  }
-  if(!sb){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = "The store isn't connected to the backend yet — the order can't be saved. This will work once the Supabase URL/key is added.";
-    return;
-  }
-
-  btn.textContent = 'Placing Order...';
-  btn.disabled = true;
-  statusEl.style.display = 'none';
-
-  try{
-    // Upload any customisation photos first, replace data-URL with a storage path
-    const items = [];
-    for(const i of cart){
-      const item = { name:i.name, type:i.type, price:i.price, qty:i.qty, customNote: i.customNote || null };
-      if(i.customPhotoDataUrl){
-        item.customPhotoPath = await uploadCustomerPhoto(i.customPhotoDataUrl);
-      }
-      items.push(item);
-    }
-    const addons = Object.keys(addonState).filter(k => addonState[k] > 0)
-      .map(k => ({ name: ADDONS[k].label, qty: addonState[k], price: ADDONS[k].price }));
-
-    const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
-    const subtotal = cartSubtotal() + addonTotal();
-    const total = Math.max(0, subtotal - discount);
-
-    const { data, error } = await sb.from('orders').insert({
-      customer_name: name, customer_phone: phone.replace(/\D/g,''), customer_address: address,
-      customer_city: city, customer_state: state, customer_pincode: pincode,
-      customer_email: null,
-      items, addons, subtotal, discount, total, payment_status:'pending'
-    }).select().single();
-    if(error) throw error;
-
-    cart = [];
-    addonState = { card:0, choco:0, wrap:0 };
-    saveCart();
+  if(!currentCustomer){
+    pendingCheckoutAfterLogin = true;
     closeAllPanels();
     document.getElementById('overlay').classList.add('show');
-    document.getElementById('orderConfirmedDrawer').classList.add('show');
-    document.getElementById('orderRefId').textContent = 'Order Ref: #' + data.id.slice(0,8);
-  }catch(err){
-    console.error(err);
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Something went wrong: ' + (err.message || 'try again');
-  }finally{
-    btn.textContent = 'Place Order';
-    btn.disabled = false;
-  }
-}
-
-function changeAddonQty(key, delta){
-  addonState[key] = Math.max(0, addonState[key] + delta);
-  renderCart();
-}
-
-/* ---------------- Customer Account (Phone OTP via Fast2SMS + Supabase Send SMS Hook) ---------------- */
-let currentCustomer = null;
-let otpPendingPhone = null; // '+91XXXXXXXXXX' once OTP has been sent, until verified
-let otpResendTimerInterval = null;
-
-function normalizePhone10(raw){
-  return (raw || '').replace(/\D/g, '').slice(-10);
-}
-
-function showOtpStatus(msg, isError){
-  const el = document.getElementById('otp-status');
-  if(!msg){ el.style.display = 'none'; return; }
-  el.style.display = 'block';
-  el.style.color = isError ? 'var(--c-red)' : 'var(--ink)';
-  el.textContent = msg;
-}
-
-function startOtpResendTimer(){
-  let seconds = 30;
-  const resendBtn = document.getElementById('otpResendBtn');
-  clearInterval(otpResendTimerInterval);
-  const tick = () => {
-    if(seconds <= 0){
-      clearInterval(otpResendTimerInterval);
-      resendBtn.disabled = false;
-      resendBtn.textContent = 'Resend OTP';
-      return;
-    }
-    resendBtn.disabled = true;
-    resendBtn.textContent = `Resend OTP (${seconds}s)`;
-    seconds--;
-  };
-  tick();
-  otpResendTimerInterval = setInterval(tick, 1000);
-}
-
-async function sendCustomerOtp(isResend){
-  if(!sb){ showOtpStatus("The store isn't connected to the backend yet.", true); return; }
-  const digits = isResend ? normalizePhone10(otpPendingPhone) : normalizePhone10(document.getElementById('otp-phone').value);
-  if(digits.length !== 10){
-    showOtpStatus('Enter a valid 10-digit mobile number.', true);
-    return;
-  }
-  const phoneE164 = '+91' + digits;
-  const btn = document.getElementById(isResend ? 'otpResendBtn' : 'otpSendBtn');
-  const originalText = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Sending...';
-  try{
-    const { error } = await sb.auth.signInWithOtp({ phone: phoneE164 });
-    if(error) throw error;
-    otpPendingPhone = phoneE164;
-    document.getElementById('otpSentToPhone').textContent = digits;
-    document.getElementById('otpPhoneStep').style.display = 'none';
-    document.getElementById('otpCodeStep').style.display = 'block';
-    document.getElementById('otp-code').value = '';
-    showOtpStatus(isResend ? 'OTP resent.' : 'OTP has been sent.', false);
-    startOtpResendTimer();
-  }catch(err){
-    console.error(err);
-    showOtpStatus("Couldn't send the OTP: " + (err.message || 'try again'), true);
-    btn.disabled = false; btn.textContent = originalText;
-  }finally{
-    if(!isResend){ btn.textContent = 'Send OTP'; btn.disabled = false; }
-  }
-}
-
-async function verifyCustomerOtp(){
-  if(!sb || !otpPendingPhone) return;
-  const code = document.getElementById('otp-code').value.trim();
-  if(!/^\d{6}$/.test(code)){
-    showOtpStatus('Enter a valid 6-digit OTP.', true);
-    return;
-  }
-  const btn = document.getElementById('otpVerifyBtn');
-  btn.textContent = 'Verifying...'; btn.disabled = true;
-  try{
-    const { error } = await sb.auth.verifyOtp({ phone: otpPendingPhone, token: code, type: 'sms' });
-    if(error) throw error;
-    resetOtpForm();
-  }catch(err){
-    console.error(err);
-    showOtpStatus('The OTP is incorrect or expired: ' + (err.message || 'try again'), true);
-  }finally{
-    btn.textContent = 'Verify & Sign In'; btn.disabled = false;
-  }
-}
-
-function changeOtpPhone(){
-  clearInterval(otpResendTimerInterval);
-  otpPendingPhone = null;
-  document.getElementById('otpCodeStep').style.display = 'none';
-  document.getElementById('otpPhoneStep').style.display = 'block';
-  showOtpStatus('', false);
-}
-
-function resetOtpForm(){
-  clearInterval(otpResendTimerInterval);
-  otpPendingPhone = null;
-  document.getElementById('otp-phone').value = '';
-  document.getElementById('otp-code').value = '';
-  document.getElementById('otpPhoneStep').style.display = 'block';
-  document.getElementById('otpCodeStep').style.display = 'none';
-  showOtpStatus('', false);
-}
-
-async function customerSignOut(){
-  if(!sb) return;
-  await sb.auth.signOut();
-  currentCustomer = null;
-  resetOtpForm();
-  renderAccountState();
-}
-
-function openAccountDrawer(){
-  closeAllPanels();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('accountDrawer').classList.add('show');
-  if(currentCustomer){ loadMyOrders(); loadMyAddresses(); }
-}
-
-function openWishlistDrawer(){
-  closeAllPanels();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('wishlistDrawer').classList.add('show');
-  renderWishlistDrawer();
-}
-
-function renderWishlistDrawer(){
-  const body = document.getElementById('wishlistBody');
-  const items = PRODUCTS.filter(p => wishlist.includes(p.id));
-  if(!items.length){
-    body.innerHTML = `<div class="acct-empty-state">${I.heart}<p>Your wishlist is empty. Tap the heart icon on products to save them here.</p></div>`;
-    return;
-  }
-  body.innerHTML = items.map(p => `
-    <div class="wish-item">
-      <div class="wish-item-img">${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name)}</div>
-      <div class="wish-item-info">
-        <div class="ci-name">${p.name}</div>
-        <div class="ci-price">₹${p.price}</div>
-        <div class="qty-row" style="margin-top:6px;">
-          <button class="remove-btn" onclick="toggleWishlist('${p.id}')">Remove</button>
-          <button class="add-btn" style="margin-left:auto;padding:8px 14px;" onclick="addToCart('${p.id}'); toggleWishlist('${p.id}');">${I.bag}<span>Add to Cart</span></button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openHelpCenterDrawer(){
-  closeAllPanels();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('helpCenterDrawer').classList.add('show');
-  document.getElementById('tk-status').style.display = 'none';
-  if(currentCustomer && !document.getElementById('tk-name').value){
-    document.getElementById('tk-name').value = currentCustomer.user_metadata?.full_name || '';
-  }
-  if(currentCustomer && !document.getElementById('tk-phone').value){
-    document.getElementById('tk-phone').value = normalizePhone10(currentCustomer.phone);
-  }
-  loadMyTickets();
-}
-
-async function submitTicket(){
-  const type = document.getElementById('tk-type').value;
-  const orderRef = document.getElementById('tk-order').value.trim();
-  const name = document.getElementById('tk-name').value.trim();
-  const phone = document.getElementById('tk-phone').value.trim();
-  const message = document.getElementById('tk-message').value.trim();
-  const statusEl = document.getElementById('tk-status');
-  const btn = document.getElementById('tk-submit-btn');
-
-  if(!name || !phone || !message){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Name, phone, and issue details are required.';
-    return;
-  }
-  if(!sb){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = "The store isn't connected to the backend yet.";
-    return;
-  }
-
-  btn.textContent = 'Submitting...';
-  btn.disabled = true;
-  statusEl.style.display = 'none';
-
-  try{
-    const { error } = await sb.from('support_tickets').insert({
-      customer_name: name, customer_phone: phone.replace(/\D/g,''),
-      customer_email: null,
-      order_ref: orderRef || null, issue_type: type, message
-    });
-    if(error) throw error;
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--ink)';
-    statusEl.textContent = "Ticket submitted — we'll get in touch soon.";
-    document.getElementById('tk-order').value = '';
-    document.getElementById('tk-message').value = '';
-    loadMyTickets();
-  }catch(err){
-    console.error(err);
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Something went wrong: ' + (err.message || 'try again');
-  }finally{
-    btn.textContent = 'Submit Ticket';
-    btn.disabled = false;
-  }
-}
-
-async function loadMyTickets(){
-  const el = document.getElementById('myTicketsList');
-  if(!sb || !currentCustomer){ el.innerHTML = '<div class="acct-empty">Sign in to see your past tickets.</div>'; return; }
-  el.innerHTML = '<div class="acct-empty">Loading...</div>';
-  try{
-    const { data, error } = await sb.from('support_tickets').select('*')
-      .eq('customer_phone', normalizePhone10(currentCustomer.phone))
-      .order('created_at', {ascending:false});
-    if(error) throw error;
-    if(!data || !data.length){ el.innerHTML = '<div class="acct-empty">No tickets yet.</div>'; return; }
-    el.innerHTML = data.map(t => {
-      const date = new Date(t.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
-      return `
-      <div class="my-order-card">
-        <div class="my-order-top">
-          <span style="font-size:12.5px;font-weight:700;">${t.issue_type}</span>
-          <span style="font-size:11px;color:var(--ink-soft);">${date}</span>
-        </div>
-        <div class="my-order-items">${t.message}</div>
-        ${t.admin_reply ? `<div class="ticket-reply">Reply: ${t.admin_reply}</div>` : ''}
-        <span class="my-order-status">${t.status.replace('_',' ')}</span>
-      </div>`;
-    }).join('');
-  }catch(err){
-    console.error(err);
-    el.innerHTML = '<div class="acct-empty">Couldn\'t load tickets.</div>';
-  }
-}
-
-function renderAccountState(){
-  const loggedOut = document.getElementById('acctLoggedOut');
-  const loggedIn = document.getElementById('acctLoggedIn');
-  const navIcon = document.getElementById('accountNavIcon');
-  if(currentCustomer){
-    loggedOut.style.display = 'none';
-    loggedIn.style.display = 'block';
-    const digits = normalizePhone10(currentCustomer.phone);
-    const fullName = currentCustomer.user_metadata?.full_name;
-    const name = fullName || 'Namaste!';
-    const initial = (fullName ? fullName.trim().charAt(0) : (digits ? digits.charAt(0) : '?')).toUpperCase();
-    document.getElementById('acctAvatar').innerHTML = initial;
-    document.getElementById('acctName').textContent = name;
-    document.getElementById('acctEmail').textContent = digits ? ('+91 ' + digits) : '';
-    if(navIcon) navIcon.innerHTML = `<div class="nav-avatar-badge">${initial}</div>`;
-  }else{
-    loggedOut.style.display = 'flex';
-    loggedIn.style.display = 'none';
-    resetOtpForm();
-    if(navIcon) navIcon.innerHTML = I.user;
-  }
-}
-
-let myOrders = [];
-const ORDER_STEPS = [
-  {key:'new', label:'Placed'},
-  {key:'processing', label:'Processing'},
-  {key:'shipped', label:'Shipped'},
-  {key:'delivered', label:'Delivered'}
-];
-function orderStepIndex(status){
-  const i = ORDER_STEPS.findIndex(s => s.key === status);
-  return i === -1 ? 0 : i;
-}
-function statusStepperHtml(status){
-  if(status === 'cancelled'){
-    return `<div style="font-size:12.5px;font-weight:700;color:var(--c-red);margin-top:10px;">This order was cancelled.</div>`;
-  }
-  const activeIdx = orderStepIndex(status);
-  return `<div class="status-stepper">${ORDER_STEPS.map((s,i) => `
-    <div class="status-step ${i<=activeIdx?'done':''}">
-      <div class="ss-dot">${i<=activeIdx ? I.check : ''}</div>
-      <div class="ss-label">${s.label}</div>
-    </div>`).join('')}</div>`;
-}
-
-async function loadMyOrders(){
-  const el = document.getElementById('myOrdersList');
-  const trackBox = document.getElementById('trackOrderBox');
-  if(!sb || !currentCustomer){ el.innerHTML = ''; trackBox.style.display = 'none'; return; }
-  el.innerHTML = '<div class="acct-empty">Loading...</div>';
-  try{
-    const { data, error } = await sb.from('orders').select('*')
-      .eq('customer_phone', normalizePhone10(currentCustomer.phone))
-      .order('created_at', {ascending:false});
-    if(error) throw error;
-    myOrders = data || [];
-    if(!myOrders.length){
-      el.innerHTML = '<div class="acct-empty">No orders yet.</div>';
-      trackBox.style.display = 'none';
-      return;
-    }
-    // Track box = most recent order that isn't delivered/cancelled yet
-    const active = myOrders.find(o => o.order_status !== 'delivered' && o.order_status !== 'cancelled');
-    if(active){
-      trackBox.style.display = 'block';
-      const date = new Date(active.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
-      trackBox.innerHTML = `
-        <div class="acct-section-title">Track Your Order</div>
-        <div class="track-card">
-          <div class="track-card-head">
-            <div>
-              <div style="font-size:12.5px;font-weight:700;">Order #${active.id.slice(0,8)}</div>
-              <div style="font-size:11px;color:var(--ink-soft);">${date} · ₹${active.total}</div>
-            </div>
-            ${I.truck}
-          </div>
-          ${statusStepperHtml(active.order_status)}
-          ${active.shiprocket_awb ? `
-          <div class="track-awb">
-            <span>AWB: <b>${active.shiprocket_awb}</b></span>
-            <a href="https://shiprocket.co/tracking/${active.shiprocket_awb}" target="_blank" rel="noopener" style="color:var(--c-red);font-weight:700;">Track &rarr;</a>
-          </div>` : ''}
-          <button class="view-detail-btn" onclick="openOrderDetail('${active.id}')">${I.package}<span>View full details</span></button>
-        </div>`;
-    }else{
-      trackBox.style.display = 'none';
-    }
-    el.innerHTML = myOrders.map(o => {
-      const items = (o.items || []).map(i => `${i.qty}× ${i.name}`).join(', ');
-      const date = new Date(o.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
-      return `
-      <div class="my-order-card">
-        <div class="my-order-top">
-          <span style="font-size:12.5px;font-weight:700;">₹${o.total}</span>
-          <span style="font-size:11px;color:var(--ink-soft);">${date}</span>
-        </div>
-        <div class="my-order-items">${items}</div>
-        <span class="my-order-status">${o.order_status}</span>
-        <button class="view-detail-btn" onclick="openOrderDetail('${o.id}')">${I.package}<span>View details</span></button>
-      </div>`;
-    }).join('');
-  }catch(err){
-    console.error(err);
-    el.innerHTML = '<div class="acct-empty">Couldn\'t load orders.</div>';
-    trackBox.style.display = 'none';
-  }
-}
-
-function openOrderDetail(orderId){
-  const o = myOrders.find(x => x.id === orderId);
-  if(!o) return;
-  const items = (o.items || []).map(i => `<div class="order-detail-item"><span>${i.qty}× ${i.name}</span><span>₹${(i.price||0)*(i.qty||1)}</span></div>`).join('');
-  const addons = (o.addons || []).map(a => `<div class="order-detail-item"><span>${a.qty}× ${a.label}</span><span>₹${(a.price||0)*(a.qty||1)}</span></div>`).join('');
-  const date = new Date(o.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
-  document.getElementById('orderDetailBody').innerHTML = `
-    <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:2px;">Order #${o.id.slice(0,8)}</div>
-    <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:14px;">${date}</div>
-    ${statusStepperHtml(o.order_status)}
-    ${o.shiprocket_awb ? `
-    <div class="track-awb" style="margin-top:16px;">
-      <span>AWB: <b>${o.shiprocket_awb}</b></span>
-      <a href="https://shiprocket.co/tracking/${o.shiprocket_awb}" target="_blank" rel="noopener" style="color:var(--c-red);font-weight:700;">Track &rarr;</a>
-    </div>` : ''}
-    <div class="acct-section-title" style="margin-top:18px;">Items</div>
-    ${items}${addons}
-    <div class="order-detail-row"><span>Subtotal</span><span>₹${o.subtotal}</span></div>
-    ${o.discount ? `<div class="order-detail-row"><span>Discount</span><span>-₹${o.discount}</span></div>` : ''}
-    <div class="order-detail-row" style="font-weight:800;"><span>Total</span><span>₹${o.total}</span></div>
-    <div class="acct-section-title" style="margin-top:14px;">Delivery Address</div>
-    <div class="addr-text">${o.customer_name}<br>${o.customer_address || ''}<br>${[o.customer_city,o.customer_state,o.customer_pincode].filter(Boolean).join(', ')}<br>+91 ${normalizePhone10(o.customer_phone)}</div>
-    <div class="acct-section-title" style="margin-top:14px;">Payment</div>
-    <div class="addr-text" style="text-transform:capitalize;">${o.payment_status || 'pending'}</div>
-  `;
-  document.getElementById('accountDrawer').classList.remove('show');
-  document.getElementById('orderDetailDrawer').classList.add('show');
-}
-function closeOrderDetail(){
-  document.getElementById('orderDetailDrawer').classList.remove('show');
-  document.getElementById('accountDrawer').classList.add('show');
-}
-
-/* ---------------- Saved Addresses ---------------- */
-let myAddresses = [];
-async function loadMyAddresses(){
-  const el = document.getElementById('myAddressesList');
-  if(!sb || !currentCustomer){ el.innerHTML = ''; return; }
-  el.innerHTML = '<div class="acct-empty">Loading...</div>';
-  try{
-    const { data, error } = await sb.from('customer_addresses').select('*')
-      .eq('customer_phone', normalizePhone10(currentCustomer.phone))
-      .order('is_default', {ascending:false}).order('created_at', {ascending:false});
-    if(error) throw error;
-    myAddresses = data || [];
-    renderChkSavedAddresses();
-    if(!myAddresses.length){ el.innerHTML = '<div class="acct-empty">No saved addresses yet.</div>'; return; }
-    el.innerHTML = myAddresses.map(a => `
-      <div class="addr-card">
-        <div class="addr-label-row">
-          <span class="addr-label-chip">${a.label || 'Home'}</span>
-          ${a.is_default ? '<span class="addr-default-chip">Default</span>' : ''}
-        </div>
-        <div class="addr-text">${a.full_name ? a.full_name + '<br>' : ''}${a.address}<br>${[a.city,a.state,a.pincode].filter(Boolean).join(', ')}</div>
-        <div class="addr-actions">
-          ${!a.is_default ? `<button class="addr-action-btn" onclick="setDefaultAddress('${a.id}')">${I.check}<span>Set Default</span></button>` : ''}
-          <button class="addr-action-btn" onclick="openAddAddressForm('${a.id}')">${I.edit}<span>Edit</span></button>
-          <button class="addr-action-btn danger" onclick="deleteAddress('${a.id}')">${I.trash}<span>Remove</span></button>
-        </div>
-      </div>`).join('');
-  }catch(err){
-    console.error(err);
-    el.innerHTML = '<div class="acct-empty">Couldn\'t load addresses.</div>';
-  }
-}
-function openAddAddressForm(addressId){
-  const box = document.getElementById('addressFormBox');
-  document.getElementById('addr-status').style.display = 'none';
-  if(addressId){
-    const a = myAddresses.find(x => x.id === addressId);
-    if(!a) return;
-    document.getElementById('addr-id').value = a.id;
-    document.getElementById('addr-label').value = a.label || 'Home';
-    document.getElementById('addr-name').value = a.full_name || '';
-    document.getElementById('addr-address').value = a.address || '';
-    document.getElementById('addr-city').value = a.city || '';
-    document.getElementById('addr-state').value = a.state || '';
-    document.getElementById('addr-pincode').value = a.pincode || '';
-    document.getElementById('addr-default').checked = !!a.is_default;
-  }else{
-    document.getElementById('addr-id').value = '';
-    ['addr-name','addr-address','addr-city','addr-state','addr-pincode'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('addr-label').value = 'Home';
-    document.getElementById('addr-default').checked = myAddresses.length === 0;
-  }
-  box.style.display = 'block';
-  box.scrollIntoView({behavior:'smooth', block:'nearest'});
-}
-function closeAddressForm(){ document.getElementById('addressFormBox').style.display = 'none'; }
-function renderChkSavedAddresses(){
-  const row = document.getElementById('chkSavedAddrRow');
-  const chips = document.getElementById('chkSavedAddrChips');
-  if(!row) return;
-  if(!currentCustomer || !myAddresses.length){ row.style.display = 'none'; return; }
-  row.style.display = 'block';
-  chips.innerHTML = myAddresses.map(a => `
-    <button type="button" onclick="applyChkAddress('${a.id}')" style="flex:0 0 auto;background:var(--paper-deep);border:1.5px solid rgba(43,31,23,0.12);border-radius:12px;padding:8px 12px;font-size:11.5px;font-weight:700;text-align:left;white-space:nowrap;">
-      ${I.mapPin} ${a.label || 'Home'}${a.is_default ? ' · Default' : ''}
-    </button>`).join('');
-}
-function applyChkAddress(id){
-  const a = myAddresses.find(x => x.id === id);
-  if(!a) return;
-  if(a.full_name) document.getElementById('chk-name').value = a.full_name;
-  document.getElementById('chk-address').value = a.address || '';
-  document.getElementById('chk-city').value = a.city || '';
-  document.getElementById('chk-state').value = a.state || '';
-  document.getElementById('chk-pincode').value = a.pincode || '';
-}
-async function saveAddress(){
-  if(!sb || !currentCustomer) return;
-  const id = document.getElementById('addr-id').value;
-  const payload = {
-    customer_phone: normalizePhone10(currentCustomer.phone),
-    label: document.getElementById('addr-label').value,
-    full_name: document.getElementById('addr-name').value.trim(),
-    address: document.getElementById('addr-address').value.trim(),
-    city: document.getElementById('addr-city').value.trim(),
-    state: document.getElementById('addr-state').value.trim(),
-    pincode: document.getElementById('addr-pincode').value.trim(),
-    is_default: document.getElementById('addr-default').checked
-  };
-  const statusEl = document.getElementById('addr-status');
-  if(!payload.address || !payload.city || !payload.pincode){
-    statusEl.style.display = 'block';
-    statusEl.textContent = 'Address, city, and pincode are required.';
-    return;
-  }
-  try{
-    if(payload.is_default){
-      await sb.from('customer_addresses').update({is_default:false}).eq('customer_phone', payload.customer_phone);
-    }
-    const { error } = id
-      ? await sb.from('customer_addresses').update(payload).eq('id', id)
-      : await sb.from('customer_addresses').insert(payload);
-    if(error) throw error;
-    closeAddressForm();
-    loadMyAddresses();
-  }catch(err){
-    console.error(err);
-    statusEl.style.display = 'block';
-    statusEl.textContent = "Couldn't save: " + (err.message || 'try again');
-  }
-}
-async function setDefaultAddress(id){
-  if(!sb || !currentCustomer) return;
-  try{
-    await sb.from('customer_addresses').update({is_default:false}).eq('customer_phone', normalizePhone10(currentCustomer.phone));
-    await sb.from('customer_addresses').update({is_default:true}).eq('id', id);
-    loadMyAddresses();
-  }catch(err){ console.error(err); }
-}
-async function deleteAddress(id){
-  if(!sb) return;
-  if(!confirm('Remove this address?')) return;
-  try{
-    const { error } = await sb.from('customer_addresses').delete().eq('id', id);
-    if(error) throw error;
-    loadMyAddresses();
-  }catch(err){ console.error(err); }
-}
-
-/* ---------------- Name capture (first login) ---------------- */
-function maybePromptForName(){
-  if(!currentCustomer) return;
-  const name = currentCustomer.user_metadata?.full_name;
-  if(name) return;
-  document.getElementById('nc-name-input').value = '';
-  document.getElementById('nc-status').style.display = 'none';
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('nameCaptureDrawer').classList.add('show');
-}
-function skipNameCapture(){
-  document.getElementById('nameCaptureDrawer').classList.remove('show');
-  if(!document.getElementById('accountDrawer').classList.contains('show')){
-    document.getElementById('overlay').classList.remove('show');
-  }
-}
-async function saveCustomerName(){
-  if(!sb) return;
-  const input = document.getElementById('nc-name-input');
-  const name = input.value.trim();
-  const statusEl = document.getElementById('nc-status');
-  if(!name){
-    statusEl.style.display = 'block';
-    statusEl.textContent = 'Please enter your name.';
-    return;
-  }
-  try{
-    const { data, error } = await sb.auth.updateUser({ data: { full_name: name } });
-    if(error) throw error;
-    currentCustomer = data.user;
+    document.getElementById('accountDrawer').classList.add('show');
     renderAccountState();
-    document.getElementById('nameCaptureDrawer').classList.remove('show');
-    if(!document.getElementById('accountDrawer').classList.contains('show')){
-      document.getElementById('overlay').classList.remove('show');
-    }
-  }catch(err){
-    console.error(err);
-    statusEl.style.display = 'block';
-    statusEl.textContent = "Couldn't save: " + (err.message || 'try again');
+    showOtpStatus('Please verify your mobile number to continue checkout.', false);
+    return;
   }
-}
-
-async function checkCustomerAuth(){
-  if(!sb) return;
-  const { data: { session } } = await sb.auth.getSession();
-  currentCustomer = session ? session.user : null;
-  renderAccountState();
-  if(currentCustomer){ loadMyOrders(); loadMyAddresses(); }
-  sb.auth.onAuthStateChange((event, session) => {
-    currentCustomer = session ? session.user : null;
-    renderAccountState();
-    if(currentCustomer){
-      loadMyOrders();
-      loadMyAddresses();
-      if(event === 'SIGNED_IN') maybePromptForName();
-    }
-  });
-}
-
-function closeAllPanels(){
-  document.getElementById('overlay').classList.remove('show');
-  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','nameCaptureDrawer'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.classList.remove('show');
-  });
-}
-function openCart(){ renderCart(); document.getElementById('overlay').classList.add('show'); document.getElementById('cartDrawer').classList.add('show'); }
-
-function basePrice(type){ const p = PRODUCTS.find(pr => pr.type === type); return p ? p.price : 199; }
-
-/* ---------------- Customised For You ---------------- */
-const CUSTOMISE_ITEMS = [
-  {type:'Keychain', desc:"Get a doodle-style keychain made with your photo or name — a keepsake you'll carry every day."},
-  {type:'Mug', desc:'Make your morning chai a little more personal — print your photo or message on a mug.'},
-  {type:'Tote Bag', desc:'Your doodle design on a canvas tote — an everyday carry that stands out.'},
-  {type:'T-Shirt', desc:'Get your custom design printed on a comfy tee — your style, your print.'},
-];
-function customiseKey(type){ return 'customise_' + type.toLowerCase().replace(/[^a-z]/g,''); }
-function renderCustomiseItems(){
-  document.getElementById('customiseScroll').innerHTML = CUSTOMISE_ITEMS.map(c => `
-    <div class="customise-card" data-type="${c.type}">
-      <div class="cc-photo">
-        <div class="cc-tag">${I.sparkle}<span>Customisable</span></div>
-        ${siteImg(customiseKey(c.type), 'Customised ' + c.type + ' photo')}
-      </div>
-      <div class="cc-body">
-        <div class="cc-name">Custom ${c.type}</div>
-        <div class="cc-from">From ₹${basePrice(c.type) + CUSTOMISATION_FEE}</div>
-        <div class="cc-btn">${I.sparkle}<span>Customise Now</span></div>
-      </div>
-    </div>
-  `).join('');
-}
-renderCustomiseItems();
-document.getElementById('customiseScroll').addEventListener('click', (e)=>{
-  const c = e.target.closest('.customise-card'); if(!c) return;
-  openCustomiseDrawer(c.dataset.type);
-});
-
-/* ---------------- Customise Product Drawer ---------------- */
-let custState = { type:null, qty:1, style:null, uploaded:false };
-
-function renderCustStylePicks(){
-  document.getElementById('custStylePickGrid').innerHTML = STYLES.map(s => `
-    <div class="style-pick" data-style="${s.key}">
-      <div class="sp-photo">${siteImg('avatarstyle_' + s.key.toLowerCase().replace(/\s+/g,''), s.label)}</div>
-      <div class="pname">${s.label}</div>
-    </div>
-  `).join('');
-}
-renderCustStylePicks();
-
-document.getElementById('custStylePickGrid').addEventListener('click', (e)=>{
-  const el = e.target.closest('.style-pick'); if(!el) return;
-  custState.style = el.dataset.style;
-  document.querySelectorAll('#custStylePickGrid .style-pick').forEach(x=>x.classList.toggle('selected', x===el));
-});
-
-function openCustomiseDrawer(type){
-  const item = CUSTOMISE_ITEMS.find(c => c.type === type);
-  custState = { type, qty:1, style:null, uploaded:false };
-  document.getElementById('customiseDrawerTitle').textContent = 'Customise Your ' + type;
-  document.getElementById('custPhotoBig').innerHTML = siteImg(customiseKey(type), 'Custom ' + type + ' photo');
-  document.getElementById('custDesc').textContent = item ? item.desc : '';
-  document.getElementById('custQtyVal').textContent = '1';
-  document.getElementById('custUploadPlaceholder').innerHTML = I.camera + '<p>Tap to upload a clear face photo</p>';
-  document.getElementById('custNote').value = '';
-  document.querySelectorAll('#custStylePickGrid .style-pick').forEach(x=>x.classList.remove('selected'));
-  updateCustPrice();
-  closeAllPanels();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('customiseDrawer').classList.add('show');
-}
-
-function changeCustQty(delta){
-  custState.qty = Math.max(1, custState.qty + delta);
-  document.getElementById('custQtyVal').textContent = custState.qty;
-  updateCustPrice();
-}
-
-function handleCustUpload(event){
-  const file = event.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    custState.uploaded = true;
-    custState.photoDataUrl = e.target.result;
-    document.getElementById('custUploadPlaceholder').innerHTML = `<img src="${e.target.result}"><p>Photo uploaded — tap to change</p>`;
-  };
-  reader.readAsDataURL(file);
-}
-
-function updateCustPrice(){
-  const base = custState.type ? basePrice(custState.type) : 0;
-  const total = (base + CUSTOMISATION_FEE) * custState.qty;
-  document.getElementById('custPrice').textContent = '₹' + total;
-}
-
-function addCustomiseToCart(){
-  if(!custState.uploaded){ alert('Please upload your photo.'); return; }
-  if(!custState.style){ alert('Pehle ek style chuno.'); return; }
-  const note = document.getElementById('custNote').value.trim();
-  const unitPrice = basePrice(custState.type) + CUSTOMISATION_FEE;
-  addCustomLineItem({
-    key: 'cust-' + Date.now(),
-    name: `Custom ${custState.type} — ${custState.style}`,
-    price: unitPrice, type: custState.type, qty: custState.qty,
-    customNote: note, customPhotoDataUrl: custState.photoDataUrl
-  });
-}
-
-/* ---------------- Hamper ---------------- */
-let hamperMode = 'ready';
-let hamperSelection = [];
-
-function openHamperDrawer(mode){
-  hamperMode = mode;
-  hamperSelection = [];
-  document.getElementById('hamperDrawerTitle').textContent = mode === 'ready' ? 'Make Your Hamper' : 'Customised Hamper';
-  document.getElementById('hamperInstructions').textContent = mode === 'ready'
-    ? 'Pick any 3 ready-made products — flat ₹' + MAKE_HAMPER_PRICE + '.'
-    : "Pick any 3 products — they'll be personalised with a custom print.";
-  document.getElementById('hamperPrice').textContent = '₹' + (mode === 'ready' ? MAKE_HAMPER_PRICE : CUSTOM_HAMPER_PRICE);
-  renderHamperList();
-  closeAllPanels();
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('hamperDrawer').classList.add('show');
-}
-
-function renderHamperList(){
-  const list = document.getElementById('hamperPickList');
-  list.innerHTML = PRODUCTS.map(p => `
-    <div class="hamper-pick-item ${hamperSelection.includes(p.id)?'selected':''}" onclick="toggleHamperItem('${p.id}')">
-      <div class="hp-ic">${TYPE_ICON[p.type]}</div>
-      <div class="hp-info"><div class="hp-name">${p.name}</div><div class="hp-price">${p.type} · ₹${p.price}</div></div>
-      <div class="hp-check">${hamperSelection.includes(p.id) ? I.check : ''}</div>
-    </div>
-  `).join('');
-  document.getElementById('hamperCount').textContent = `${hamperSelection.length} / 3 selected`;
-}
-function toggleHamperItem(id){
-  if(hamperSelection.includes(id)){ hamperSelection = hamperSelection.filter(x => x !== id); }
-  else{ if(hamperSelection.length >= 3){ alert('Sirf 3 products chuno.'); return; } hamperSelection.push(id); }
-  renderHamperList();
-}
-function addHamperToCart(){
-  if(hamperSelection.length !== 3){ alert('Pehle 3 products chuno.'); return; }
-  const names = hamperSelection.map(id => PRODUCTS.find(p=>p.id===id).name);
-  const price = hamperMode === 'ready' ? MAKE_HAMPER_PRICE : CUSTOM_HAMPER_PRICE;
-  const label = (hamperMode === 'ready' ? 'Hamper: ' : 'Customised Hamper: ') + names.join(', ');
-  addCustomLineItem({ key:'hamper-'+Date.now(), name:label, price, type:'Hamper', qty:1 });
-}
-
-/* ---------------- Horizontal scroll rows (category pills, quicklinks,
-   gift tiles etc.) — touch/swipe works out of the box on phones.
-   Ye extra JS sirf desktop/mouse users ke liye hai: mouse-wheel se bhi
-   scroll ho aur click-drag se bhi pan ho jaaye. */
-function enableHScroll(el){
-  if(!el || el._hScrollBound) return;
-  el._hScrollBound = true;
-  let isDown = false, moved = false, startX = 0, startScroll = 0;
-  el.addEventListener('wheel', (e) => {
-    if(el.scrollWidth <= el.clientWidth) return;
-    if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){
-      el.scrollLeft += e.deltaY;
-      e.preventDefault();
-    }
-  }, { passive:false });
-  el.addEventListener('mousedown', (e) => {
-    if(el.scrollWidth <= el.clientWidth) return;
-    isDown = true; moved = false;
-    startX = e.pageX; startScroll = el.scrollLeft;
-    el.classList.add('dragging');
-  });
-  window.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
-  el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
-  el.addEventListener('mousemove', (e) => {
-    if(!isDown) return;
-    const dx = e.pageX - startX;
-    if(Math.abs(dx) > 4) moved = true;
-    el.scrollLeft = startScroll - dx;
-  });
-  el.addEventListener('click', (e) => {
-    if(moved){ e.stopPropagation(); e.preventDefault(); moved = false; }
-  }, true);
-}
-function enableAllHScroll(){
-  document.querySelectorAll('.pill-tabs, .quicklinks, .gifts-grid, .occasion-row2, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll').forEach(enableHScroll);
-}
-
-/* ---------------- Init ---------------- */
-function renderRestOfPage(){
-  renderHero();
-  renderQuickLinks();
-  renderFeelings();
-  renderOccasions();
-  renderBanner();
-  renderCollection();
-  renderCustStylePicks();
-  renderCustomiseItems();
-}
-
-(async function init(){
-  await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages()]);
-  updateCartCount();
-  renderBestsellers();
-  renderProducts();
-  renderGiftsGrid();
-  renderRestOfPage();
-  renderCustomisedView();
-  renderCategoryView();
-  checkCustomerAuth();
-  enableAllHScroll();
-})();
-
-</script>
-
-</body>
-</html>
+  pendingCheckoutAfterLogin = false;
+  document.getElementById('chk-status').style.display = 'none';
+  document.getElementById('chk-status').textContent = '';
+  const submitBtn = document.getElementById('chk-submit-btn');
+  delete submitBtn.dataset.retryOrderId;
+  submitBtn.textContent =
