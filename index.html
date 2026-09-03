@@ -300,6 +300,7 @@
   .acct-tile svg{width:22px; height:22px;}
   .acct-profile{display:flex; align-items:center; gap:12px; padding-bottom:18px; border-bottom:1px solid rgba(43,31,23,0.1); margin-bottom:18px;}
   .acct-avatar{width:48px; height:48px; border-radius:50%; overflow:hidden; background:var(--c-red); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; flex-shrink:0;}
+  .nav-avatar-badge{width:19px; height:19px; border-radius:50%; background:var(--c-red); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10.5px; line-height:1;}
   .acct-avatar img{width:100%; height:100%; object-fit:cover;}
   .acct-name{font-size:14.5px; font-weight:700;}
   .acct-email{font-size:11.5px; color:var(--ink-soft);}
@@ -1251,7 +1252,7 @@ document.getElementById('bottomNav').innerHTML = `
   <div class="nav-item active" id="navHome">${I.home}<span>Home</span></div>
   <div class="nav-item" id="navCustomised">${I.sparkle}<span>Customised</span></div>
   <div class="nav-item" id="navCategory">${I.grid}<span>Category</span></div>
-  <div class="nav-item" id="accountNavItem">${I.user}<span>Account</span></div>
+  <div class="nav-item" id="accountNavItem"><span id="accountNavIcon">${I.user}</span><span>Account</span></div>
 `;
 document.getElementById('accountNavItem').addEventListener('click', openAccountDrawer);
 
@@ -1918,18 +1919,23 @@ async function loadMyTickets(){
 function renderAccountState(){
   const loggedOut = document.getElementById('acctLoggedOut');
   const loggedIn = document.getElementById('acctLoggedIn');
+  const navIcon = document.getElementById('accountNavIcon');
   if(currentCustomer){
     loggedOut.style.display = 'none';
     loggedIn.style.display = 'block';
     const digits = normalizePhone10(currentCustomer.phone);
-    const name = currentCustomer.user_metadata?.full_name || 'Namaste!';
-    document.getElementById('acctAvatar').innerHTML = digits ? digits.charAt(0) : '?';
+    const fullName = currentCustomer.user_metadata?.full_name;
+    const name = fullName || 'Namaste!';
+    const initial = (fullName ? fullName.trim().charAt(0) : (digits ? digits.charAt(0) : '?')).toUpperCase();
+    document.getElementById('acctAvatar').innerHTML = initial;
     document.getElementById('acctName').textContent = name;
     document.getElementById('acctEmail').textContent = digits ? ('+91 ' + digits) : '';
+    if(navIcon) navIcon.innerHTML = `<div class="nav-avatar-badge">${initial}</div>`;
   }else{
     loggedOut.style.display = 'flex';
     loggedIn.style.display = 'none';
     resetOtpForm();
+    if(navIcon) navIcon.innerHTML = I.user;
   }
 }
 
