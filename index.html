@@ -445,7 +445,7 @@
     <div class="eyebrow" id="heroEyebrow"></div>
     <h1>Jagashilp</h1>
     <div class="hero-tagline">Keep Blooming</div>
-    <p>India's first personalised gifts brand — keychains, mugs, totes, tees, sab hand-crafted with dil.</p>
+    <p>India's first personalised gifts brand — keychains, mugs, totes, tees, all hand-crafted with heart.</p>
     <a href="#shopGrid" class="hero-cta" id="heroCta"></a>
   </div>
 </div>
@@ -485,7 +485,7 @@
 <div class="hamper-section" id="hamperSection">
   <div class="eyebrow">Gift Sets</div>
   <h2>Build a Hamper</h2>
-  <div class="sub">Do tareeke se banao apna hamper.</div>
+  <div class="sub">Two ways to build your hamper.</div>
   <div class="hamper-grid" id="hamperGrid"></div>
 </div>
 
@@ -943,7 +943,7 @@ async function loadProducts(){
       }));
     }
   }catch(err){
-    console.error('Products load failed, fallback data use ho rahi hai:', err);
+    console.error('Products load failed, using fallback data:', err);
   }
 }
 
@@ -1218,14 +1218,14 @@ document.getElementById('hamperGrid').innerHTML = `
     <div class="hicon">${I.gift}</div>
     <h4>Make Your Hamper</h4>
     <div class="hprice">₹${MAKE_HAMPER_PRICE} flat</div>
-    <p>Koi bhi 3 readymade products chuno, hum hamper mein pack kar denge.</p>
+    <p>Pick any 3 ready-made products, and we'll pack them into a hamper.</p>
     <button class="hamper-btn" onclick="openHamperDrawer('ready')">Build Now ${I.arrow}</button>
   </div>
   <div class="hamper-card">
     <div class="hicon">${I.sparkle}</div>
     <h4>Customised Hamper</h4>
     <div class="hprice">From ₹${CUSTOM_HAMPER_PRICE}</div>
-    <p>3 products chuno aur apne hisaab se customise karwao.</p>
+    <p>Pick 3 products and get them customised your way.</p>
     <button class="hamper-btn" onclick="openHamperDrawer('custom')">Build Now ${I.arrow}</button>
   </div>
 `;
@@ -1304,7 +1304,7 @@ function renderHighlightRow(containerId, predicate){
   const list = PRODUCTS.filter(p => p.highlight && predicate(p));
   el.classList.toggle('hl-empty', !list.length);
   if(!list.length){
-    el.innerHTML = `<div class="acct-empty-state" style="padding:6px 18px 4px;"><p>Abhi koi highlighted product nahi hai — admin panel se product edit karke "Show on Highlight" on karo.</p></div>`;
+    el.innerHTML = `<div class="acct-empty-state" style="padding:6px 18px 4px;"><p>No highlighted products yet — edit a product in the admin panel and turn on "Show on Highlight".</p></div>`;
     return;
   }
 
@@ -1371,7 +1371,7 @@ function renderCustomisedView(){
   renderHighlightRow('customisedHighlightRow', p => p.customisable);
   const list = PRODUCTS.filter(p => p.customisable && (customisedActiveType === 'All' || p.type === customisedActiveType));
   const grid = document.getElementById('customisedGrid');
-  grid.innerHTML = list.length ? list.map(productCardHtml).join('') : `<div class="acct-empty-state" style="grid-column:1/-1;"><p>Is category mein abhi koi customisable product nahi hai.</p></div>`;
+  grid.innerHTML = list.length ? list.map(productCardHtml).join('') : `<div class="acct-empty-state" style="grid-column:1/-1;"><p>There are no customisable products in this category yet.</p></div>`;
 }
 document.getElementById('customisedCatStrip').addEventListener('click', (e)=>{
   const c = e.target.closest('.cat-chip'); if(!c) return;
@@ -1386,7 +1386,7 @@ function renderCategoryView(){
   renderHighlightRow('categoryHighlightRow', p => !p.customisable);
   const list = PRODUCTS.filter(p => !p.customisable && (categoryActiveType === 'All' || p.type === categoryActiveType));
   const grid = document.getElementById('categoryGrid');
-  grid.innerHTML = list.length ? list.map(productCardHtml).join('') : `<div class="acct-empty-state" style="grid-column:1/-1;"><p>Is category mein abhi koi product nahi hai.</p></div>`;
+  grid.innerHTML = list.length ? list.map(productCardHtml).join('') : `<div class="acct-empty-state" style="grid-column:1/-1;"><p>There are no products in this category yet.</p></div>`;
 }
 document.getElementById('categoryCatStrip').addEventListener('click', (e)=>{
   const c = e.target.closest('.cat-chip'); if(!c) return;
@@ -1416,7 +1416,7 @@ function renderProducts(){
   let list = activeType === 'All' ? PRODUCTS : PRODUCTS.filter(p => p.type === activeType);
   if(activeTag) list = list.filter(p => (p.tags || []).includes(activeTag.key));
   if(!list.length){
-    grid.innerHTML = `<div class="acct-empty-state" style="grid-column:1/-1;"><p>${activeTag ? activeTag.label + ' ke liye abhi koi product tag nahi hai — admin panel se product edit karke ye tag lagao.' : 'Is category mein abhi koi product nahi hai.'}</p></div>`;
+    grid.innerHTML = `<div class="acct-empty-state" style="grid-column:1/-1;"><p>${activeTag ? 'There are no products tagged for ' + activeTag.label + ' yet — edit a product in the admin panel and add this tag.' : 'There are no products in this category yet.'}</p></div>`;
     return;
   }
   grid.innerHTML = list.map(p => `
@@ -1495,7 +1495,7 @@ function renderCart(){
   const body = document.getElementById('cartBody');
   const foot = document.getElementById('cartFoot');
   if(cart.length === 0){
-    body.innerHTML = `<div class="empty-cart">Aapka cart khaali hai</div>`;
+    body.innerHTML = `<div class="empty-cart">Your cart is empty</div>`;
     foot.innerHTML = '';
     return;
   }
@@ -1600,25 +1600,25 @@ async function submitOrder(){
   if(!name || !phone || !address || !city || !state || !pincode){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Sab fields bharna zaroori hai (courier ke liye pincode chahiye).';
+    statusEl.textContent = 'All fields are required (pincode is needed for the courier).';
     return;
   }
   if(!/^\d{6}$/.test(pincode)){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Sahi 6-digit pincode daalo.';
+    statusEl.textContent = 'Enter a valid 6-digit pincode.';
     return;
   }
   if(!/^\d{10}$/.test(phone.replace(/\D/g,''))){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Sahi 10-digit phone number daalo.';
+    statusEl.textContent = 'Enter a valid 10-digit phone number.';
     return;
   }
   if(!sb){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Store abhi backend se connect nahi hai — order save nahi ho payega. Supabase URL/key add karne ke baad ye kaam karega.';
+    statusEl.textContent = "The store isn't connected to the backend yet — the order can't be saved. This will work once the Supabase URL/key is added.";
     return;
   }
 
@@ -1662,7 +1662,7 @@ async function submitOrder(){
     console.error(err);
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Kuch galat ho gaya: ' + (err.message || 'try again');
+    statusEl.textContent = 'Something went wrong: ' + (err.message || 'try again');
   }finally{
     btn.textContent = 'Place Order';
     btn.disabled = false;
@@ -1711,10 +1711,10 @@ function startOtpResendTimer(){
 }
 
 async function sendCustomerOtp(isResend){
-  if(!sb){ showOtpStatus('Store abhi backend se connect nahi hai.', true); return; }
+  if(!sb){ showOtpStatus("The store isn't connected to the backend yet.", true); return; }
   const digits = isResend ? normalizePhone10(otpPendingPhone) : normalizePhone10(document.getElementById('otp-phone').value);
   if(digits.length !== 10){
-    showOtpStatus('Sahi 10-digit mobile number daalo.', true);
+    showOtpStatus('Enter a valid 10-digit mobile number.', true);
     return;
   }
   const phoneE164 = '+91' + digits;
@@ -1729,11 +1729,11 @@ async function sendCustomerOtp(isResend){
     document.getElementById('otpPhoneStep').style.display = 'none';
     document.getElementById('otpCodeStep').style.display = 'block';
     document.getElementById('otp-code').value = '';
-    showOtpStatus(isResend ? 'OTP dobara bhej diya.' : 'OTP bhej diya gaya hai.', false);
+    showOtpStatus(isResend ? 'OTP resent.' : 'OTP has been sent.', false);
     startOtpResendTimer();
   }catch(err){
     console.error(err);
-    showOtpStatus('OTP bhejne mein dikkat hui: ' + (err.message || 'try again'), true);
+    showOtpStatus("Couldn't send the OTP: " + (err.message || 'try again'), true);
     btn.disabled = false; btn.textContent = originalText;
   }finally{
     if(!isResend){ btn.textContent = 'Send OTP'; btn.disabled = false; }
@@ -1744,7 +1744,7 @@ async function verifyCustomerOtp(){
   if(!sb || !otpPendingPhone) return;
   const code = document.getElementById('otp-code').value.trim();
   if(!/^\d{6}$/.test(code)){
-    showOtpStatus('Sahi 6-digit OTP daalo.', true);
+    showOtpStatus('Enter a valid 6-digit OTP.', true);
     return;
   }
   const btn = document.getElementById('otpVerifyBtn');
@@ -1755,7 +1755,7 @@ async function verifyCustomerOtp(){
     resetOtpForm();
   }catch(err){
     console.error(err);
-    showOtpStatus('OTP galat ya expire ho gaya: ' + (err.message || 'try again'), true);
+    showOtpStatus('The OTP is incorrect or expired: ' + (err.message || 'try again'), true);
   }finally{
     btn.textContent = 'Verify & Sign In'; btn.disabled = false;
   }
@@ -1805,7 +1805,7 @@ function renderWishlistDrawer(){
   const body = document.getElementById('wishlistBody');
   const items = PRODUCTS.filter(p => wishlist.includes(p.id));
   if(!items.length){
-    body.innerHTML = `<div class="acct-empty-state">${I.heart}<p>Wishlist khaali hai. Products pe heart icon dabao unhe yahan save karne ke liye.</p></div>`;
+    body.innerHTML = `<div class="acct-empty-state">${I.heart}<p>Your wishlist is empty. Tap the heart icon on products to save them here.</p></div>`;
     return;
   }
   body.innerHTML = items.map(p => `
@@ -1849,13 +1849,13 @@ async function submitTicket(){
   if(!name || !phone || !message){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Naam, phone aur issue ka detail bharna zaroori hai.';
+    statusEl.textContent = 'Name, phone, and issue details are required.';
     return;
   }
   if(!sb){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Store abhi backend se connect nahi hai.';
+    statusEl.textContent = "The store isn't connected to the backend yet.";
     return;
   }
 
@@ -1872,7 +1872,7 @@ async function submitTicket(){
     if(error) throw error;
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--ink)';
-    statusEl.textContent = 'Ticket submit ho gaya — hum jaldi contact karenge.';
+    statusEl.textContent = "Ticket submitted — we'll get in touch soon.";
     document.getElementById('tk-order').value = '';
     document.getElementById('tk-message').value = '';
     loadMyTickets();
@@ -1880,7 +1880,7 @@ async function submitTicket(){
     console.error(err);
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Kuch galat ho gaya: ' + (err.message || 'try again');
+    statusEl.textContent = 'Something went wrong: ' + (err.message || 'try again');
   }finally{
     btn.textContent = 'Submit Ticket';
     btn.disabled = false;
@@ -1889,14 +1889,14 @@ async function submitTicket(){
 
 async function loadMyTickets(){
   const el = document.getElementById('myTicketsList');
-  if(!sb || !currentCustomer){ el.innerHTML = '<div class="acct-empty">Sign in karke apne pichle tickets dekh sakte ho.</div>'; return; }
+  if(!sb || !currentCustomer){ el.innerHTML = '<div class="acct-empty">Sign in to see your past tickets.</div>'; return; }
   el.innerHTML = '<div class="acct-empty">Loading...</div>';
   try{
     const { data, error } = await sb.from('support_tickets').select('*')
       .eq('customer_phone', normalizePhone10(currentCustomer.phone))
       .order('created_at', {ascending:false});
     if(error) throw error;
-    if(!data || !data.length){ el.innerHTML = '<div class="acct-empty">Koi ticket nahi hai.</div>'; return; }
+    if(!data || !data.length){ el.innerHTML = '<div class="acct-empty">No tickets yet.</div>'; return; }
     el.innerHTML = data.map(t => {
       const date = new Date(t.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
       return `
@@ -1912,7 +1912,7 @@ async function loadMyTickets(){
     }).join('');
   }catch(err){
     console.error(err);
-    el.innerHTML = '<div class="acct-empty">Tickets load nahi ho paaye.</div>';
+    el.innerHTML = '<div class="acct-empty">Couldn\'t load tickets.</div>';
   }
 }
 
@@ -1974,7 +1974,7 @@ async function loadMyOrders(){
     if(error) throw error;
     myOrders = data || [];
     if(!myOrders.length){
-      el.innerHTML = '<div class="acct-empty">Abhi koi order nahi hai.</div>';
+      el.innerHTML = '<div class="acct-empty">No orders yet.</div>';
       trackBox.style.display = 'none';
       return;
     }
@@ -2020,7 +2020,7 @@ async function loadMyOrders(){
     }).join('');
   }catch(err){
     console.error(err);
-    el.innerHTML = '<div class="acct-empty">Orders load nahi ho paaye.</div>';
+    el.innerHTML = '<div class="acct-empty">Couldn\'t load orders.</div>';
     trackBox.style.display = 'none';
   }
 }
@@ -2071,7 +2071,7 @@ async function loadMyAddresses(){
     if(error) throw error;
     myAddresses = data || [];
     renderChkSavedAddresses();
-    if(!myAddresses.length){ el.innerHTML = '<div class="acct-empty">Koi saved address nahi hai.</div>'; return; }
+    if(!myAddresses.length){ el.innerHTML = '<div class="acct-empty">No saved addresses yet.</div>'; return; }
     el.innerHTML = myAddresses.map(a => `
       <div class="addr-card">
         <div class="addr-label-row">
@@ -2087,7 +2087,7 @@ async function loadMyAddresses(){
       </div>`).join('');
   }catch(err){
     console.error(err);
-    el.innerHTML = '<div class="acct-empty">Addresses load nahi ho paaye.</div>';
+    el.innerHTML = '<div class="acct-empty">Couldn\'t load addresses.</div>';
   }
 }
 function openAddAddressForm(addressId){
@@ -2150,7 +2150,7 @@ async function saveAddress(){
   const statusEl = document.getElementById('addr-status');
   if(!payload.address || !payload.city || !payload.pincode){
     statusEl.style.display = 'block';
-    statusEl.textContent = 'Address, city aur pincode bharna zaroori hai.';
+    statusEl.textContent = 'Address, city, and pincode are required.';
     return;
   }
   try{
@@ -2166,7 +2166,7 @@ async function saveAddress(){
   }catch(err){
     console.error(err);
     statusEl.style.display = 'block';
-    statusEl.textContent = 'Save nahi ho paaya: ' + (err.message || 'try again');
+    statusEl.textContent = "Couldn't save: " + (err.message || 'try again');
   }
 }
 async function setDefaultAddress(id){
@@ -2179,7 +2179,7 @@ async function setDefaultAddress(id){
 }
 async function deleteAddress(id){
   if(!sb) return;
-  if(!confirm('Ye address remove karna hai?')) return;
+  if(!confirm('Remove this address?')) return;
   try{
     const { error } = await sb.from('customer_addresses').delete().eq('id', id);
     if(error) throw error;
@@ -2225,7 +2225,7 @@ async function saveCustomerName(){
   }catch(err){
     console.error(err);
     statusEl.style.display = 'block';
-    statusEl.textContent = 'Save nahi ho paaya: ' + (err.message || 'try again');
+    statusEl.textContent = "Couldn't save: " + (err.message || 'try again');
   }
 }
 
@@ -2259,10 +2259,10 @@ function basePrice(type){ const p = PRODUCTS.find(pr => pr.type === type); retur
 
 /* ---------------- Customised For You ---------------- */
 const CUSTOMISE_ITEMS = [
-  {type:'Keychain', desc:'Apni photo ya naam se ek doodle-style keychain banwao — roz apne saath rakhne wali ek yaad.'},
-  {type:'Mug', desc:'Har subah ki chai/coffee ab thodi personal — apni photo ya message ke saath mug print karwao.'},
-  {type:'Tote Bag', desc:'Apna doodle design ek canvas tote pe — daily carry jo alag dikhe.'},
-  {type:'T-Shirt', desc:'Apna custom design ek comfy tee pe print karwao — apna style, apna print.'},
+  {type:'Keychain', desc:"Get a doodle-style keychain made with your photo or name — a keepsake you'll carry every day."},
+  {type:'Mug', desc:'Make your morning chai a little more personal — print your photo or message on a mug.'},
+  {type:'Tote Bag', desc:'Your doodle design on a canvas tote — an everyday carry that stands out.'},
+  {type:'T-Shirt', desc:'Get your custom design printed on a comfy tee — your style, your print.'},
 ];
 function customiseKey(type){ return 'customise_' + type.toLowerCase().replace(/[^a-z]/g,''); }
 function renderCustomiseItems(){
@@ -2345,7 +2345,7 @@ function updateCustPrice(){
 }
 
 function addCustomiseToCart(){
-  if(!custState.uploaded){ alert('Apni photo upload karo.'); return; }
+  if(!custState.uploaded){ alert('Please upload your photo.'); return; }
   if(!custState.style){ alert('Pehle ek style chuno.'); return; }
   const note = document.getElementById('custNote').value.trim();
   const unitPrice = basePrice(custState.type) + CUSTOMISATION_FEE;
@@ -2366,8 +2366,8 @@ function openHamperDrawer(mode){
   hamperSelection = [];
   document.getElementById('hamperDrawerTitle').textContent = mode === 'ready' ? 'Make Your Hamper' : 'Customised Hamper';
   document.getElementById('hamperInstructions').textContent = mode === 'ready'
-    ? 'Koi bhi 3 readymade products chuno — flat ₹' + MAKE_HAMPER_PRICE + ' mein.'
-    : 'Koi bhi 3 products chuno — inhe custom print se personalise karwaya jayega.';
+    ? 'Pick any 3 ready-made products — flat ₹' + MAKE_HAMPER_PRICE + '.'
+    : "Pick any 3 products — they'll be personalised with a custom print.";
   document.getElementById('hamperPrice').textContent = '₹' + (mode === 'ready' ? MAKE_HAMPER_PRICE : CUSTOM_HAMPER_PRICE);
   renderHamperList();
   closeAllPanels();
