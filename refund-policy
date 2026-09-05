@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Refund & Cancellation Policy — Jagashilp</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFFFFF; --paper-deep:#F0F0F0; --ink:#211922; --ink-soft:rgba(33,25,34,0.60);
+    --c-red:#E60023; --bg:#F6F6F6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased;}
+  h1,h2,.serif{font-family:'Fredoka', sans-serif; font-weight:600;}
+  a{color:var(--c-red); text-decoration:none;}
+  .wrap{max-width:720px; margin:0 auto; padding:28px 20px 60px;}
+  header{display:flex; align-items:center; gap:10px; padding:18px 20px; background:var(--paper); border-bottom:1px solid rgba(33,25,34,0.08); position:sticky; top:0;}
+  header a.back{font-size:13px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;}
+  header .brand{font-family:'Fredoka',sans-serif; font-weight:700; font-size:16px; margin-left:auto;}
+  h1{font-size:26px; margin-bottom:6px;}
+  .updated{font-size:12px; color:var(--ink-soft); margin-bottom:28px;}
+  h2{font-size:16px; margin:26px 0 8px;}
+  p, li{font-size:14px; line-height:1.7; color:var(--ink);}
+  ul, ol{padding-left:20px; margin:8px 0;}
+  li{margin-bottom:6px;}
+  .card{background:var(--paper); border-radius:16px; padding:18px 20px; margin-bottom:14px;}
+  .contact-row{display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; margin-bottom:10px;}
+  footer{text-align:center; padding:24px; font-size:12px; color:var(--ink-soft);}
+</style>
+
+</head>
+<body>
+<header>
+  <a class="back" href="../">&larr; Back to Jagashilp</a>
+  <span class="brand">JAGASHILP</span>
+</header>
+
+<div class="wrap">
+  <h1>Refund & Cancellation Policy</h1>
+  <div class="updated">Last updated: 5 September 2026</div>
+  
+<div class="card">
+<p>We want you to love what you order. Here's how cancellations, returns, and refunds work at Jagashilp.</p>
+</div>
+
+<h2>Order Cancellation</h2>
+<ul>
+  <li>You can cancel your order for free as long as it hasn't been dispatched yet — reach out to us via the Help Center with your order number.</li>
+  <li>Once an order has been dispatched, it can no longer be cancelled.</li>
+</ul>
+
+<h2>Customised / Hand-Painted Products</h2>
+<p>Since every customised or personalised product (keychains, canvases, and other made-to-order items) is created specifically for you, these items are <strong>not eligible for return or refund</strong> once made, except in the case of a genuine defect, damage in transit, or a wrong item being delivered.</p>
+
+<h2>Damaged, Defective, or Wrong Item</h2>
+<ul>
+  <li>If your order arrives damaged, defective, or different from what you ordered, contact us within <strong>48 hours of delivery</strong> via the Help Center, along with clear photos/video of the product and packaging.</li>
+  <li>Once verified, we will offer a <strong>free replacement</strong>. If a replacement isn't possible, we will process a refund instead.</li>
+</ul>
+
+<h2>Refund Method & Timeline</h2>
+<ul>
+  <li>For prepaid (Razorpay) orders, approved refunds are credited back to the original payment method within 5–7 business days.</li>
+  <li>For Cash on Delivery (COD) orders, approved refunds are processed via bank transfer/UPI — we will collect your payment details for this once your refund is approved.</li>
+</ul>
+
+<h2>Contact Us</h2>
+<p>For any order issue, please use the Help Center on our website, or write to us at <a href="mailto:v8xmedia@gmail.com">v8xmedia@gmail.com</a> / call +91 70614 59730.</p>
+
+</div>
+<footer>Made with care by Jagashilp — hand-doodled in India</footer>
+</body>
+</html>
