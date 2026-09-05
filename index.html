@@ -24,8 +24,8 @@
   body{background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:76px;}
   h1,h2,h3,.serif{font-family:'Fredoka', sans-serif; font-weight:600;}
   .eyebrow{font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; letter-spacing:.1em; text-transform:uppercase; font-size:11.5px;}
-  .pill-tabs, .quicklinks, .gifts-grid, .occasion-row2, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll{cursor:grab; -webkit-overflow-scrolling:touch;}
-  .pill-tabs.dragging, .quicklinks.dragging, .gifts-grid.dragging, .occasion-row2.dragging, .customise-scroll.dragging, .scroll-row.dragging, .cat-strip.dragging, .addon-scroll.dragging{cursor:grabbing; scroll-behavior:auto;}
+  .pill-tabs, .quicklinks, .gifts-grid, .occasion-scroll, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll, .banner-carousel{cursor:grab; -webkit-overflow-scrolling:touch;}
+  .pill-tabs.dragging, .quicklinks.dragging, .gifts-grid.dragging, .occasion-scroll.dragging, .customise-scroll.dragging, .scroll-row.dragging, .cat-strip.dragging, .addon-scroll.dragging, .banner-carousel.dragging{cursor:grabbing; scroll-behavior:auto;}
   img{max-width:100%; display:block;}
   a{color:inherit; text-decoration:none;}
   button{font-family:inherit; cursor:pointer; border:none; background:none;}
@@ -93,15 +93,15 @@
   .feeling-card .flabel{font-size:13px; font-weight:700;}
 
   /* ============ GIFTS FOR EVERY OCCASION ============ */
-  .occasion-row1{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:14px 18px 4px;}
-  .occasion-row2{display:flex; gap:12px; padding:10px 18px 6px; overflow-x:auto; scrollbar-width:none;}
-  .occasion-row2::-webkit-scrollbar{display:none;}
-  .occasion-card{border-radius:22px; padding:14px 12px; display:flex; flex-direction:column; position:relative; overflow:hidden; min-height:210px; cursor:pointer;}
-  .occasion-row2 .occasion-card{flex:0 0 auto; width:190px; min-height:190px;}
+  .occasion-scroll{display:flex; gap:12px; padding:14px 18px 6px; overflow-x:auto; scrollbar-width:none;}
+  .occasion-scroll::-webkit-scrollbar{display:none;}
+  .occasion-card{flex:0 0 auto; width:144px; height:200px; border-radius:20px; position:relative; overflow:hidden; cursor:pointer; background:var(--paper-deep);}
+  .occasion-card .oc-bg{position:absolute; inset:0;}
+  .occasion-card .oc-bg img{width:100%; height:100%; object-fit:cover;}
+  .occasion-card .oc-scrim{position:absolute; inset:0; background:linear-gradient(180deg, rgba(23,19,19,0) 45%, rgba(23,19,19,0.82) 100%);}
+  .occasion-card .oc-badge{position:absolute; top:10px; left:10px; background:#fff; color:var(--ink); padding:4px 10px; border-radius:8px; font-size:9px; font-weight:800; z-index:2;}
+  .occasion-card .oc-content{position:absolute; left:13px; right:13px; bottom:13px; z-index:2; color:#fff;}
   .occasion-card .oc-title{font-size:14px; font-weight:800; display:flex; align-items:center; gap:3px;}
-  .occasion-card .oc-sub{font-size:9.5px; font-weight:700; text-transform:uppercase; opacity:.55; margin-top:2px; letter-spacing:.03em;}
-  .occasion-card .oc-badge{position:absolute; top:10px; left:10px; background:#fff; color:var(--ink); padding:4px 10px; border-radius:8px; font-size:9.5px; font-weight:800; z-index:2;}
-  .occasion-card .oc-photo{margin-top:auto; width:100%; aspect-ratio:1/0.8; border-radius:12px; overflow:hidden;}
 
   /* ============ CUSTOMISED FOR YOU ============ */
   .customise-scroll{display:flex; gap:14px; padding:14px 18px 6px; overflow-x:auto; scrollbar-width:none;}
@@ -131,14 +131,12 @@
 
   /* ============ PROMO BANNER ============ */
   .banner-wrap{padding:22px 18px 6px;}
-  .banner{border-radius:20px; position:relative; overflow:hidden; min-height:180px;}
-  .banner-photo{position:absolute; inset:0;}
-  .banner-scrim{position:absolute; inset:0; background:linear-gradient(100deg, rgba(43,31,23,0.72), rgba(43,31,23,0.15));}
-  .banner-content{position:relative; z-index:2; padding:26px 22px; display:flex; flex-direction:column; justify-content:center; min-height:180px; color:#fff;}
-  .banner-content .eyebrow{color:rgba(255,255,255,0.85);}
-  .banner-content h3{font-size:23px; color:#fff; margin:4px 0 4px; max-width:70%;}
-  .banner-content p{font-size:12.5px; opacity:0.9; max-width:65%; margin-bottom:14px;}
-  .banner-cta{background:#fff; color:var(--ink); font-weight:700; font-size:12.5px; padding:10px 18px; border-radius:10px; display:inline-flex; align-items:center; gap:6px; width:fit-content;}
+  .banner-carousel{display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; border-radius:20px;}
+  .banner-carousel::-webkit-scrollbar{display:none;}
+  .banner-slide{flex:0 0 100%; scroll-snap-align:start; position:relative; overflow:hidden; min-height:180px; cursor:pointer;}
+  .banner-slide .banner-photo{position:absolute; inset:0;}
+  .banner-slide .banner-photo img{width:100%; height:100%; object-fit:cover;}
+  .banner-cta{position:absolute; left:18px; bottom:18px; z-index:2; background:#fff; color:var(--ink); font-weight:700; font-size:12.5px; padding:10px 18px; border-radius:10px; display:inline-flex; align-items:center; gap:6px; width:fit-content;}
   .dots{display:flex; gap:6px; justify-content:center; padding-top:12px;}
   .dot{width:6px; height:6px; border-radius:50%; background:rgba(43,31,23,0.2);}
   .dot.active{background:var(--rose); width:16px; border-radius:4px;}
@@ -296,6 +294,13 @@
   .acct-signout-btn{width:100%; background:none; border:1.5px solid rgba(183,40,46,0.4); color:var(--c-red); padding:12px; border-radius:14px; font-weight:700; font-size:13px; margin-top:8px;}
   /* ---- Saved addresses ---- */
   .addr-card{background:var(--paper-deep); border-radius:14px; padding:12px 14px; margin-bottom:10px; position:relative;}
+  .delivery-est-card{background:var(--rose-tint,#FBEAEA); border-radius:14px; padding:12px 14px; margin-bottom:16px; display:flex; gap:10px; align-items:flex-start;}
+  .delivery-est-card svg{flex-shrink:0; margin-top:1px; color:var(--rose);}
+  .delivery-est-card .de-title{font-size:12.5px; font-weight:700;}
+  .delivery-est-card .de-sub{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .order-price-block{font-size:12.5px; padding:2px 0;}
+  .order-price-row{display:flex; justify-content:space-between; padding:3px 0; color:var(--ink-soft);}
+  .order-price-row.grand{color:var(--ink); font-weight:700; font-size:14px; border-top:1px solid rgba(43,31,23,0.12); margin-top:4px; padding-top:8px;}
   .addr-label-row{display:flex; align-items:center; gap:6px; margin-bottom:4px;}
   .addr-label-chip{font-size:9.5px; font-weight:800; text-transform:uppercase; background:var(--ink); color:var(--paper); padding:2px 8px; border-radius:20px;}
   .addr-default-chip{font-size:9.5px; font-weight:800; text-transform:uppercase; background:var(--c-yellow); color:var(--ink); padding:2px 8px; border-radius:20px;}
@@ -441,8 +446,7 @@
 
 <!-- ============ GIFTS FOR EVERY OCCASION ============ -->
 <div class="section-head"><div><div class="eyebrow">Pick an Occasion</div><h2>Gifts for Every Occasion</h2></div></div>
-<div class="occasion-row1" id="occasionRow1"></div>
-<div class="occasion-row2" id="occasionRow2"></div>
+<div class="occasion-scroll" id="occasionScroll"></div>
 
 <!-- ============ CUSTOMISED FOR YOU ============ -->
 <div class="section-head"><div><div class="eyebrow">Make It Yours</div><h2>Customised For You</h2></div></div>
@@ -450,8 +454,8 @@
 
 <!-- ============ PROMO BANNER ============ -->
 <div class="banner-wrap">
-  <div class="banner" id="bannerBlock"></div>
-  <div class="dots"><span class="dot active"></span><span class="dot"></span><span class="dot"></span></div>
+  <div class="banner-carousel" id="bannerBlock"></div>
+  <div class="dots" id="bannerDots"></div>
 </div>
 
 <!-- ============ HAMPER SPOTLIGHT ============ -->
@@ -568,18 +572,32 @@
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div>
         <label>Pincode</label>
-        <input type="text" id="chk-pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric">
+        <input type="text" id="chk-pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric" oninput="handlePincodeInput()">
       </div>
       <div>
         <label>Country</label>
         <input type="text" id="chk-country" value="India" disabled style="opacity:.65;">
       </div>
     </div>
+    <div id="chk-delivery-row" style="display:none;font-size:12px;color:var(--ink-soft);margin:-6px 0 14px;"></div>
     <div id="chk-status" class="chk-status"></div>
   </div>
   <div class="drawer-foot">
+    <div class="subtotal-row" id="chk-delivery-line" style="display:none;font-size:12.5px;font-weight:600;color:var(--ink-soft);"><span>Delivery</span><span id="chk-delivery-amt">₹0</span></div>
     <div class="subtotal-row"><span>Total</span><span id="chk-total">₹0</span></div>
-    <button class="checkout-btn" id="chk-submit-btn" onclick="submitOrder()">Continue to Payment</button>
+    <button class="checkout-btn" id="chk-submit-btn" onclick="submitOrder()">Review Order</button>
+  </div>
+</div>
+
+<!-- ============ ORDER REVIEW (address + items + delivery estimate + price breakdown, before payment) ============ -->
+<div class="drawer" id="orderReviewDrawer">
+  <div class="drawer-head"><h3>Review Your Order</h3><button class="close-btn" onclick="closeAllPanels()" id="reviewCloseBtn"></button></div>
+  <div class="drawer-body" id="reviewBody"></div>
+  <div class="drawer-foot">
+    <div class="subtotal-row" id="review-delivery-line" style="display:none;font-size:12.5px;font-weight:600;color:var(--ink-soft);"><span>Delivery</span><span id="review-delivery-amt">₹0</span></div>
+    <div class="subtotal-row"><span>Total</span><span id="review-total">₹0</span></div>
+    <div id="review-status" class="chk-status"></div>
+    <button class="checkout-btn" id="review-pay-btn" onclick="confirmAndPay()">Proceed to Payment</button>
   </div>
 </div>
 
@@ -931,6 +949,9 @@ async function loadProducts(){
         id:p.id, name:p.name, type:p.category, price:p.price, mrp:p.price,
         best:false, image_url:p.image_url,
         customisable:p.customisable, customisation_fee:p.customisation_fee,
+        weight_grams: p.weight_grams || 150,
+        photo_upload_enabled: !!p.photo_upload_enabled, photo_upload_max: p.photo_upload_max || 1,
+        note_enabled: !!p.note_enabled, note_title: p.note_title || 'Customisation Notes (optional)',
         highlight: !!p.highlight,
         tags: p.tags || []
       }));
@@ -981,7 +1002,7 @@ document.getElementById('custPlusBtn').innerHTML = I.plus;
    (products ko 'occasions' tag admin panel se lagti hai). Occasion khatam
    hone pe CURRENT_OCCASION = null kar do, button phir se normal "Shop Now"
    (full catalog) mode mein chala jayega.
-   key OCCASIONS_ROW1 / OCCASIONS_ROW2 (niche defined) ke 'key' se match hona chahiye.
+   key OCCASIONS (admin panel ke Occasions tab se load hoti hai) ke 'key' se match hona chahiye.
 
    NOTE: Admin panel ke "Site Images" tab -> Hero & Banner group se agar
    koi specific product "Shop Now" button ke saath link kiya gaya ho
@@ -1119,38 +1140,49 @@ renderFeelings();
   });
 });
 
-/* ---------------- Gifts for Every Occasion ---------------- */
-const OCCASIONS_ROW1 = [
-  {key:'birthday', title:'Birthday', sub:'PERSONALISED GIFTS', bg:'#F7E3E3', text:'#171313'},
-  {key:'rakhi', title:'Rakhi Gifts', badge:'28TH AUG', bg:'#B7282E', text:'#ffffff'},
-  {key:'anniversary', title:'Anniversary', bg:'#171313', text:'#ffffff'},
+/* ---------------- Gifts for Every Occasion ----------------
+   Titles/badge text ab admin panel (Occasions tab) se aate hain — 'occasion_cards'
+   table se load hote hain. Photo wahi purana system use karta hai (Site Images
+   tab, key = 'occasion_<key>'), isliye siteImg() se hi photo milti hai. Supabase
+   connect na ho to niche wali fallback list dikhti hai. */
+const OCCASIONS_FALLBACK = [
+  {key:'birthday', title:'Birthday'},
+  {key:'rakhi', title:'Rakhi Gifts', badge:'28TH AUG'},
+  {key:'anniversary', title:'Anniversary'},
+  {key:'congrats', title:'Congratulations'},
+  {key:'thankyou', title:'Thank You'},
+  {key:'housewarming', title:'Housewarming'},
+  {key:'babyshower', title:'Baby Shower'},
+  {key:'retirement', title:'Retirement'},
 ];
-const OCCASIONS_ROW2 = [
-  {key:'congrats', title:'Congratulations', bg:'#F4EEEE', text:'#171313'},
-  {key:'thankyou', title:'Thank You', bg:'#F7E3E3', text:'#171313'},
-  {key:'housewarming', title:'Housewarming', bg:'#EDEDED', text:'#171313'},
-  {key:'babyshower', title:'Baby Shower', bg:'#FBEAEA', text:'#171313'},
-  {key:'retirement', title:'Retirement', bg:'#171313', text:'#ffffff'},
-];
+let OCCASIONS = OCCASIONS_FALLBACK;
+async function loadOccasions(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('occasion_cards').select('*').eq('active', true).order('sort_order', {ascending:true});
+    if(error) throw error;
+    if(data && data.length) OCCASIONS = data;
+  }catch(err){
+    console.error('Occasions load failed:', err);
+  }
+}
 function occasionCard(o){
-  return `<div class="occasion-card" data-key="${o.key}" style="background:${o.bg}; color:${o.text};">
+  const imgUrl = SITE_IMAGES['occasion_' + o.key];
+  return `<div class="occasion-card" data-key="${o.key}">
+    <div class="oc-bg">${imgUrl ? `<img src="${imgUrl}" alt="${o.title}">` : ''}</div>
+    <div class="oc-scrim"></div>
     ${o.badge ? `<div class="oc-badge">${o.badge}</div>` : ''}
-    <div class="oc-title">${o.title} ${I.arrow}</div>
-    ${o.sub ? `<div class="oc-sub">${o.sub}</div>` : ''}
-    <div class="oc-photo">${siteImg('occasion_' + o.key, o.title + ' gift photo')}</div>
+    <div class="oc-content"><div class="oc-title">${o.title} ${I.arrow}</div></div>
   </div>`;
 }
 function renderOccasions(){
-  document.getElementById('occasionRow1').innerHTML = OCCASIONS_ROW1.map(occasionCard).join('');
-  document.getElementById('occasionRow2').innerHTML = OCCASIONS_ROW2.map(occasionCard).join('');
+  document.getElementById('occasionScroll').innerHTML = OCCASIONS.map(occasionCard).join('');
 }
 renderOccasions();
-[document.getElementById('occasionRow1'), document.getElementById('occasionRow2')].forEach(el=>{
-  el.addEventListener('click', (e)=>{
-    const c = e.target.closest('.occasion-card'); if(!c) return;
-    const o = [...OCCASIONS_ROW1, ...OCCASIONS_ROW2].find(x => x.key === c.dataset.key);
-    applyTagFilter(o.key, o.title);
-  });
+document.getElementById('occasionScroll').addEventListener('click', (e)=>{
+  const c = e.target.closest('.occasion-card'); if(!c) return;
+  const o = OCCASIONS.find(x => x.key === c.dataset.key);
+  applyTagFilter(o.key, o.title);
 });
 
 /* ---------------- Unified tag filter (hero "Shop Now" + person/mood/occasion cards) ----------------
@@ -1234,19 +1266,71 @@ const STYLES = [
 ];
 
 /* ---------------- Banner ---------------- */
+/* Promo banner — up to 3 full-image slides, each with its own optional
+   "Shop Now" product link (set in admin: Site Images -> Hero & Banner).
+   Keys: banner1/banner2/banner3 for photos, banner1_link/banner2_link/
+   banner3_link (product id, reusing the same site_images-table trick as
+   hero_link_product) for where "Shop Now" takes the customer. A slide only
+   shows once its photo is uploaded. */
+const BANNER_KEYS = ['banner1', 'banner2', 'banner3'];
+let bannerAutoplayTimer = null;
+let bannerAutoplayPausedUntil = 0;
+function startBannerAutoplay(slideCount){
+  clearInterval(bannerAutoplayTimer);
+  if(slideCount < 2) return;
+  bannerAutoplayTimer = setInterval(() => {
+    if(Date.now() < bannerAutoplayPausedUntil) return; // customer abhi khud swipe kar raha hai
+    const el = document.getElementById('bannerBlock');
+    const current = Math.round(el.scrollLeft / el.clientWidth);
+    const next = (current + 1) % slideCount;
+    el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
+  }, 3000);
+}
 function renderBanner(){
-  document.getElementById('bannerBlock').innerHTML = `
-    <div class="banner-photo">${siteImg('banner', 'Banner photo — festive product flatlay')}</div>
-    <div class="banner-scrim"></div>
-    <div class="banner-content">
-      <div class="eyebrow">New Drop</div>
-      <h3>Rangoli Season Edit</h3>
-      <p>Fresh hand-doodled designs across every product.</p>
-      <div class="banner-cta">Shop Now ${I.arrow}</div>
+  const uploadedKeys = BANNER_KEYS.filter(k => SITE_IMAGES[k]);
+  let keys;
+  if(uploadedKeys.length){
+    keys = uploadedKeys;
+  }else if(SITE_IMAGES['banner']){
+    // Legacy single-banner key (pehle se upload ki hui photo) — jab tak
+    // naye Promo Banner 1/2/3 slots mein kuch upload nahi hota, yehi dikhti rahegi.
+    keys = ['banner'];
+  }else{
+    keys = ['banner1']; // kuch bhi upload nahi hai — ek placeholder slide dikhao, section gayab na ho
+  }
+  const el = document.getElementById('bannerBlock');
+  const dotsEl = document.getElementById('bannerDots');
+  el.innerHTML = keys.map(key => `
+    <div class="banner-slide" data-key="${key}">
+      <div class="banner-photo">${siteImg(key, 'Banner photo — upload in admin (Site Images -> Hero & Banner)')}</div>
+      ${SITE_IMAGES[key] ? `<div class="banner-cta">Shop Now ${I.arrow}</div>` : ''}
     </div>
-  `;
+  `).join('');
+  dotsEl.innerHTML = keys.length > 1 ? keys.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}"></span>`).join('') : '';
+  startBannerAutoplay(uploadedKeys.length);
 }
 renderBanner();
+document.getElementById('bannerBlock').addEventListener('click', (e) => {
+  const slide = e.target.closest('.banner-slide'); if(!slide) return;
+  const linkedProductId = SITE_IMAGES[slide.dataset.key + '_link'];
+  if(linkedProductId){
+    showProductSpotlight(linkedProductId);
+  }else{
+    clearTagFilter();
+    showView('productsView');
+  }
+});
+document.getElementById('bannerBlock').addEventListener('scroll', () => {
+  const el = document.getElementById('bannerBlock');
+  const idx = Math.round(el.scrollLeft / el.clientWidth);
+  document.querySelectorAll('#bannerDots .dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+}, { passive: true });
+// Customer khud swipe kare to kuch der autoplay ruk jaaye, phir wapas chalu ho jaaye
+['touchstart', 'pointerdown', 'wheel'].forEach(evt => {
+  document.getElementById('bannerBlock').addEventListener(evt, () => {
+    bannerAutoplayPausedUntil = Date.now() + 6000;
+  }, { passive: true });
+});
 
 /* ---------------- Hamper cards ---------------- */
 document.getElementById('hamperGrid').innerHTML = `
@@ -1498,7 +1582,7 @@ function addToCart(productId){
   if(!product) return;
   const existing = cart.find(i => i.key === product.id);
   if(existing){ existing.qty += 1; }
-  else{ cart.push({key:product.id, name:product.name, price:product.price, type:product.type, qty:1}); }
+  else{ cart.push({key:product.id, productId:product.id, name:product.name, price:product.price, type:product.type, qty:1}); }
   saveCart(); openCart();
 }
 function addCustomLineItem(item){ cart.push(item); saveCart(); openCart(); }
@@ -1512,6 +1596,13 @@ function changeQty(key, delta){
 function removeItem(key){ cart = cart.filter(i => i.key !== key); saveCart(); renderCart(); }
 function cartSubtotal(){ return cart.reduce((s,i)=> s + i.price * i.qty, 0); }
 function addonTotal(){ return Object.keys(addonState).reduce((s,k)=> s + (ADDONS[k].price * addonState[k]), 0); }
+function cartTotalWeightGrams(){
+  const DEFAULT_ITEM_WEIGHT = 150; // customiseDrawer ke generic items (koi catalog product se linked nahi) ke liye fallback
+  return cart.reduce((s,i) => {
+    const product = i.productId ? PRODUCTS.find(p => p.id === i.productId) : null;
+    return s + (product?.weight_grams || DEFAULT_ITEM_WEIGHT) * i.qty;
+  }, 0);
+}
 
 const HAMPER_NUDGE_TARGET = 3;
 const HAMPER_NUDGE_DISCOUNT = 100;
@@ -1546,7 +1637,9 @@ function renderCart(){
 
   const itemsHtml = cart.map(i => `
     <div class="cart-item">
-      <div class="ci-img">${i.customPhotoDataUrl ? `<img src="${i.customPhotoDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : (TYPE_ICON[i.type] || I.gift).replace('width="20" height="20"','width="30" height="30"')}</div>
+      <div class="ci-img" style="position:relative;">${i.customPhotoDataUrl ? `<img src="${i.customPhotoDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : (TYPE_ICON[i.type] || I.gift).replace('width="20" height="20"','width="30" height="30"')}
+        ${i.customPhotoDataUrls && i.customPhotoDataUrls.length > 1 ? `<span style="position:absolute;bottom:-4px;right:-4px;background:var(--rose);color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;">+${i.customPhotoDataUrls.length - 1}</span>` : ''}
+      </div>
       <div class="ci-info">
         <div class="ci-name">${i.name}</div>
         ${i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : ''}
@@ -1602,6 +1695,89 @@ function renderCart(){
    jaata hai. Isse dobara "Proceed to Checkout" tap nahi karna padta. */
 let pendingCheckoutAfterLogin = false;
 
+/* ---------------- Live delivery charge (Shiprocket) ----------------
+   Jaise hi customer 6-digit pincode type kar leta hai, Edge Function
+   'check-delivery-rate' se real courier rate maangte hain (cart ke total
+   weight ke hisaab se) — koi guessed flat fee nahi, exact Shiprocket cost. */
+let deliveryCharge = 0;
+let deliveryPincodeChecked = null;
+let deliveryCourier = '';
+let deliveryEtd = '';
+let pincodeDebounceTimer = null;
+
+function updateCheckoutTotals(){
+  const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
+  const total = Math.max(0, cartSubtotal() + addonTotal() - discount + deliveryCharge);
+  document.getElementById('chk-total').textContent = '₹' + total;
+  const deliveryLine = document.getElementById('chk-delivery-line');
+  if(deliveryCharge > 0){
+    deliveryLine.style.display = 'flex';
+    document.getElementById('chk-delivery-amt').textContent = '₹' + deliveryCharge;
+  }else{
+    deliveryLine.style.display = 'none';
+  }
+}
+
+function handlePincodeInput(){
+  const pincode = document.getElementById('chk-pincode').value.trim();
+  clearTimeout(pincodeDebounceTimer);
+  const rowEl = document.getElementById('chk-delivery-row');
+  if(!/^\d{6}$/.test(pincode)){
+    deliveryCharge = 0;
+    deliveryPincodeChecked = null;
+    deliveryCourier = '';
+    deliveryEtd = '';
+    rowEl.style.display = 'none';
+    updateCheckoutTotals();
+    return;
+  }
+  pincodeDebounceTimer = setTimeout(() => checkDeliveryRate(pincode), 500);
+}
+
+async function checkDeliveryRate(pincode){
+  const rowEl = document.getElementById('chk-delivery-row');
+  if(!sb){ return; }
+  rowEl.style.display = 'block';
+  rowEl.style.color = 'var(--ink-soft)';
+  rowEl.textContent = 'Checking delivery charge for ' + pincode + '...';
+  try{
+    const { data, error } = await sb.functions.invoke('check-delivery-rate', {
+      body: {
+        pincode,
+        weightGrams: cartTotalWeightGrams(),
+        orderValue: Math.max(0, cartSubtotal() + addonTotal()),
+        cod: false,
+      },
+    });
+    if(error) throw error;
+    if(!data.serviceable){
+      deliveryCharge = 0;
+      deliveryPincodeChecked = null;
+      deliveryCourier = '';
+      deliveryEtd = '';
+      rowEl.style.color = 'var(--rose)';
+      rowEl.textContent = data.message || "This pincode isn't serviceable right now.";
+    }else{
+      deliveryCharge = data.charge;
+      deliveryPincodeChecked = pincode;
+      deliveryCourier = data.courier;
+      deliveryEtd = data.etd || '';
+      rowEl.style.color = 'var(--ink-soft)';
+      rowEl.textContent = `Delivery via ${data.courier} — ₹${data.charge}${data.etd ? ' · arrives ' + data.etd : ''}`;
+    }
+  }catch(err){
+    console.error('Delivery rate check failed:', err);
+    deliveryCharge = 0;
+    deliveryPincodeChecked = null;
+    deliveryCourier = '';
+    deliveryEtd = '';
+    rowEl.style.color = 'var(--rose)';
+    rowEl.textContent = "Couldn't fetch delivery charge — try re-entering the pincode.";
+  }
+  updateCheckoutTotals();
+}
+
+
 function openCheckoutDrawer(){
   if(cart.length === 0) return;
   if(!currentCustomer){
@@ -1618,7 +1794,7 @@ function openCheckoutDrawer(){
   document.getElementById('chk-status').textContent = '';
   const submitBtn = document.getElementById('chk-submit-btn');
   delete submitBtn.dataset.retryOrderId;
-  submitBtn.textContent = 'Continue to Payment';
+  submitBtn.textContent = 'Review Order';
   submitBtn.disabled = false;
   if(currentCustomer && !document.getElementById('chk-name').value){
     document.getElementById('chk-name').value = currentCustomer.user_metadata?.full_name || '';
@@ -1630,9 +1806,15 @@ function openCheckoutDrawer(){
     document.getElementById('chk-email').value = currentCustomer.email || currentCustomer.user_metadata?.email || '';
   }
   if(currentCustomer){ loadMyAddresses(); } else { document.getElementById('chkSavedAddrRow').style.display = 'none'; }
-  const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
-  const total = Math.max(0, cartSubtotal() + addonTotal() - discount);
-  document.getElementById('chk-total').textContent = '₹' + total;
+  deliveryCharge = 0;
+  deliveryPincodeChecked = null;
+  deliveryCourier = '';
+  deliveryEtd = '';
+  document.getElementById('chk-delivery-row').style.display = 'none';
+  // Agar pincode pehle se bhara hai (saved address se), turant rate check karo
+  const existingPincode = document.getElementById('chk-pincode').value.trim();
+  updateCheckoutTotals();
+  if(/^\d{6}$/.test(existingPincode)) checkDeliveryRate(existingPincode);
   closeAllPanels();
   document.getElementById('overlay').classList.add('show');
   document.getElementById('checkoutDrawer').classList.add('show');
@@ -1648,35 +1830,21 @@ function proceedPendingCheckoutIfNeeded(){
   openCheckoutDrawer();
 }
 
-/* ---------------- Razorpay payment (TEST MODE) ----------------
+/* ---------------- Razorpay payment (LIVE — production-grade flow) ----------------
    Key ID yahan client-side mein rakhna sahi hai — ye Razorpay ki public/
-   publishable key hai, isko chhupane ki zaroorat nahi (jaise Stripe ki
-   "publishable key"). Secret key KABHI bhi frontend code mein nahi jaati —
-   wo sirf backend/server (ya Supabase Edge Function) mein use hoti hai,
-   order-create aur payment-signature-verify karne ke liye. Abhi ye site
-   poori tarah static/client-side hai (koi apna server nahi), isliye simple
-   client-side Razorpay Checkout use ho raha hai (order_id ke bina, seedha
-   amount se) — testing ke liye theek hai. Production-grade security ke
-   liye baad mein ek Supabase Edge Function banayenge jo secret key se
-   Razorpay order create kare aur payment signature verify kare. */
-const RAZORPAY_KEY_ID = 'rzp_test_TXTgxo4ZchLGHW';
+   publishable key hai, isko chhupane ki zaroorat nahi. Secret key KABHI bhi
+   frontend code mein nahi jaati — sirf Supabase Edge Function secrets mein
+   rehti hai. Flow ab do Edge Functions se guzarta hai:
+     1. create-razorpay-order — hamara 'orders' row ban jaane ke baad, secret
+        key se Razorpay ka apna order_id banata hai (amount tamper-proof).
+     2. verify-razorpay-payment — Checkout success ke turant baad, payment
+        signature ko secret key se server-side verify karta hai, tabhi
+        payment_status 'paid' hota hai — sirf browser ka "success" bolna
+        kaafi nahi hai, wo fake ho sakta hai. */
+const RAZORPAY_KEY_ID = 'rzp_live_TYH5HRqACg3gPC';
 
 async function submitOrder(){
-  const btn = document.getElementById('chk-submit-btn');
   const statusEl = document.getElementById('chk-status');
-
-  // Retry flow: pehle se bana hua (pending) order hai, seedha payment dobara khol do
-  if(btn.dataset.retryOrderId){
-    const orderId = btn.dataset.retryOrderId;
-    const totalTxt = document.getElementById('chk-total').textContent.replace(/[^\d]/g, '');
-    const total = parseInt(totalTxt, 10) || 0;
-    openRazorpayForOrder(orderId, total, {
-      name: document.getElementById('chk-name').value.trim(),
-      email: document.getElementById('chk-email').value.trim(),
-      phone: document.getElementById('chk-phone').value.trim().replace(/\D/g,'')
-    });
-    return;
-  }
 
   const name = document.getElementById('chk-name').value.trim();
   const phone = document.getElementById('chk-phone').value.trim();
@@ -1705,6 +1873,13 @@ async function submitOrder(){
     statusEl.textContent = 'Enter a valid 6-digit pincode.';
     return;
   }
+  if(deliveryPincodeChecked !== pincode){
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Fetching your delivery charge — please wait a moment and try again.';
+    checkDeliveryRate(pincode);
+    return;
+  }
   if(!/^\d{10}$/.test(phone.replace(/\D/g,''))){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
@@ -1718,6 +1893,123 @@ async function submitOrder(){
     return;
   }
 
+  statusEl.style.display = 'none';
+  showOrderReview({ name, phone, email, address, landmark, city, state, pincode });
+}
+
+/* Address form fields sahi hain — ab items, delivery estimate aur poora price
+   breakdown ek jagah dikha do, taaki customer confirm karke hi payment pe jaaye. */
+let reviewAddress = null;
+function showOrderReview(addr){
+  reviewAddress = addr;
+  const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
+  const subtotal = cartSubtotal() + addonTotal();
+  const total = Math.max(0, subtotal - discount + deliveryCharge);
+  const fullAddress = addr.landmark ? (addr.address + ' (Landmark: ' + addr.landmark + ')') : addr.address;
+
+  const itemsHtml = cart.map(i => `
+    <div class="cart-item">
+      <div class="ci-img">${i.customPhotoDataUrl ? `<img src="${i.customPhotoDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : (TYPE_ICON[i.type] || I.gift).replace('width="20" height="20"','width="30" height="30"')}</div>
+      <div class="ci-info">
+        <div class="ci-name">${i.name} × ${i.qty}</div>
+        ${i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : ''}
+        <div class="ci-price">₹${i.price * i.qty}</div>
+      </div>
+    </div>
+  `).join('');
+  const addonsHtml = Object.keys(addonState).filter(k => addonState[k] > 0).map(k => `
+    <div class="cart-item"><div class="ci-info"><div class="ci-name">${ADDONS[k].label} × ${addonState[k]}</div><div class="ci-price">₹${ADDONS[k].price * addonState[k]}</div></div></div>
+  `).join('');
+
+  document.getElementById('reviewBody').innerHTML = `
+    <div class="acct-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+      Delivery Address
+      <button class="link-btn" onclick="editAddressFromReview()" style="font-size:11px;font-weight:700;color:var(--rose);background:none;border:none;">Edit</button>
+    </div>
+    <div class="addr-card">
+      <div style="font-size:13px;font-weight:700;">${addr.name}</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${fullAddress}, ${addr.city}, ${addr.state} — ${addr.pincode}</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">${addr.phone} · ${addr.email}</div>
+    </div>
+
+    ${deliveryCourier ? `
+    <div class="delivery-est-card">
+      ${I.truck || I.box}
+      <div>
+        <div class="de-title">Estimated Delivery${deliveryEtd ? ': ' + deliveryEtd : ''}</div>
+        <div class="de-sub">Shipped via ${deliveryCourier}</div>
+      </div>
+    </div>` : ''}
+
+    <div class="acct-section-title">Items</div>
+    ${itemsHtml}
+    ${addonsHtml}
+
+    <div class="acct-section-title" style="margin-top:16px;">Payment Breakdown</div>
+    <div class="order-price-block" style="border-top:none;padding:0 0 4px;">
+      <div class="order-price-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
+      ${discount ? `<div class="order-price-row"><span>Discount</span><span>−₹${discount}</span></div>` : ''}
+      <div class="order-price-row"><span>Delivery</span><span>${deliveryCharge ? '₹' + deliveryCharge : 'Free'}</span></div>
+      <div class="order-price-row grand"><span>Total</span><span>₹${total}</span></div>
+    </div>
+  `;
+  document.getElementById('review-total').textContent = '₹' + total;
+  const deliveryLine = document.getElementById('review-delivery-line');
+  if(deliveryCharge > 0){
+    deliveryLine.style.display = 'flex';
+    document.getElementById('review-delivery-amt').textContent = '₹' + deliveryCharge;
+  }else{
+    deliveryLine.style.display = 'none';
+  }
+  document.getElementById('review-status').style.display = 'none';
+  const payBtn = document.getElementById('review-pay-btn');
+  payBtn.textContent = 'Proceed to Payment';
+  payBtn.disabled = false;
+  delete payBtn.dataset.retryOrderId;
+
+  closeAllPanels();
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('orderReviewDrawer').classList.add('show');
+}
+function editAddressFromReview(){
+  closeAllPanels();
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('checkoutDrawer').classList.add('show');
+}
+
+/* Review confirm ho gaya — ab actual order Supabase mein banega aur Razorpay khulega */
+async function confirmAndPay(){
+  const btn = document.getElementById('review-pay-btn');
+  const statusEl = document.getElementById('review-status');
+
+  // Retry flow: pehle se bana hua (pending) order hai — Razorpay dismiss/fail hua tha,
+  // seedha payment dobara khol do (naya 'orders' row nahi banega, bas Razorpay
+  // ka order_id fresh bana lete hain — pehle wale ka status Razorpay side pe
+  // "attempted" reh gaya hoga)
+  if(btn.dataset.retryOrderId){
+    const orderId = btn.dataset.retryOrderId;
+    btn.textContent = 'Processing...';
+    btn.disabled = true;
+    statusEl.style.display = 'none';
+    try{
+      const { data: rzpData, error: rzpError } = await sb.functions.invoke('create-razorpay-order', { body: { orderId } });
+      if(rzpError || !rzpData?.success) throw new Error(rzpData?.error || rzpError?.message || 'Could not restart payment');
+      const totalTxt = document.getElementById('review-total').textContent.replace(/[^\d]/g, '');
+      const total = parseInt(totalTxt, 10) || 0;
+      openRazorpayForOrder(orderId, rzpData.razorpay_order_id, total, {
+        name: reviewAddress.name, email: reviewAddress.email, phone: reviewAddress.phone.replace(/\D/g,'')
+      });
+    }catch(err){
+      statusEl.style.display = 'block';
+      statusEl.style.color = 'var(--rose)';
+      statusEl.textContent = 'Something went wrong: ' + (err.message || 'try again');
+      btn.textContent = 'Retry Payment';
+      btn.disabled = false;
+    }
+    return;
+  }
+
+  const { name, phone, email, address, landmark, city, state, pincode } = reviewAddress;
   btn.textContent = 'Processing...';
   btn.disabled = true;
   statusEl.style.display = 'none';
@@ -1726,8 +2018,15 @@ async function submitOrder(){
     // Upload any customisation photos first, replace data-URL with a storage path
     const items = [];
     for(const i of cart){
-      const item = { name:i.name, type:i.type, price:i.price, qty:i.qty, customNote: i.customNote || null };
-      if(i.customPhotoDataUrl){
+      const product = i.productId ? PRODUCTS.find(p => p.id === i.productId) : null;
+      const item = { name:i.name, type:i.type, price:i.price, qty:i.qty, weight_grams: product?.weight_grams || 150, customNote: i.customNote || null };
+      if(i.customPhotoDataUrls && i.customPhotoDataUrls.length){
+        item.customPhotoPaths = [];
+        for(const dataUrl of i.customPhotoDataUrls){
+          item.customPhotoPaths.push(await uploadCustomerPhoto(dataUrl));
+        }
+        item.customPhotoPath = item.customPhotoPaths[0]; // backward-compat single path
+      }else if(i.customPhotoDataUrl){
         item.customPhotoPath = await uploadCustomerPhoto(i.customPhotoDataUrl);
       }
       items.push(item);
@@ -1737,33 +2036,40 @@ async function submitOrder(){
 
     const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
     const subtotal = cartSubtotal() + addonTotal();
-    const total = Math.max(0, subtotal - discount);
+    const total = Math.max(0, subtotal - discount + deliveryCharge);
     const fullAddress = landmark ? (address + ' (Landmark: ' + landmark + ')') : address;
 
-    // Order pehle 'pending' status mein save hota hai — payment success hote hi
-    // markOrderPaid() isse 'paid' mein update kar dega.
+    // Order pehle 'pending' status mein save hota hai — payment signature
+    // verify hone ke baad verify-razorpay-payment Edge Function isse 'paid' karta hai.
     const { data, error } = await sb.from('orders').insert({
       customer_name: name, customer_phone: phone.replace(/\D/g,''), customer_address: fullAddress,
       customer_city: city, customer_state: state, customer_pincode: pincode,
       customer_email: email,
-      items, addons, subtotal, discount, total, payment_status:'pending'
+      items, addons, subtotal, discount, delivery_charge: deliveryCharge, total, payment_status:'pending'
     }).select().single();
     if(error) throw error;
 
-    openRazorpayForOrder(data.id, total, { name, email, phone: phone.replace(/\D/g,'') });
+    // Amount tamper-proof rakhne ke liye Razorpay ka apna order_id server-side
+    // banwaya jaata hai (secret key se) — isi se Checkout khulega.
+    const { data: rzpData, error: rzpError } = await sb.functions.invoke('create-razorpay-order', {
+      body: { orderId: data.id },
+    });
+    if(rzpError || !rzpData?.success) throw new Error(rzpData?.error || rzpError?.message || 'Could not start payment');
+
+    openRazorpayForOrder(data.id, rzpData.razorpay_order_id, total, { name, email, phone: phone.replace(/\D/g,'') });
   }catch(err){
     console.error(err);
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
     statusEl.textContent = 'Something went wrong: ' + (err.message || 'try again');
-    btn.textContent = 'Continue to Payment';
+    btn.textContent = 'Proceed to Payment';
     btn.disabled = false;
   }
 }
 
-function openRazorpayForOrder(orderId, amountRupees, customer){
-  const statusEl = document.getElementById('chk-status');
-  const btn = document.getElementById('chk-submit-btn');
+function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
+  const statusEl = document.getElementById('review-status');
+  const btn = document.getElementById('review-pay-btn');
   btn.textContent = 'Waiting for payment...';
   btn.disabled = true;
 
@@ -1771,13 +2077,14 @@ function openRazorpayForOrder(orderId, amountRupees, customer){
     key: RAZORPAY_KEY_ID,
     amount: Math.round(amountRupees * 100), // paise
     currency: 'INR',
+    order_id: razorpayOrderId, // Razorpay-side order — amount ab tamper-proof hai
     name: 'Jagashilp',
     description: 'Order #' + orderId.slice(0,8),
     prefill: { name: customer.name, email: customer.email, contact: customer.phone },
     theme: { color: '#E60023' },
     notes: { order_id: orderId },
     handler: function(response){
-      markOrderPaid(orderId, response.razorpay_payment_id);
+      verifyAndCompletePayment(orderId, response);
     },
     modal: {
       ondismiss: function(){
@@ -1801,20 +2108,44 @@ function openRazorpayForOrder(orderId, amountRupees, customer){
   rzp.open();
 }
 
-async function markOrderPaid(orderId, paymentId){
+/* Checkout ne "success" bola — lekin ye seedha maan lena unsafe hai (browser
+   ka data spoof ho sakta hai), isliye signature ko Edge Function ke zariye
+   secret key se server-side verify karte hain, tabhi order 'paid' hota hai. */
+async function verifyAndCompletePayment(orderId, response){
+  const statusEl = document.getElementById('review-status');
+  const btn = document.getElementById('review-pay-btn');
+  btn.textContent = 'Verifying payment...';
+  statusEl.style.display = 'none';
   try{
-    const { error } = await sb.from('orders').update({ payment_status: 'paid' }).eq('id', orderId);
-    if(error) throw error;
+    const { data, error } = await sb.functions.invoke('verify-razorpay-payment', {
+      body: {
+        orderId,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+      },
+    });
+    if(error || !data?.success) throw new Error(data?.error || error?.message || 'Payment verification failed');
+    completeOrderSuccess(orderId);
   }catch(err){
-    // Payment ho chuka hai (Razorpay ne confirm kar diya), sirf DB toggle mein
-    // dikkat aayi — order abhi bhi customer ko dikhega, admin panel se payment
-    // status manually 'paid' kiya ja sakta hai.
-    console.error('Payment status update failed:', err);
+    console.error('Payment verification failed:', err);
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = "Payment went through but couldn't be verified: " + (err.message || 'try again') + '. If money was deducted, contact us with your order number — it will be sorted out.';
+    btn.textContent = 'Retry Payment';
+    btn.disabled = false;
+    btn.dataset.retryOrderId = orderId;
   }
+}
+
+async function completeOrderSuccess(orderId){
+  // payment_status 'paid' pehle hi verify-razorpay-payment Edge Function ne
+  // (server-side, signature verify karke) set kar diya hai — yahan sirf
+  // cart clear karke confirmation dikhana hai.
   cart = [];
   addonState = { card:0, choco:0, wrap:0 };
   saveCart();
-  const submitBtn = document.getElementById('chk-submit-btn');
+  const submitBtn = document.getElementById('review-pay-btn');
   delete submitBtn.dataset.retryOrderId;
   closeAllPanels();
   document.getElementById('overlay').classList.add('show');
@@ -2292,6 +2623,7 @@ function applyChkAddress(id){
   document.getElementById('chk-city').value = a.city || '';
   document.getElementById('chk-state').value = a.state || '';
   document.getElementById('chk-pincode').value = a.pincode || '';
+  if(/^\d{6}$/.test(a.pincode || '')) checkDeliveryRate(a.pincode);
 }
 async function saveAddress(){
   if(!sb || !currentCustomer) return;
@@ -2417,14 +2749,45 @@ function closeAllPanels(){
 }
 function openCart(){ renderCart(); document.getElementById('overlay').classList.add('show'); document.getElementById('cartDrawer').classList.add('show'); }
 
-/* ---------------- Product detail (tap on any product card) ---------------- */
+/* ---------------- Product detail (tap on any product card) ----------------
+   Agar product par admin ne Photo Upload aur/ya Text Note Panel on kiya hai,
+   to yahin par customer photo(s) upload kar sakta hai aur note likh sakta hai —
+   dono cart item ke saath save hote hain aur checkout par photos storage mein
+   upload hoti hain (jaisa purani single-photo customiseDrawer flow mein hota tha). */
+let pdPhotoState = []; // array of data-URLs, index = slot number
 function openProductDetail(id){
   const p = PRODUCTS.find(pr => pr.id === id);
   if(!p) return;
   closeAllPanels();
+  pdPhotoState = [];
   document.getElementById('overlay').classList.add('show');
   document.getElementById('productDetailDrawer').classList.add('show');
   const off = p.mrp && p.mrp > p.price ? Math.round((1 - p.price/p.mrp) * 100) : 0;
+  const showPhoto = p.customisable && p.photo_upload_enabled;
+  const showNote = p.customisable && p.note_enabled;
+  const maxPhotos = Math.max(1, p.photo_upload_max || 1);
+
+  const photoSlotsHtml = showPhoto ? `
+    <div class="step-block">
+      <div class="step-label">Upload Photo${maxPhotos > 1 ? 's' : ''}${maxPhotos > 1 ? ` (up to ${maxPhotos})` : ''}</div>
+      <div id="pdPhotoSlots" style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${Array.from({length:maxPhotos}).map((_,i) => `
+          <label class="upload-box" for="pdPhotoInput${i}" id="pdPhotoBox${i}" style="width:${maxPhotos>1?'84px':'100%'};height:${maxPhotos>1?'84px':'auto'};padding:${maxPhotos>1?'0':'16px'};display:flex;align-items:center;justify-content:center;">
+            <span>${I.camera}</span>
+            <input type="file" accept="image/*" style="display:none;" id="pdPhotoInput${i}" onchange="handlePdPhoto(${i}, event)">
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const noteHtml = showNote ? `
+    <div class="step-block">
+      <div class="step-label">${p.note_title}</div>
+      <textarea class="note-box" id="pdNote" rows="3" placeholder="${p.note_title}"></textarea>
+    </div>
+  ` : '';
+
   document.getElementById('pdBody').innerHTML = `
     <div class="pd-img">
       ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}
@@ -2434,8 +2797,47 @@ function openProductDetail(id){
     <div class="card-name" style="font-size:18px;">${p.name}</div>
     <div class="price-row"><span class="price">₹${p.price}</span>${off ? `<span class="mrp">₹${p.mrp}</span><span class="pd-off">${off}% OFF</span>` : ''}</div>
     <div class="pd-desc">${p.description ? p.description : 'No description added for this product yet.'}</div>
+    ${photoSlotsHtml}
+    ${noteHtml}
   `;
-  document.getElementById('pdAddBtn').onclick = () => addToCart(p.id);
+
+  document.getElementById('pdAddBtn').onclick = () => {
+    if(showPhoto && pdPhotoState.filter(Boolean).length === 0){
+      alert('Please upload ' + (maxPhotos > 1 ? 'at least one photo.' : 'your photo.'));
+      return;
+    }
+    if(!showPhoto && !showNote){
+      addToCart(p.id);
+      return;
+    }
+    const photos = pdPhotoState.filter(Boolean);
+    const note = showNote ? document.getElementById('pdNote').value.trim() : '';
+    // Customised items har baar naya line item ban ke jaate hain (alag photo/note ho sakti hai),
+    // isliye ek unique key use karte hain taaki cart mein stack na ho jaayen.
+    if(photos.length || note){
+      cart.push({
+        key: p.id + '-cust-' + Date.now(),
+        productId: p.id,
+        name: p.name, price: p.price, type: p.type, qty: 1,
+        customNote: note || null,
+        customPhotoDataUrl: photos[0] || null,       // pehli photo — cart thumbnail ke liye
+        customPhotoDataUrls: photos.length ? photos : null // saari photos — checkout upload ke liye
+      });
+      saveCart(); openCart();
+    }else{
+      addToCart(p.id);
+    }
+  };
+}
+function handlePdPhoto(slot, event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pdPhotoState[slot] = e.target.result;
+    document.getElementById('pdPhotoBox' + slot).innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`;
+  };
+  reader.readAsDataURL(file);
 }
 
 function basePrice(type){ const p = PRODUCTS.find(pr => pr.type === type); return p ? p.price : 199; }
@@ -2466,8 +2868,18 @@ function renderCustomiseItems(){
 renderCustomiseItems();
 document.getElementById('customiseScroll').addEventListener('click', (e)=>{
   const c = e.target.closest('.customise-card'); if(!c) return;
-  openCustomiseDrawer(c.dataset.type);
+  goToCustomisedCategory(c.dataset.type);
 });
+
+/* Tapping a "Customised For You" card jumps to the Customised tab, already
+   filtered to that category — e.g. tapping "Custom Keychain" shows every
+   customisable keychain in the catalog, not just the one generic card. */
+function goToCustomisedCategory(type){
+  customisedActiveType = type;
+  showView('customisedView');
+  renderCustomisedView();
+  document.querySelectorAll('#customisedCatStrip .cat-chip').forEach(x => x.classList.toggle('active', x.dataset.type === type));
+}
 
 /* ---------------- Customise Product Drawer ---------------- */
 let custState = { type:null, qty:1, style:null, uploaded:false };
@@ -2616,7 +3028,7 @@ function enableHScroll(el){
   }, true);
 }
 function enableAllHScroll(){
-  document.querySelectorAll('.pill-tabs, .quicklinks, .gifts-grid, .occasion-row2, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll').forEach(enableHScroll);
+  document.querySelectorAll('.pill-tabs, .quicklinks, .gifts-grid, .occasion-scroll, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll, .banner-carousel').forEach(enableHScroll);
 }
 
 /* ---------------- Init ---------------- */
@@ -2631,7 +3043,7 @@ function renderRestOfPage(){
 }
 
 (async function init(){
-  await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages()]);
+  await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions()]);
   updateCartCount();
   renderBestsellers();
   renderProducts();
