@@ -369,7 +369,17 @@ const SUPABASE_ANON_KEY = 'sb_publishable_FcybQttvdd_6ghB3PW2PKQ_zkLCzwyQ';
 let sb = null;
 try{
   if(SUPABASE_URL !== 'YOUR_SUPABASE_URL'){
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    /* IMPORTANT: admin.html and the customer storefront (index.html) run on
+       the same domain + same Supabase project, so by default they'd share
+       the SAME auth session in localStorage. That caused a real bug: any
+       customer OTP login on the storefront would fire a SIGNED_IN event
+       here too, this admin panel would check is_admin() for that customer,
+       find they're not an admin, and sign the (shared!) session out —
+       instantly logging the customer out of the storefront as well.
+       A separate storageKey keeps this admin session fully isolated. */
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { storageKey: 'sb-jagashilp-admin-auth' }
+    });
   }
 }catch(err){
   console.error('Supabase not configured yet:', err);
