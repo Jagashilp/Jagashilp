@@ -2624,11 +2624,21 @@ async function saveCustomerName(){
 async function checkCustomerAuth(){
   if(!sb) return;
   const { data: { session } } = await sb.auth.getSession();
-  currentCustomer = session ? session.user : null;
+  if(session){
+    const { data: { user } } = await sb.auth.getUser();
+    currentCustomer = user || session.user;
+  }else{
+    currentCustomer = null;
+  }
   renderAccountState();
   if(currentCustomer){ loadMyOrders(); loadMyAddresses(); }
-  sb.auth.onAuthStateChange((event, session) => {
-    currentCustomer = session ? session.user : null;
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if(session){
+      const { data: { user } } = await sb.auth.getUser();
+      currentCustomer = user || session.user;
+    }else{
+      currentCustomer = null;
+    }
     renderAccountState();
     if(currentCustomer){
       loadMyOrders();
