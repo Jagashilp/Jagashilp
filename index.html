@@ -1942,7 +1942,7 @@ async function confirmAndPay(){
       customer_name: name, customer_phone: phone.replace(/\D/g,''), customer_address: fullAddress,
       customer_city: city, customer_state: state, customer_pincode: pincode,
       customer_email: email,
-      items, addons, subtotal, discount, delivery_charge: deliveryCharge, total, payment_status:'pending'
+      items, addons, subtotal, discount, total, payment_status:'pending'
     }).select().single();
     if(error) throw error;
 
