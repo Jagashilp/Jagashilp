@@ -2639,7 +2639,6 @@ async function checkCustomerAuth(){
      sign-out. session.user is already fresh at sign-in/refresh time, so
      we use it directly with no follow-up call. */
   sb.auth.onAuthStateChange((event, session) => {
-    console.log('[auth]', event, session ? ('session for user ' + session.user.id) : 'NO SESSION');
     currentCustomer = session ? session.user : null;
     renderAccountState();
     if(currentCustomer){
