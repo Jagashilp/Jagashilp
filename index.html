@@ -621,29 +621,17 @@
     </div>
     <!-- Logged out state -->
     <div id="acctLoggedOut" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding-top:14px;">
-      <p style="font-size:13px;color:var(--ink-soft);max-width:260px;line-height:1.6;">Sign in with your mobile number to track your orders and check out faster next time.</p>
-      <div class="otp-box" id="otpPhoneStep">
-        <div class="field">
-          <label>Mobile Number</label>
-          <div class="phone-input-row">
-            <span class="phone-prefix">+91</span>
-            <input type="tel" id="otp-phone" maxlength="10" placeholder="98765 43210" inputmode="numeric" autocomplete="tel">
-          </div>
-        </div>
-        <button class="checkout-btn" id="otpSendBtn" onclick="sendCustomerOtp()">Send OTP</button>
-      </div>
-      <div class="otp-box" id="otpCodeStep" style="display:none;">
-        <div class="field">
-          <label>Enter OTP sent to +91 <span id="otpSentToPhone"></span></label>
-          <input type="tel" id="otp-code" maxlength="6" placeholder="6-digit code" inputmode="numeric" autocomplete="one-time-code">
-        </div>
-        <button class="checkout-btn" id="otpVerifyBtn" onclick="verifyCustomerOtp()">Verify &amp; Sign In</button>
-        <div class="otp-resend-row">
-          <button class="otp-link-btn" onclick="changeOtpPhone()">Change number</button>
-          <button class="otp-link-btn" id="otpResendBtn" onclick="sendCustomerOtp(true)" disabled>Resend OTP (30s)</button>
-        </div>
-      </div>
-      <div id="otp-status" style="display:none;font-size:12.5px;width:100%;"></div>
+      <p style="font-size:13px;color:var(--ink-soft);max-width:260px;line-height:1.6;">Sign in with Google to track your orders and check out faster next time.</p>
+      <button class="checkout-btn" id="googleSignInBtn" onclick="signInWithGoogle()" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#3c4043;border:1.5px solid rgba(22,22,22,0.15);">
+        <svg width="18" height="18" viewBox="0 0 48 48" style="flex:0 0 auto;">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div id="acct-login-status" style="display:none;font-size:12.5px;width:100%;"></div>
     </div>
     <!-- Logged in state -->
     <div id="acctLoggedIn" style="display:none;">
@@ -693,20 +681,6 @@
 <div class="drawer" id="orderDetailDrawer">
   <div class="drawer-head"><h3>Order Details</h3><button class="close-btn" onclick="closeOrderDetail()" id="orderDetailCloseBtn"></button></div>
   <div class="drawer-body" id="orderDetailBody"></div>
-</div>
-
-<!-- ============ NAME CAPTURE (first login) ============ -->
-<div class="drawer" id="nameCaptureDrawer" style="max-width:340px;">
-  <div class="drawer-head"><h3>Welcome!</h3><button class="close-btn" onclick="skipNameCapture()" id="nameCaptureCloseBtn"></button></div>
-  <div class="drawer-body">
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:14px;">What's your name? We'll use this on your account and orders.</p>
-    <div class="field">
-      <label>Your Name</label>
-      <input type="text" id="nc-name-input" placeholder="e.g. Priya Sharma" autocomplete="name">
-    </div>
-    <div id="nc-status" style="display:none;font-size:12px;color:var(--c-red);margin:6px 0;"></div>
-    <button class="checkout-btn" style="margin-top:6px;" onclick="saveCustomerName()">Save &amp; Continue</button>
-  </div>
 </div>
 
 <!-- ============ WISHLIST DRAWER ============ -->
@@ -991,7 +965,6 @@ document.getElementById('acctTileHelp').innerHTML = I.package + document.getElem
 document.getElementById('wishlistCloseBtn').innerHTML = I.close;
 document.getElementById('helpCloseBtn').innerHTML = I.close;
 document.getElementById('orderDetailCloseBtn').innerHTML = I.close;
-document.getElementById('nameCaptureCloseBtn').innerHTML = I.close;
 document.getElementById('customiseCloseBtn').innerHTML = I.close;
 document.getElementById('custMinusBtn').innerHTML = I.minus;
 document.getElementById('custPlusBtn').innerHTML = I.plus;
@@ -1718,7 +1691,7 @@ function openCheckoutDrawer(){
     document.getElementById('overlay').classList.add('show');
     document.getElementById('accountDrawer').classList.add('show');
     renderAccountState();
-    showOtpStatus('Please verify your mobile number to continue checkout.', false);
+    showLoginStatus('Please sign in with Google to continue checkout.', false);
     return;
   }
   pendingCheckoutAfterLogin = false;
@@ -1744,12 +1717,10 @@ function openCheckoutDrawer(){
   document.getElementById('checkoutDrawer').classList.add('show');
 }
 
-/* Login-gate se login hone ke baad (ya naam-capture khatam hone ke baad)
-   isse call karo — agar checkout pending tha toh seedha Delivery Details
-   drawer khol dega. */
+/* Login-gate se login hone ke baad isse call karo — agar checkout pending
+   tha toh seedha Delivery Details drawer khol dega. */
 function proceedPendingCheckoutIfNeeded(){
   if(!pendingCheckoutAfterLogin || !currentCustomer) return;
-  if(document.getElementById('nameCaptureDrawer').classList.contains('show')) return; // pehle naam capture poora hone do
   pendingCheckoutAfterLogin = false;
   openCheckoutDrawer();
 }
@@ -1942,6 +1913,7 @@ async function confirmAndPay(){
     // Order pehle 'pending' status mein save hota hai — payment signature
     // verify hone ke baad verify-razorpay-payment Edge Function isse 'paid' karta hai.
     const { data, error } = await sb.from('orders').insert({
+      customer_id: currentCustomer ? currentCustomer.id : null,
       customer_name: name, customer_phone: phone.replace(/\D/g,''), customer_address: fullAddress,
       customer_city: city, customer_state: state, customer_pincode: pincode,
       customer_email: email,
@@ -2064,116 +2036,49 @@ function changeAddonQty(key, delta){
   renderCart();
 }
 
-/* ---------------- Customer Account (Phone OTP via Fast2SMS + Supabase Send SMS Hook) ---------------- */
+/* ---------------- Customer Account (Google Sign-In via Supabase Auth) ----------------
+   Session persistence is handled entirely by Supabase's client (on by
+   default) — once a customer signs in with Google on a device, they stay
+   signed in there until they tap "Sign Out". No OTP, no name-capture step:
+   Google already gives us their name, email, and photo. */
 let currentCustomer = null;
-let otpPendingPhone = null; // '+91XXXXXXXXXX' once OTP has been sent, until verified
-let otpResendTimerInterval = null;
 
 function normalizePhone10(raw){
   return (raw || '').replace(/\D/g, '').slice(-10);
 }
 
-function showOtpStatus(msg, isError){
-  const el = document.getElementById('otp-status');
+function showLoginStatus(msg, isError){
+  const el = document.getElementById('acct-login-status');
+  if(!el) return;
   if(!msg){ el.style.display = 'none'; return; }
   el.style.display = 'block';
   el.style.color = isError ? 'var(--c-red)' : 'var(--ink)';
   el.textContent = msg;
 }
 
-function startOtpResendTimer(){
-  let seconds = 30;
-  const resendBtn = document.getElementById('otpResendBtn');
-  clearInterval(otpResendTimerInterval);
-  const tick = () => {
-    if(seconds <= 0){
-      clearInterval(otpResendTimerInterval);
-      resendBtn.disabled = false;
-      resendBtn.textContent = 'Resend OTP';
-      return;
-    }
-    resendBtn.disabled = true;
-    resendBtn.textContent = `Resend OTP (${seconds}s)`;
-    seconds--;
-  };
-  tick();
-  otpResendTimerInterval = setInterval(tick, 1000);
-}
-
-async function sendCustomerOtp(isResend){
-  if(!sb){ showOtpStatus("The store isn't connected to the backend yet.", true); return; }
-  const digits = isResend ? normalizePhone10(otpPendingPhone) : normalizePhone10(document.getElementById('otp-phone').value);
-  if(digits.length !== 10){
-    showOtpStatus('Enter a valid 10-digit mobile number.', true);
-    return;
-  }
-  const phoneE164 = '+91' + digits;
-  const btn = document.getElementById(isResend ? 'otpResendBtn' : 'otpSendBtn');
-  const originalText = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Sending...';
+async function signInWithGoogle(){
+  if(!sb){ showLoginStatus("The store isn't connected to the backend yet.", true); return; }
+  const btn = document.getElementById('googleSignInBtn');
+  if(btn) btn.disabled = true;
+  showLoginStatus('', false);
   try{
-    const { error } = await sb.auth.signInWithOtp({ phone: phoneE164 });
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
     if(error) throw error;
-    otpPendingPhone = phoneE164;
-    document.getElementById('otpSentToPhone').textContent = digits;
-    document.getElementById('otpPhoneStep').style.display = 'none';
-    document.getElementById('otpCodeStep').style.display = 'block';
-    document.getElementById('otp-code').value = '';
-    showOtpStatus(isResend ? 'OTP resent.' : 'OTP has been sent.', false);
-    startOtpResendTimer();
+    // Browser redirects to Google now; nothing more runs on this page load.
   }catch(err){
     console.error(err);
-    showOtpStatus("Couldn't send the OTP: " + (err.message || 'try again'), true);
-    btn.disabled = false; btn.textContent = originalText;
-  }finally{
-    if(!isResend){ btn.textContent = 'Send OTP'; btn.disabled = false; }
+    showLoginStatus("Couldn't start Google sign-in: " + (err.message || 'try again'), true);
+    if(btn) btn.disabled = false;
   }
-}
-
-async function verifyCustomerOtp(){
-  if(!sb || !otpPendingPhone) return;
-  const code = document.getElementById('otp-code').value.trim();
-  if(!/^\d{6}$/.test(code)){
-    showOtpStatus('Enter a valid 6-digit OTP.', true);
-    return;
-  }
-  const btn = document.getElementById('otpVerifyBtn');
-  btn.textContent = 'Verifying...'; btn.disabled = true;
-  try{
-    const { error } = await sb.auth.verifyOtp({ phone: otpPendingPhone, token: code, type: 'sms' });
-    if(error) throw error;
-    resetOtpForm();
-  }catch(err){
-    console.error(err);
-    showOtpStatus('The OTP is incorrect or expired: ' + (err.message || 'try again'), true);
-  }finally{
-    btn.textContent = 'Verify & Sign In'; btn.disabled = false;
-  }
-}
-
-function changeOtpPhone(){
-  clearInterval(otpResendTimerInterval);
-  otpPendingPhone = null;
-  document.getElementById('otpCodeStep').style.display = 'none';
-  document.getElementById('otpPhoneStep').style.display = 'block';
-  showOtpStatus('', false);
-}
-
-function resetOtpForm(){
-  clearInterval(otpResendTimerInterval);
-  otpPendingPhone = null;
-  document.getElementById('otp-phone').value = '';
-  document.getElementById('otp-code').value = '';
-  document.getElementById('otpPhoneStep').style.display = 'block';
-  document.getElementById('otpCodeStep').style.display = 'none';
-  showOtpStatus('', false);
 }
 
 async function customerSignOut(){
   if(!sb) return;
   await sb.auth.signOut();
   currentCustomer = null;
-  resetOtpForm();
   renderAccountState();
 }
 
@@ -2255,8 +2160,9 @@ async function submitTicket(){
 
   try{
     const { error } = await sb.from('support_tickets').insert({
+      customer_id: currentCustomer ? currentCustomer.id : null,
       customer_name: name, customer_phone: phone.replace(/\D/g,''),
-      customer_email: null,
+      customer_email: currentCustomer ? (currentCustomer.email || null) : null,
       order_ref: orderRef || null, issue_type: type, message
     });
     if(error) throw error;
@@ -2283,7 +2189,7 @@ async function loadMyTickets(){
   el.innerHTML = '<div class="acct-empty">Loading...</div>';
   try{
     const { data, error } = await sb.from('support_tickets').select('*')
-      .eq('customer_phone', normalizePhone10(currentCustomer.phone))
+      .eq('customer_id', currentCustomer.id)
       .order('created_at', {ascending:false});
     if(error) throw error;
     if(!data || !data.length){ el.innerHTML = '<div class="acct-empty">No tickets yet.</div>'; return; }
@@ -2313,18 +2219,19 @@ function renderAccountState(){
   if(currentCustomer){
     loggedOut.style.display = 'none';
     loggedIn.style.display = 'block';
-    const digits = normalizePhone10(currentCustomer.phone);
-    const fullName = currentCustomer.user_metadata?.full_name;
-    const name = fullName || 'Namaste!';
-    const initial = (fullName ? fullName.trim().charAt(0) : (digits ? digits.charAt(0) : '?')).toUpperCase();
-    document.getElementById('acctAvatar').innerHTML = initial;
-    document.getElementById('acctName').textContent = name;
-    document.getElementById('acctEmail').textContent = digits ? ('+91 ' + digits) : '';
-    if(navIcon) navIcon.innerHTML = `<div class="nav-avatar-badge">${initial}</div>`;
+    const meta = currentCustomer.user_metadata || {};
+    const fullName = meta.full_name || meta.name || '';
+    const email = currentCustomer.email || meta.email || '';
+    const avatarUrl = meta.avatar_url || meta.picture || '';
+    const initial = (fullName ? fullName.trim().charAt(0) : (email ? email.charAt(0) : '?')).toUpperCase();
+    const avatarImg = avatarUrl ? `<img src="${avatarUrl}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : initial;
+    document.getElementById('acctAvatar').innerHTML = avatarImg;
+    document.getElementById('acctName').textContent = fullName || 'Namaste!';
+    document.getElementById('acctEmail').textContent = email;
+    if(navIcon) navIcon.innerHTML = `<div class="nav-avatar-badge">${avatarImg}</div>`;
   }else{
     loggedOut.style.display = 'flex';
     loggedIn.style.display = 'none';
-    resetOtpForm();
     if(navIcon) navIcon.innerHTML = I.user;
   }
 }
@@ -2359,7 +2266,7 @@ async function loadMyOrders(){
   el.innerHTML = '<div class="acct-empty">Loading...</div>';
   try{
     const { data, error } = await sb.from('orders').select('*')
-      .eq('customer_phone', normalizePhone10(currentCustomer.phone))
+      .eq('customer_id', currentCustomer.id)
       .order('created_at', {ascending:false});
     if(error) throw error;
     myOrders = data || [];
@@ -2456,7 +2363,7 @@ async function loadMyAddresses(){
   el.innerHTML = '<div class="acct-empty">Loading...</div>';
   try{
     const { data, error } = await sb.from('customer_addresses').select('*')
-      .eq('customer_phone', normalizePhone10(currentCustomer.phone))
+      .eq('customer_id', currentCustomer.id)
       .order('is_default', {ascending:false}).order('created_at', {ascending:false});
     if(error) throw error;
     myAddresses = data || [];
@@ -2528,7 +2435,7 @@ async function saveAddress(){
   if(!sb || !currentCustomer) return;
   const id = document.getElementById('addr-id').value;
   const payload = {
-    customer_phone: normalizePhone10(currentCustomer.phone),
+    customer_id: currentCustomer.id,
     label: document.getElementById('addr-label').value,
     full_name: document.getElementById('addr-name').value.trim(),
     address: document.getElementById('addr-address').value.trim(),
@@ -2545,7 +2452,7 @@ async function saveAddress(){
   }
   try{
     if(payload.is_default){
-      await sb.from('customer_addresses').update({is_default:false}).eq('customer_phone', payload.customer_phone);
+      await sb.from('customer_addresses').update({is_default:false}).eq('customer_id', payload.customer_id);
     }
     const { error } = id
       ? await sb.from('customer_addresses').update(payload).eq('id', id)
@@ -2562,7 +2469,7 @@ async function saveAddress(){
 async function setDefaultAddress(id){
   if(!sb || !currentCustomer) return;
   try{
-    await sb.from('customer_addresses').update({is_default:false}).eq('customer_phone', normalizePhone10(currentCustomer.phone));
+    await sb.from('customer_addresses').update({is_default:false}).eq('customer_id', currentCustomer.id);
     await sb.from('customer_addresses').update({is_default:true}).eq('id', id);
     loadMyAddresses();
   }catch(err){ console.error(err); }
@@ -2575,50 +2482,6 @@ async function deleteAddress(id){
     if(error) throw error;
     loadMyAddresses();
   }catch(err){ console.error(err); }
-}
-
-/* ---------------- Name capture (first login) ---------------- */
-function maybePromptForName(){
-  if(!currentCustomer) return;
-  const name = currentCustomer.user_metadata?.full_name;
-  if(name) return;
-  document.getElementById('nc-name-input').value = '';
-  document.getElementById('nc-status').style.display = 'none';
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('nameCaptureDrawer').classList.add('show');
-}
-function skipNameCapture(){
-  document.getElementById('nameCaptureDrawer').classList.remove('show');
-  if(!document.getElementById('accountDrawer').classList.contains('show')){
-    document.getElementById('overlay').classList.remove('show');
-  }
-  proceedPendingCheckoutIfNeeded();
-}
-async function saveCustomerName(){
-  if(!sb) return;
-  const input = document.getElementById('nc-name-input');
-  const name = input.value.trim();
-  const statusEl = document.getElementById('nc-status');
-  if(!name){
-    statusEl.style.display = 'block';
-    statusEl.textContent = 'Please enter your name.';
-    return;
-  }
-  try{
-    const { data, error } = await sb.auth.updateUser({ data: { full_name: name } });
-    if(error) throw error;
-    currentCustomer = data.user;
-    renderAccountState();
-    document.getElementById('nameCaptureDrawer').classList.remove('show');
-    if(!document.getElementById('accountDrawer').classList.contains('show')){
-      document.getElementById('overlay').classList.remove('show');
-    }
-    proceedPendingCheckoutIfNeeded();
-  }catch(err){
-    console.error(err);
-    statusEl.style.display = 'block';
-    statusEl.textContent = "Couldn't save: " + (err.message || 'try again');
-  }
 }
 
 async function checkCustomerAuth(){
@@ -2644,7 +2507,6 @@ async function checkCustomerAuth(){
     if(currentCustomer){
       loadMyOrders();
       loadMyAddresses();
-      if(event === 'SIGNED_IN') maybePromptForName();
       proceedPendingCheckoutIfNeeded();
     }
   });
@@ -2652,7 +2514,7 @@ async function checkCustomerAuth(){
 
 function closeAllPanels(){
   document.getElementById('overlay').classList.remove('show');
-  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','nameCaptureDrawer','productDetailDrawer'].forEach(id=>{
+  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','productDetailDrawer'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.classList.remove('show');
   });
