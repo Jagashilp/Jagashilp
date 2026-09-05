@@ -572,18 +572,16 @@
     <div class="field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div>
         <label>Pincode</label>
-        <input type="text" id="chk-pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric" oninput="handlePincodeInput()">
+        <input type="text" id="chk-pincode" placeholder="6-digit pincode" maxlength="6" inputmode="numeric">
       </div>
       <div>
         <label>Country</label>
         <input type="text" id="chk-country" value="India" disabled style="opacity:.65;">
       </div>
     </div>
-    <div id="chk-delivery-row" style="display:none;font-size:12px;color:var(--ink-soft);margin:-6px 0 14px;"></div>
     <div id="chk-status" class="chk-status"></div>
   </div>
   <div class="drawer-foot">
-    <div class="subtotal-row" id="chk-delivery-line" style="display:none;font-size:12.5px;font-weight:600;color:var(--ink-soft);"><span>Delivery</span><span id="chk-delivery-amt">₹0</span></div>
     <div class="subtotal-row"><span>Total</span><span id="chk-total">₹0</span></div>
     <button class="checkout-btn" id="chk-submit-btn" onclick="submitOrder()">Review Order</button>
   </div>
@@ -594,7 +592,6 @@
   <div class="drawer-head"><h3>Review Your Order</h3><button class="close-btn" onclick="closeAllPanels()" id="reviewCloseBtn"></button></div>
   <div class="drawer-body" id="reviewBody"></div>
   <div class="drawer-foot">
-    <div class="subtotal-row" id="review-delivery-line" style="display:none;font-size:12.5px;font-weight:600;color:var(--ink-soft);"><span>Delivery</span><span id="review-delivery-amt">₹0</span></div>
     <div class="subtotal-row"><span>Total</span><span id="review-total">₹0</span></div>
     <div id="review-status" class="chk-status"></div>
     <button class="checkout-btn" id="review-pay-btn" onclick="confirmAndPay()">Proceed to Payment</button>
@@ -1695,86 +1692,18 @@ function renderCart(){
    jaata hai. Isse dobara "Proceed to Checkout" tap nahi karna padta. */
 let pendingCheckoutAfterLogin = false;
 
-/* ---------------- Live delivery charge (Shiprocket) ----------------
-   Jaise hi customer 6-digit pincode type kar leta hai, Edge Function
-   'check-delivery-rate' se real courier rate maangte hain (cart ke total
-   weight ke hisaab se) — koi guessed flat fee nahi, exact Shiprocket cost. */
-let deliveryCharge = 0;
-let deliveryPincodeChecked = null;
-let deliveryCourier = '';
-let deliveryEtd = '';
-let pincodeDebounceTimer = null;
+/* ---------------- Delivery charge: removed ----------------
+   Live Shiprocket rate-check feature removed on request — delivery is
+   no longer fetched or shown; deliveryCharge stays 0 everywhere it's
+   still referenced (order payload etc.) for backward compatibility. */
+const deliveryCharge = 0;
+const deliveryCourier = '';
+const deliveryEtd = '';
 
 function updateCheckoutTotals(){
   const discount = (cart.length >= HAMPER_NUDGE_TARGET) ? HAMPER_NUDGE_DISCOUNT : 0;
   const total = Math.max(0, cartSubtotal() + addonTotal() - discount + deliveryCharge);
   document.getElementById('chk-total').textContent = '₹' + total;
-  const deliveryLine = document.getElementById('chk-delivery-line');
-  if(deliveryCharge > 0){
-    deliveryLine.style.display = 'flex';
-    document.getElementById('chk-delivery-amt').textContent = '₹' + deliveryCharge;
-  }else{
-    deliveryLine.style.display = 'none';
-  }
-}
-
-function handlePincodeInput(){
-  const pincode = document.getElementById('chk-pincode').value.trim();
-  clearTimeout(pincodeDebounceTimer);
-  const rowEl = document.getElementById('chk-delivery-row');
-  if(!/^\d{6}$/.test(pincode)){
-    deliveryCharge = 0;
-    deliveryPincodeChecked = null;
-    deliveryCourier = '';
-    deliveryEtd = '';
-    rowEl.style.display = 'none';
-    updateCheckoutTotals();
-    return;
-  }
-  pincodeDebounceTimer = setTimeout(() => checkDeliveryRate(pincode), 500);
-}
-
-async function checkDeliveryRate(pincode){
-  const rowEl = document.getElementById('chk-delivery-row');
-  if(!sb){ return; }
-  rowEl.style.display = 'block';
-  rowEl.style.color = 'var(--ink-soft)';
-  rowEl.textContent = 'Checking delivery charge for ' + pincode + '...';
-  try{
-    const { data, error } = await sb.functions.invoke('check-delivery-rate', {
-      body: {
-        pincode,
-        weightGrams: cartTotalWeightGrams(),
-        orderValue: Math.max(0, cartSubtotal() + addonTotal()),
-        cod: false,
-      },
-    });
-    if(error) throw error;
-    if(!data.serviceable){
-      deliveryCharge = 0;
-      deliveryPincodeChecked = null;
-      deliveryCourier = '';
-      deliveryEtd = '';
-      rowEl.style.color = 'var(--rose)';
-      rowEl.textContent = data.message || "This pincode isn't serviceable right now.";
-    }else{
-      deliveryCharge = data.charge;
-      deliveryPincodeChecked = pincode;
-      deliveryCourier = data.courier;
-      deliveryEtd = data.etd || '';
-      rowEl.style.color = 'var(--ink-soft)';
-      rowEl.textContent = `Delivery via ${data.courier} — ₹${data.charge}${data.etd ? ' · arrives ' + data.etd : ''}`;
-    }
-  }catch(err){
-    console.error('Delivery rate check failed:', err);
-    deliveryCharge = 0;
-    deliveryPincodeChecked = null;
-    deliveryCourier = '';
-    deliveryEtd = '';
-    rowEl.style.color = 'var(--rose)';
-    rowEl.textContent = "Couldn't fetch delivery charge — try re-entering the pincode.";
-  }
-  updateCheckoutTotals();
 }
 
 
@@ -1806,15 +1735,7 @@ function openCheckoutDrawer(){
     document.getElementById('chk-email').value = currentCustomer.email || currentCustomer.user_metadata?.email || '';
   }
   if(currentCustomer){ loadMyAddresses(); } else { document.getElementById('chkSavedAddrRow').style.display = 'none'; }
-  deliveryCharge = 0;
-  deliveryPincodeChecked = null;
-  deliveryCourier = '';
-  deliveryEtd = '';
-  document.getElementById('chk-delivery-row').style.display = 'none';
-  // Agar pincode pehle se bhara hai (saved address se), turant rate check karo
-  const existingPincode = document.getElementById('chk-pincode').value.trim();
   updateCheckoutTotals();
-  if(/^\d{6}$/.test(existingPincode)) checkDeliveryRate(existingPincode);
   closeAllPanels();
   document.getElementById('overlay').classList.add('show');
   document.getElementById('checkoutDrawer').classList.add('show');
@@ -1873,13 +1794,6 @@ async function submitOrder(){
     statusEl.textContent = 'Enter a valid 6-digit pincode.';
     return;
   }
-  if(deliveryPincodeChecked !== pincode){
-    statusEl.style.display = 'block';
-    statusEl.style.color = 'var(--rose)';
-    statusEl.textContent = 'Fetching your delivery charge — please wait a moment and try again.';
-    checkDeliveryRate(pincode);
-    return;
-  }
   if(!/^\d{10}$/.test(phone.replace(/\D/g,''))){
     statusEl.style.display = 'block';
     statusEl.style.color = 'var(--rose)';
@@ -1932,15 +1846,6 @@ function showOrderReview(addr){
       <div style="font-size:12px;color:var(--ink-soft);margin-top:4px;">${addr.phone} · ${addr.email}</div>
     </div>
 
-    ${deliveryCourier ? `
-    <div class="delivery-est-card">
-      ${I.truck || I.box}
-      <div>
-        <div class="de-title">Estimated Delivery${deliveryEtd ? ': ' + deliveryEtd : ''}</div>
-        <div class="de-sub">Shipped via ${deliveryCourier}</div>
-      </div>
-    </div>` : ''}
-
     <div class="acct-section-title">Items</div>
     ${itemsHtml}
     ${addonsHtml}
@@ -1949,18 +1854,10 @@ function showOrderReview(addr){
     <div class="order-price-block" style="border-top:none;padding:0 0 4px;">
       <div class="order-price-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
       ${discount ? `<div class="order-price-row"><span>Discount</span><span>−₹${discount}</span></div>` : ''}
-      <div class="order-price-row"><span>Delivery</span><span>${deliveryCharge ? '₹' + deliveryCharge : 'Free'}</span></div>
       <div class="order-price-row grand"><span>Total</span><span>₹${total}</span></div>
     </div>
   `;
   document.getElementById('review-total').textContent = '₹' + total;
-  const deliveryLine = document.getElementById('review-delivery-line');
-  if(deliveryCharge > 0){
-    deliveryLine.style.display = 'flex';
-    document.getElementById('review-delivery-amt').textContent = '₹' + deliveryCharge;
-  }else{
-    deliveryLine.style.display = 'none';
-  }
   document.getElementById('review-status').style.display = 'none';
   const payBtn = document.getElementById('review-pay-btn');
   payBtn.textContent = 'Proceed to Payment';
@@ -2623,7 +2520,6 @@ function applyChkAddress(id){
   document.getElementById('chk-city').value = a.city || '';
   document.getElementById('chk-state').value = a.state || '';
   document.getElementById('chk-pincode').value = a.pincode || '';
-  if(/^\d{6}$/.test(a.pincode || '')) checkDeliveryRate(a.pincode);
 }
 async function saveAddress(){
   if(!sb || !currentCustomer) return;
