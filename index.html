@@ -2632,19 +2632,27 @@ async function checkCustomerAuth(){
   }
   renderAccountState();
   if(currentCustomer){ loadMyOrders(); loadMyAddresses(); }
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if(session){
-      const { data: { user } } = await sb.auth.getUser();
-      currentCustomer = user || session.user;
-    }else{
-      currentCustomer = null;
-    }
+  /* IMPORTANT: never await another sb.auth.* call directly inside this
+     listener — Supabase docs warn this can deadlock the client, since
+     the listener holds an internal lock while auth state is processed.
+     So we render immediately from session.user, then refresh the fresher
+     copy (for full_name etc.) via setTimeout, outside that lock. */
+  sb.auth.onAuthStateChange((event, session) => {
+    currentCustomer = session ? session.user : null;
     renderAccountState();
     if(currentCustomer){
       loadMyOrders();
       loadMyAddresses();
       if(event === 'SIGNED_IN') maybePromptForName();
       proceedPendingCheckoutIfNeeded();
+    }
+    if(session){
+      setTimeout(async () => {
+        try{
+          const { data: { user } } = await sb.auth.getUser();
+          if(user){ currentCustomer = user; renderAccountState(); }
+        }catch(err){ console.error('getUser refresh failed:', err); }
+      }, 0);
     }
   });
 }
