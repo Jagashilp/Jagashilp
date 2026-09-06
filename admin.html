@@ -127,6 +127,17 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
 .tag-chip{display:flex;align-items:center;gap:5px;padding:6px 11px;border:1.5px solid var(--line-strong);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;user-select:none;}
 .tag-chip input{width:13px;height:13px;accent-color:var(--rose);margin:0;}
 .tag-chip.checked{border-color:var(--rose);background:rgba(183,40,46,0.06);}
+
+/* Product modal — section grouping + dynamic note-fields list */
+.pf-section{margin-bottom:22px;}
+.pf-section-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--rose);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+.personalise-card{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px 14px 4px;margin-top:2px;}
+.note-field-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
+.note-field-row input{flex:1;margin:0;}
+.note-field-remove{flex:0 0 auto;width:38px;height:38px;border-radius:9px;border:1.5px solid var(--line-strong);background:#fff;color:var(--rose);font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.note-field-remove:hover{background:var(--rose);color:#fff;border-color:var(--rose);}
+.add-field-btn{width:100%;padding:10px;border:1.5px dashed var(--line-strong);border-radius:9px;background:none;color:var(--ink);font-weight:700;font-size:12.5px;cursor:pointer;margin-bottom:14px;}
+.add-field-btn:hover{border-color:var(--ink);}
 .upload-box{border:1.5px dashed var(--line-strong);border-radius:11px;padding:16px;text-align:center;font-size:12px;color:var(--muted);cursor:pointer;background:var(--surface);transition:border-color .15s;}
 .upload-box:hover{border-color:var(--rose);}
 .upload-box img{max-width:100%;max-height:120px;border-radius:8px;}
@@ -306,69 +317,85 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
   <div class="modal">
     <h3 id="productModalTitle">Add Product</h3>
     <input type="hidden" id="pf-id">
-    <div class="field">
-      <label>Photo</label>
-      <label class="upload-box" for="pf-photo-input" id="pf-photo-box">Tap to upload photo</label>
-      <input type="file" accept="image/*" id="pf-photo-input" style="display:none;" onchange="handleProductPhoto(event)">
-    </div>
-    <div class="field">
-      <label>Name</label>
-      <input type="text" id="pf-name" placeholder="e.g. Mandala Doodle Keychain">
-    </div>
-    <div class="field row2">
-      <div>
-        <label>Category</label>
-        <select id="pf-category">
-          <option value="Keychain">Keychain</option>
-          <option value="Mug">Mug</option>
-          <option value="Tote Bag">Tote Bag</option>
-          <option value="T-Shirt">T-Shirt</option>
-          <option value="Fridge Magnet">Fridge Magnet</option>
-          <option value="Hamper">Hamper</option>
-        </select>
-      </div>
-      <div>
-        <label>Price (₹)</label>
-        <input type="number" id="pf-price" placeholder="299">
-      </div>
-    </div>
-    <div class="field">
-      <label>Description</label>
-      <textarea id="pf-description" placeholder="Short product description"></textarea>
-    </div>
-    <div class="field">
-      <div class="check-row"><input type="checkbox" id="pf-customisable" onchange="togglePersonaliseFields()"> Customisable product</div>
-    </div>
-    <div class="field">
-      <label>Customisation fee (₹, agar customisable hai)</label>
-      <input type="number" id="pf-custfee" placeholder="150">
-    </div>
-    <div id="pf-personalise-block">
+
+    <div class="pf-section">
+      <div class="pf-section-title">Basic Details</div>
       <div class="field">
-        <div class="check-row"><input type="checkbox" id="pf-allowphoto" onchange="togglePersonaliseFields()"> Allow photo upload (customer apni photo upload kar sake)</div>
-      </div>
-      <div class="field" id="pf-maxphoto-row">
-        <label>Max photos allowed</label>
-        <input type="number" id="pf-maxphoto" min="1" max="6" placeholder="1">
+        <label>Photo</label>
+        <label class="upload-box" for="pf-photo-input" id="pf-photo-box">Tap to upload photo</label>
+        <input type="file" accept="image/*" id="pf-photo-input" style="display:none;" onchange="handleProductPhoto(event)">
       </div>
       <div class="field">
-        <div class="check-row"><input type="checkbox" id="pf-allownote" onchange="togglePersonaliseFields()"> Allow custom text/message</div>
+        <label>Name</label>
+        <input type="text" id="pf-name" placeholder="e.g. Mandala Doodle Keychain">
       </div>
-      <div class="field" id="pf-notetitle-row">
-        <label>Text field label (customer ko yeh dikhega)</label>
-        <input type="text" id="pf-notetitle" placeholder="e.g. Name to print / Message to add">
+      <div class="field row2">
+        <div>
+          <label>Category</label>
+          <select id="pf-category">
+            <option value="Keychain">Keychain</option>
+            <option value="Mug">Mug</option>
+            <option value="Tote Bag">Tote Bag</option>
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Fridge Magnet">Fridge Magnet</option>
+            <option value="Hamper">Hamper</option>
+          </select>
+        </div>
+        <div>
+          <label>Price (₹)</label>
+          <input type="number" id="pf-price" placeholder="299">
+        </div>
+      </div>
+      <div class="field">
+        <label>Description</label>
+        <textarea id="pf-description" placeholder="Short product description"></textarea>
       </div>
     </div>
-    <div class="field">
-      <div class="check-row"><input type="checkbox" id="pf-highlight"> Show on Highlight (Customised / Category tab ke top pe dikhega — new arrivals, occasion picks)</div>
+
+    <div class="pf-section">
+      <div class="pf-section-title">Personalisation</div>
+      <div class="field">
+        <div class="check-row"><input type="checkbox" id="pf-customisable" onchange="togglePersonaliseFields()"> Customisable product</div>
+      </div>
+      <div id="pf-personalise-block">
+        <div class="field">
+          <label>Customisation fee (₹)</label>
+          <input type="number" id="pf-custfee" placeholder="150">
+        </div>
+        <div class="personalise-card">
+          <div class="field">
+            <div class="check-row"><input type="checkbox" id="pf-allowphoto" onchange="togglePersonaliseFields()"> Allow photo upload</div>
+          </div>
+          <div class="field" id="pf-maxphoto-row" style="margin-bottom:16px;">
+            <label>Max photos allowed</label>
+            <input type="number" id="pf-maxphoto" min="1" max="6" placeholder="1">
+          </div>
+          <div class="field">
+            <div class="check-row"><input type="checkbox" id="pf-allownote" onchange="togglePersonaliseFields()"> Allow custom text/message</div>
+          </div>
+          <div id="pf-notefields-row">
+            <label style="display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:8px;">Text fields (customer ko yeh dikhenge)</label>
+            <div id="pf-notefields-list"></div>
+            <button type="button" class="add-field-btn" onclick="addNoteField()">+ Add Text Field</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="field">
-      <label>Tags — Occasion / Person / Mood (jitne apply hote hain sab tick karo — ek product multiple occasions/persons/moods mein dikh sakta hai)</label>
-      <div id="pfTagGroups"></div>
+
+    <div class="pf-section">
+      <div class="pf-section-title">Visibility &amp; Tags</div>
+      <div class="field">
+        <div class="check-row"><input type="checkbox" id="pf-highlight"> Show on Highlight (Customised / Category tab ke top pe dikhega — new arrivals, occasion picks)</div>
+      </div>
+      <div class="field">
+        <label>Tags — Occasion / Person / Mood (jitne apply hote hain sab tick karo)</label>
+        <div id="pfTagGroups"></div>
+      </div>
+      <div class="field">
+        <div class="check-row"><input type="checkbox" id="pf-active" checked> Active (storefront pe dikhega)</div>
+      </div>
     </div>
-    <div class="field">
-      <div class="check-row"><input type="checkbox" id="pf-active" checked> Active (storefront pe dikhega)</div>
-    </div>
+
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeProductModal()">Cancel</button>
       <button class="btn" onclick="saveProduct()">Save</button>
@@ -659,13 +686,35 @@ function renderProductsGrid(){
   `).join('');
 }
 
+let pfNoteFieldsState = [];
+
+function renderNoteFieldsList(){
+  document.getElementById('pf-notefields-list').innerHTML = pfNoteFieldsState.map((label, idx) => `
+    <div class="note-field-row">
+      <input type="text" value="${(label || '').replace(/"/g,'&quot;')}" placeholder="e.g. Name to print" oninput="updateNoteField(${idx}, this.value)">
+      <button type="button" class="note-field-remove" onclick="removeNoteField(${idx})">&times;</button>
+    </div>
+  `).join('') || '<p style="font-size:12px;color:var(--muted);margin-bottom:10px;">No text fields yet — add one below.</p>';
+}
+function addNoteField(){
+  pfNoteFieldsState.push('');
+  renderNoteFieldsList();
+}
+function removeNoteField(idx){
+  pfNoteFieldsState.splice(idx, 1);
+  renderNoteFieldsList();
+}
+function updateNoteField(idx, value){
+  pfNoteFieldsState[idx] = value;
+}
+
 function togglePersonaliseFields(){
   const customisable = document.getElementById('pf-customisable').checked;
   const allowPhoto = document.getElementById('pf-allowphoto').checked;
   const allowNote = document.getElementById('pf-allownote').checked;
   document.getElementById('pf-personalise-block').style.display = customisable ? 'block' : 'none';
   document.getElementById('pf-maxphoto-row').style.display = (customisable && allowPhoto) ? 'block' : 'none';
-  document.getElementById('pf-notetitle-row').style.display = (customisable && allowNote) ? 'block' : 'none';
+  document.getElementById('pf-notefields-row').style.display = (customisable && allowNote) ? 'block' : 'none';
 }
 
 function openProductModal(id){
@@ -685,7 +734,11 @@ function openProductModal(id){
     document.getElementById('pf-allowphoto').checked = !!p.photo_upload_enabled;
     document.getElementById('pf-maxphoto').value = p.photo_upload_max || 1;
     document.getElementById('pf-allownote').checked = !!p.note_enabled;
-    document.getElementById('pf-notetitle').value = p.note_title || 'Customisation Notes (optional)';
+    // Backward-compat: purane products mein single note_title tha, naye mein note_fields array hai
+    pfNoteFieldsState = Array.isArray(p.note_fields) && p.note_fields.length
+      ? [...p.note_fields]
+      : (p.note_title ? [p.note_title] : []);
+    renderNoteFieldsList();
     document.getElementById('pf-highlight').checked = !!p.highlight;
     renderTagGroups(p.tags || []);
     document.getElementById('pf-active').checked = p.active;
@@ -702,7 +755,8 @@ function openProductModal(id){
     document.getElementById('pf-allowphoto').checked = (productsSubTab === 'customised');
     document.getElementById('pf-maxphoto').value = 1;
     document.getElementById('pf-allownote').checked = false;
-    document.getElementById('pf-notetitle').value = 'Customisation Notes (optional)';
+    pfNoteFieldsState = [];
+    renderNoteFieldsList();
     document.getElementById('pf-highlight').checked = false;
     renderTagGroups([]);
     document.getElementById('pf-active').checked = true;
@@ -745,6 +799,14 @@ async function saveProduct(){
     return;
   }
 
+  const cleanNoteFields = pfNoteFieldsState.map(s => (s || '').trim()).filter(Boolean);
+  const allowNote = document.getElementById('pf-allownote').checked;
+  if(allowNote && !cleanNoteFields.length){
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Kam se kam ek text field add karo, ya "Allow custom text/message" uncheck karo.';
+    return;
+  }
+
   const payload = {
     name, category, price,
     description: document.getElementById('pf-description').value.trim(),
@@ -752,8 +814,8 @@ async function saveProduct(){
     customisation_fee: parseFloat(document.getElementById('pf-custfee').value) || 0,
     photo_upload_enabled: document.getElementById('pf-allowphoto').checked,
     photo_upload_max: Math.max(1, parseInt(document.getElementById('pf-maxphoto').value) || 1),
-    note_enabled: document.getElementById('pf-allownote').checked,
-    note_title: document.getElementById('pf-notetitle').value.trim() || 'Customisation Notes (optional)',
+    note_enabled: allowNote,
+    note_fields: cleanNoteFields,
     highlight: document.getElementById('pf-highlight').checked,
     tags: getCheckedTags(),
     active: document.getElementById('pf-active').checked,
@@ -957,7 +1019,7 @@ async function loadOrders(){
    customer ne note likha ho ya photo upload ki ho — yehi signal storefront
    khud use karta hai customisable products ke liye. Baaki sab Readymade. */
 function orderIsCustomised(o){
-  return (o.items || []).some(i => i.customNote || i.customPhotoPath);
+  return (o.items || []).some(i => i.customNote || (i.customNotes && i.customNotes.length) || i.customPhotoPath);
 }
 
 function switchOrdersSubTab(name){
@@ -975,8 +1037,8 @@ function renderOrders(){
     const itemsHtml = (o.items || []).map(i => `
       <div class="order-line">
         <span>${i.qty}× ${i.name} <span class="mono" style="color:var(--muted);">₹${i.price}</span></span>
-        ${i.customNote ? `<div class="order-note">"${i.customNote}"</div>` : ''}
-        ${i.customPhotoPath ? `<button class="btn ghost small" style="margin-top:5px;" onclick="viewCustomerPhoto('${i.customPhotoPath}', this)">View Photo</button>` : ''}
+        ${i.customNotes && i.customNotes.length ? i.customNotes.map(n => `<div class="order-note"><b>${n.label}:</b> "${n.value}"</div>`).join('') : (i.customNote ? `<div class="order-note">"${i.customNote}"</div>` : '')}
+        ${i.customPhotoPaths && i.customPhotoPaths.length ? i.customPhotoPaths.map((path, idx) => `<button class="btn ghost small" style="margin-top:5px;margin-right:5px;" onclick="viewCustomerPhoto('${path}', this)">View Photo${i.customPhotoPaths.length>1 ? ' ' + (idx+1) : ''}</button>`).join('') : (i.customPhotoPath ? `<button class="btn ghost small" style="margin-top:5px;" onclick="viewCustomerPhoto('${i.customPhotoPath}', this)">View Photo</button>` : '')}
       </div>
     `).join('');
     const date = new Date(o.created_at).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
