@@ -347,6 +347,13 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
         </div>
       </div>
       <div class="field">
+        <label>MRP (₹, optional — set higher than Price to show a "% OFF" badge on the storefront)</label>
+        <input type="number" id="pf-mrp" placeholder="leave blank if no discount">
+      </div>
+      <div class="field">
+        <div class="check-row"><input type="checkbox" id="pf-bestseller"> Mark as Bestseller (badge shows on storefront)</div>
+      </div>
+      <div class="field">
         <label>Description</label>
         <textarea id="pf-description" placeholder="Short product description"></textarea>
       </div>
@@ -728,6 +735,8 @@ function openProductModal(id){
     document.getElementById('pf-name').value = p.name;
     document.getElementById('pf-category').value = p.category;
     document.getElementById('pf-price').value = p.price;
+    document.getElementById('pf-mrp').value = p.mrp && p.mrp > p.price ? p.mrp : '';
+    document.getElementById('pf-bestseller').checked = !!p.best;
     document.getElementById('pf-description').value = p.description || '';
     document.getElementById('pf-customisable').checked = p.customisable;
     document.getElementById('pf-custfee').value = p.customisation_fee || 0;
@@ -749,6 +758,8 @@ function openProductModal(id){
     document.getElementById('pf-name').value = '';
     document.getElementById('pf-category').value = 'Keychain';
     document.getElementById('pf-price').value = '';
+    document.getElementById('pf-mrp').value = '';
+    document.getElementById('pf-bestseller').checked = false;
     document.getElementById('pf-description').value = '';
     document.getElementById('pf-customisable').checked = (productsSubTab === 'customised');
     document.getElementById('pf-custfee').value = '';
@@ -809,6 +820,8 @@ async function saveProduct(){
 
   const payload = {
     name, category, price,
+    mrp: parseFloat(document.getElementById('pf-mrp').value) || null,
+    best: document.getElementById('pf-bestseller').checked,
     description: document.getElementById('pf-description').value.trim(),
     customisable: document.getElementById('pf-customisable').checked,
     customisation_fee: parseFloat(document.getElementById('pf-custfee').value) || 0,
