@@ -2514,7 +2514,7 @@ async function checkCustomerAuth(){
 
 function closeAllPanels(){
   document.getElementById('overlay').classList.remove('show');
-  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','productDetailDrawer'].forEach(id=>{
+  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderReviewDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','productDetailDrawer'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.classList.remove('show');
   });
