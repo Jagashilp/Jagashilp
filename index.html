@@ -1364,7 +1364,7 @@ function productCardHtml(p){
         <div class="card-name">${p.name}</div>
         <div class="price-row"><span class="price">₹${p.price}</span><span class="mrp">₹${p.mrp}</span></div>
         <div class="btn-row">
-          <button class="add-btn full" onclick="event.stopPropagation(); addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
+          <button class="add-btn full" onclick="event.stopPropagation(); handleAddToCartClick('${p.id}')">${I.bag}<span>Add to Cart</span></button>
         </div>
       </div>
     </div>`;
@@ -1400,7 +1400,7 @@ function renderHighlightRow(containerId, predicate){
           <div class="hl-slide-content">
             <div class="hl-name">${p.name}</div>
             <div class="hl-price-row"><span class="hl-now">₹${p.price}</span>${off ? `<span class="hl-was">₹${p.mrp}</span><span class="hl-off">${off}% OFF</span>` : ''}</div>
-            <button class="hl-add" onclick="event.stopPropagation(); addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
+            <button class="hl-add" onclick="event.stopPropagation(); handleAddToCartClick('${p.id}')">${I.bag}<span>Add to Cart</span></button>
           </div>
         </div>`;
       }).join('')}
@@ -1515,7 +1515,7 @@ function renderProducts(){
         <div class="card-name">${p.name}</div>
         <div class="price-row"><span class="price">₹${p.price}</span><span class="mrp">₹${p.mrp}</span></div>
         <div class="btn-row">
-          <button class="add-btn full" onclick="event.stopPropagation(); addToCart('${p.id}')">${I.bag}<span>Add to Cart</span></button>
+          <button class="add-btn full" onclick="event.stopPropagation(); handleAddToCartClick('${p.id}')">${I.bag}<span>Add to Cart</span></button>
         </div>
       </div>
     </div>
@@ -1557,6 +1557,19 @@ function addToCart(productId){
   if(existing){ existing.qty += 1; }
   else{ cart.push({key:product.id, productId:product.id, name:product.name, price:product.price, type:product.type, qty:1}); }
   saveCart(); openCart();
+}
+/* Quick "Add to Cart" buttons (grid/highlight cards) call this instead of
+   addToCart() directly — agar product par photo upload ya text note zaroori
+   hai, toh seedha add na karke Product Details drawer khol dete hain jaha
+   woh capture ho sakta hai; warna turant cart mein daal dete hain. */
+function handleAddToCartClick(productId){
+  const product = PRODUCTS.find(p => p.id === productId);
+  if(!product) return;
+  if(product.customisable && (product.photo_upload_enabled || product.note_enabled)){
+    openProductDetail(productId);
+  }else{
+    addToCart(productId);
+  }
 }
 function addCustomLineItem(item){ cart.push(item); saveCart(); openCart(); }
 
@@ -2111,7 +2124,7 @@ function renderWishlistDrawer(){
         <div class="ci-price">₹${p.price}</div>
         <div class="qty-row" style="margin-top:6px;">
           <button class="remove-btn" onclick="toggleWishlist('${p.id}')">Remove</button>
-          <button class="add-btn" style="margin-left:auto;padding:8px 14px;" onclick="addToCart('${p.id}'); toggleWishlist('${p.id}');">${I.bag}<span>Add to Cart</span></button>
+          <button class="add-btn" style="margin-left:auto;padding:8px 14px;" onclick="handleAddToCartClick('${p.id}'); toggleWishlist('${p.id}');">${I.bag}<span>Add to Cart</span></button>
         </div>
       </div>
     </div>
