@@ -389,6 +389,9 @@
 
   /* ============ BOTTOM NAV ============ */
   .bottom-nav{position:fixed; bottom:0; left:0; right:0; z-index:55; background:var(--card); border-top:1px solid rgba(43,31,23,0.1); display:flex; justify-content:space-around; padding:9px 0 12px;}
+  .toast{position:fixed; left:50%; bottom:78px; transform:translateX(-50%) translateY(20px); background:var(--ink,#211922); color:#fff; padding:11px 20px; border-radius:30px; font-size:13.5px; font-weight:700; display:flex; align-items:center; gap:8px; z-index:200; opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; box-shadow:0 8px 24px rgba(0,0,0,0.25); white-space:nowrap;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .toast svg{flex:0 0 auto;}
   .nav-item{display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:600; color:var(--ink-soft);}
   .nav-item.active{color:var(--rose);}
   .nav-item svg{margin:0 auto;}
@@ -406,6 +409,12 @@
 </style>
 </head>
 <body>
+<div class="toast" id="appToast"></div>
+<div id="pageLoader" style="position:fixed;inset:0;z-index:300;background:#F6F6F6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+  <div style="width:38px;height:38px;border-radius:50%;border:3px solid rgba(33,25,34,0.12);border-top-color:#E60023;animation:pageLoaderSpin .8s linear infinite;"></div>
+  <div style="font-family:'Momo Trust Display',sans-serif;font-size:15px;color:#211922;">Loading Jagashilp…</div>
+</div>
+<style>@keyframes pageLoaderSpin{to{transform:rotate(360deg);}}</style>
 
 <div class="page-wrap">
 
@@ -418,11 +427,19 @@
       <button class="icon-btn-plain" onclick="openCart()" id="cartBtn"><span class="icon-badge" id="cartCount">0</span></button>
     </div>
   </div>
-  <div class="search-row">
-    <div class="search-box" id="searchBox"></div>
+  <div class="search-row" style="position:relative;">
+    <div class="search-box" style="padding:0 6px 0 15px;">
+      <span id="searchIcon" style="display:flex;flex-shrink:0;opacity:.6;"></span>
+      <input type="text" id="searchInput" placeholder="Search keychains, mugs, totes..." autocomplete="off"
+        style="flex:1;border:none;background:none;outline:none;font-size:13.5px;color:var(--ink);padding:12px 6px;"
+        oninput="handleSearchInput(this.value)" onfocus="handleSearchInput(this.value)">
+      <button id="searchClearBtn" onclick="clearSearch()" style="display:none;flex-shrink:0;padding:8px;color:var(--ink-soft);"></button>
+    </div>
+    <div id="searchResults" style="display:none;position:absolute;left:18px;right:18px;top:calc(100% + 4px);background:var(--paper);border-radius:16px;box-shadow:0 10px 30px rgba(33,25,34,0.15);max-height:340px;overflow-y:auto;z-index:60;"></div>
   </div>
   <div class="pill-tabs" id="typeTabs"></div>
 </div>
+<div id="searchOverlay" onclick="clearSearch()" style="display:none;position:fixed;inset:0;background:rgba(33,25,34,0.25);z-index:40;"></div>
 
 <div id="homeView">
 
@@ -665,7 +682,7 @@
         </label>
         <div id="addr-status" style="display:none;font-size:12px;color:var(--c-red);margin-bottom:8px;"></div>
         <div style="display:flex;gap:8px;">
-          <button class="checkout-btn" style="flex:1;padding:11px;" onclick="saveAddress()">Save Address</button>
+          <button class="checkout-btn" id="addrSaveBtn" style="flex:1;padding:11px;" onclick="saveAddress()">Save Address</button>
           <button class="otp-link-btn" onclick="closeAddressForm()">Cancel</button>
         </div>
       </div>
@@ -829,6 +846,12 @@ const I = {
 /* image placeholder helpers */
 function phBox(label){ return `<div class="img-ph">${I.image}<span>${label}</span></div>`; }
 function phCircle(){ return `<div class="img-ph sm">${I.imageSm}</div>`; }
+/* Photo URL kabhi broken/expired ho jaaye (deleted image, bad link waghera)
+   toh browser ka bhaddaa "broken image" icon dikhane ke bajaye, usi jagah
+   apna styled placeholder laga do. */
+function imgFallback(imgEl, label){
+  imgEl.outerHTML = phBox(label);
+}
 
 const TYPE_ICON = {Keychain:I.key, Mug:I.mug, "Tote Bag":I.tote, "T-Shirt":I.shirt, "Fridge Magnet":I.gift, Hamper:I.gift};
 
@@ -953,7 +976,8 @@ let addonState = { card:0, choco:0, wrap:0 };
 /* ---------------- Static icon injections ---------------- */
 document.getElementById('wishlistBtn').innerHTML = I.heart;
 document.getElementById('cartBtn').innerHTML = I.bag + document.getElementById('cartBtn').innerHTML;
-document.getElementById('searchBox').innerHTML = I.search + ' <span>Search keychains, mugs, totes...</span>';
+document.getElementById('searchIcon').innerHTML = I.search;
+document.getElementById('searchClearBtn').innerHTML = I.close;
 document.getElementById('seeAllBtn').innerHTML = 'See All ' + I.arrow;
 document.getElementById('cartCloseBtn').innerHTML = I.close;
 document.getElementById('checkoutCloseBtn').innerHTML = I.close;
@@ -1356,7 +1380,7 @@ function productCardHtml(p){
   return `
     <div class="card" onclick="openProductDetail('${p.id}')">
       <div class="card-img">
-        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}
+        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
         ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
         <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
       </div>
@@ -1394,7 +1418,7 @@ function renderHighlightRow(containerId, predicate){
         const off = p.mrp && p.mrp > p.price ? Math.round((1 - p.price/p.mrp) * 100) : 0;
         return `
         <div class="hl-slide" onclick="openProductDetail('${p.id}')">
-          ${p.image_url ? `<img src="${p.image_url}" draggable="false">` : phBox(p.name + ' photo')}
+          ${p.image_url ? `<img src="${p.image_url}" draggable="false" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
           <div class="hl-slide-scrim"></div>
           <span class="hl-badge">Highlight</span>
           <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
@@ -1483,7 +1507,7 @@ function renderBestsellers(){
     const off = Math.round((1 - p.price/p.mrp) * 100);
     return `
     <div class="scard" onclick="openProductDetail('${p.id}')">
-      <div class="scard-img"><span class="best-badge">Bestseller</span>${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}<button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button></div>
+      <div class="scard-img"><span class="best-badge">Bestseller</span>${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}<button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button></div>
       <div class="scard-name">${p.name}</div>
       <div class="scard-price"><span class="now">₹${p.price}</span><span class="was">₹${p.mrp}</span><span class="off">${off}% OFF</span></div>
     </div>`;
@@ -1507,7 +1531,7 @@ function renderProducts(){
   grid.innerHTML = list.map(p => `
     <div class="card" onclick="openProductDetail('${p.id}')">
       <div class="card-img">
-        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}
+        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
         ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
         <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
       </div>
@@ -1551,6 +1575,53 @@ document.getElementById('quickLinks').addEventListener('click', (e)=>{
 function saveCart(){ localStorage.setItem('jagashilp_cart', JSON.stringify(cart)); updateCartCount(); }
 function updateCartCount(){ document.getElementById('cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0); }
 
+let toastTimer = null;
+function showToast(msg){
+  const el = document.getElementById('appToast');
+  if(!el) return;
+  clearTimeout(toastTimer);
+  el.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg><span>${msg}</span>`;
+  el.classList.add('show');
+  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 2000);
+}
+
+/* ---------------- Live search (topbar) ---------------- */
+function handleSearchInput(query){
+  const q = query.trim().toLowerCase();
+  const resultsEl = document.getElementById('searchResults');
+  const overlayEl = document.getElementById('searchOverlay');
+  document.getElementById('searchClearBtn').style.display = q ? 'flex' : 'none';
+  if(!q){
+    resultsEl.style.display = 'none';
+    overlayEl.style.display = 'none';
+    return;
+  }
+  const matches = PRODUCTS.filter(p =>
+    p.name.toLowerCase().includes(q) || (p.type || '').toLowerCase().includes(q)
+  ).slice(0, 20);
+  resultsEl.innerHTML = matches.length
+    ? matches.map(p => `
+        <div onclick="clearSearch(); openProductDetail('${p.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid rgba(33,25,34,0.06);cursor:pointer;">
+          <div style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--paper-deep);">
+            ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name)})'>` : phCircle()}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+            <div style="font-size:11.5px;color:var(--ink-soft);">${p.type} · ₹${p.price}</div>
+          </div>
+        </div>`).join('')
+    : `<div style="padding:24px 16px;text-align:center;font-size:13px;color:var(--ink-soft);">No products found for "${query.trim()}"</div>`;
+  resultsEl.style.display = 'block';
+  overlayEl.style.display = 'block';
+}
+function clearSearch(){
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClearBtn').style.display = 'none';
+  document.getElementById('searchResults').style.display = 'none';
+  document.getElementById('searchOverlay').style.display = 'none';
+}
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') clearSearch(); });
+
 function addToCart(productId){
   const product = PRODUCTS.find(p => p.id === productId);
   if(!product) return;
@@ -1558,6 +1629,7 @@ function addToCart(productId){
   if(existing){ existing.qty += 1; }
   else{ cart.push({key:product.id, productId:product.id, name:product.name, price:product.price, type:product.type, qty:1}); }
   saveCart(); openCart();
+  showToast('Added to cart!');
 }
 /* Quick "Add to Cart" buttons (grid/highlight cards) call this instead of
    addToCart() directly — agar product par photo upload ya text note zaroori
@@ -1572,7 +1644,7 @@ function handleAddToCartClick(productId){
     addToCart(productId);
   }
 }
-function addCustomLineItem(item){ cart.push(item); saveCart(); openCart(); }
+function addCustomLineItem(item){ cart.push(item); saveCart(); openCart(); showToast('Added to cart!'); }
 
 function changeQty(key, delta){
   const item = cart.find(i => i.key === key); if(!item) return;
@@ -1598,7 +1670,7 @@ function renderCart(){
   const body = document.getElementById('cartBody');
   const foot = document.getElementById('cartFoot');
   if(cart.length === 0){
-    body.innerHTML = `<div class="empty-cart">Your cart is empty</div>`;
+    body.innerHTML = `<div class="acct-empty-state">${I.bag}<p>Your cart is empty. Explore our collection and add something you love!</p><button class="checkout-btn" style="margin-top:6px;padding:11px 24px;width:auto;" onclick="closeAllPanels(); showView('productsView'); renderProducts();">Browse Products</button></div>`;
     foot.innerHTML = '';
     return;
   }
@@ -2119,7 +2191,7 @@ function renderWishlistDrawer(){
   }
   body.innerHTML = items.map(p => `
     <div class="wish-item">
-      <div class="wish-item-img">${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name)}</div>
+      <div class="wish-item-img">${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name)}</div>
       <div class="wish-item-info">
         <div class="ci-name">${p.name}</div>
         <div class="ci-price">₹${p.price}</div>
@@ -2464,6 +2536,10 @@ async function saveAddress(){
     statusEl.textContent = 'Address, city, and pincode are required.';
     return;
   }
+  const btn = document.getElementById('addrSaveBtn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
   try{
     if(payload.is_default){
       await sb.from('customer_addresses').update({is_default:false}).eq('customer_id', payload.customer_id);
@@ -2478,6 +2554,8 @@ async function saveAddress(){
     console.error(err);
     statusEl.style.display = 'block';
     statusEl.textContent = "Couldn't save: " + (err.message || 'try again');
+    btn.disabled = false;
+    btn.textContent = originalText;
   }
 }
 async function setDefaultAddress(id){
@@ -2528,12 +2606,13 @@ async function checkCustomerAuth(){
 
 function closeAllPanels(){
   document.getElementById('overlay').classList.remove('show');
+  clearSearch();
   ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderReviewDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','productDetailDrawer'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.classList.remove('show');
   });
 }
-function openCart(){ renderCart(); document.getElementById('overlay').classList.add('show'); document.getElementById('cartDrawer').classList.add('show'); }
+function openCart(){ renderCart(); closeAllPanels(); document.getElementById('overlay').classList.add('show'); document.getElementById('cartDrawer').classList.add('show'); }
 
 /* ---------------- Product detail (tap on any product card) ----------------
    Agar product par admin ne Photo Upload aur/ya Text Note Panel on kiya hai,
@@ -2577,7 +2656,7 @@ function openProductDetail(id){
 
   document.getElementById('pdBody').innerHTML = `
     <div class="pd-img">
-      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(p.name + ' photo')}
+      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
       <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}'); this.classList.toggle('active');">${I.heart}</button>
     </div>
     <div class="card-cat">${p.type}</div>
@@ -2613,6 +2692,7 @@ function openProductDetail(id){
         customPhotoDataUrls: photos.length ? photos : null // saari photos — checkout upload ke liye
       });
       saveCart(); openCart();
+      showToast('Added to cart!');
     }else{
       addToCart(p.id);
     }
@@ -2832,16 +2912,60 @@ function renderRestOfPage(){
 }
 
 (async function init(){
-  await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions()]);
-  updateCartCount();
-  renderBestsellers();
-  renderProducts();
-  renderGiftsGrid();
-  renderRestOfPage();
-  renderCustomisedView();
-  renderCategoryView();
-  checkCustomerAuth();
-  enableAllHScroll();
+  try{
+    await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions()]);
+    updateCartCount();
+    renderBestsellers();
+    renderProducts();
+    renderGiftsGrid();
+    renderRestOfPage();
+    renderCustomisedView();
+    renderCategoryView();
+    checkCustomerAuth();
+    enableAllHScroll();
+  }catch(err){
+    console.error('Page failed to load fully:', err);
+  }finally{
+    document.getElementById('pageLoader')?.remove();
+  }
+})();
+
+/* ---------------- Drawer polish: background scroll-lock + mobile back-
+   button support ----------------
+   Watches the shared #overlay element instead of touching every single
+   openXxx()/closeAllPanels() call site — works for all current drawers
+   and any added later automatically.
+   1) Locks page scroll behind an open drawer/modal.
+   2) Pushes a history entry when a drawer opens, so the phone's/browser's
+      back button closes the drawer first instead of leaving the page. */
+(function(){
+  const overlayEl = document.getElementById('overlay');
+  if(!overlayEl) return;
+  let panelHistoryPushed = false;
+  let closingViaPopstate = false;
+
+  new MutationObserver(() => {
+    const isOpen = overlayEl.classList.contains('show');
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    if(isOpen && !panelHistoryPushed){
+      history.pushState({ jagashilpPanel: true }, '');
+      panelHistoryPushed = true;
+    }else if(!isOpen && panelHistoryPushed && !closingViaPopstate){
+      panelHistoryPushed = false;
+      history.back();
+    }else if(!isOpen){
+      panelHistoryPushed = false;
+    }
+  }).observe(overlayEl, { attributes: true, attributeFilter: ['class'] });
+
+  window.addEventListener('popstate', () => {
+    if(overlayEl.classList.contains('show')){
+      closingViaPopstate = true;
+      closeAllPanels();
+      panelHistoryPushed = false;
+      closingViaPopstate = false;
+    }
+  });
 })();
 
 </script>
