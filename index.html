@@ -922,7 +922,8 @@ async function loadProducts(){
         customisable:p.customisable, customisation_fee:p.customisation_fee,
         weight_grams: p.weight_grams || 150,
         photo_upload_enabled: !!p.photo_upload_enabled, photo_upload_max: p.photo_upload_max || 1,
-        note_enabled: !!p.note_enabled, note_title: p.note_title || 'Customisation Notes (optional)',
+        note_enabled: !!p.note_enabled,
+        note_fields: Array.isArray(p.note_fields) && p.note_fields.length ? p.note_fields : (p.note_title ? [p.note_title] : []),
         highlight: !!p.highlight,
         tags: p.tags || []
       }));
@@ -1628,7 +1629,7 @@ function renderCart(){
       </div>
       <div class="ci-info">
         <div class="ci-name">${i.name}</div>
-        ${i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : ''}
+        ${i.customNotes && i.customNotes.length ? i.customNotes.map(n => `<div class="ci-note"><b>${n.label}:</b> "${n.value}"</div>`).join("") : (i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : "")}
         <div class="ci-price">₹${i.price} x ${i.qty}</div>
         <div class="qty-row">
           <button class="qty-btn" onclick="changeQty('${i.key}', -1)">${I.minus}</button>
@@ -1813,7 +1814,7 @@ function showOrderReview(addr){
       <div class="ci-img">${i.customPhotoDataUrl ? `<img src="${i.customPhotoDataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">` : (TYPE_ICON[i.type] || I.gift).replace('width="20" height="20"','width="30" height="30"')}</div>
       <div class="ci-info">
         <div class="ci-name">${i.name} × ${i.qty}</div>
-        ${i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : ''}
+        ${i.customNotes && i.customNotes.length ? i.customNotes.map(n => `<div class="ci-note"><b>${n.label}:</b> "${n.value}"</div>`).join("") : (i.customNote ? `<div class="ci-note">"${i.customNote}"</div>` : "")}
         <div class="ci-price">₹${i.price * i.qty}</div>
       </div>
     </div>
@@ -1903,7 +1904,7 @@ async function confirmAndPay(){
     const items = [];
     for(const i of cart){
       const product = i.productId ? PRODUCTS.find(p => p.id === i.productId) : null;
-      const item = { name:i.name, type:i.type, price:i.price, qty:i.qty, weight_grams: product?.weight_grams || 150, customNote: i.customNote || null };
+      const item = { name:i.name, type:i.type, price:i.price, qty:i.qty, weight_grams: product?.weight_grams || 150, customNote: i.customNote || null, customNotes: i.customNotes || null };
       if(i.customPhotoDataUrls && i.customPhotoDataUrls.length){
         item.customPhotoPaths = [];
         for(const dataUrl of i.customPhotoDataUrls){
@@ -2566,12 +2567,13 @@ function openProductDetail(id){
     </div>
   ` : '';
 
-  const noteHtml = showNote ? `
+  const noteFields = showNote ? (p.note_fields && p.note_fields.length ? p.note_fields : ['Customisation Notes (optional)']) : [];
+  const noteHtml = showNote ? noteFields.map((label, idx) => `
     <div class="step-block">
-      <div class="step-label">${p.note_title}</div>
-      <textarea class="note-box" id="pdNote" rows="3" placeholder="${p.note_title}"></textarea>
+      <div class="step-label">${label}</div>
+      <textarea class="note-box" id="pdNote${idx}" rows="3" placeholder="${label}"></textarea>
     </div>
-  ` : '';
+  `).join('') : '';
 
   document.getElementById('pdBody').innerHTML = `
     <div class="pd-img">
@@ -2596,15 +2598,17 @@ function openProductDetail(id){
       return;
     }
     const photos = pdPhotoState.filter(Boolean);
-    const note = showNote ? document.getElementById('pdNote').value.trim() : '';
+    const notes = showNote
+      ? noteFields.map((label, idx) => ({ label, value: document.getElementById('pdNote' + idx).value.trim() })).filter(n => n.value)
+      : [];
     // Customised items har baar naya line item ban ke jaate hain (alag photo/note ho sakti hai),
     // isliye ek unique key use karte hain taaki cart mein stack na ho jaayen.
-    if(photos.length || note){
+    if(photos.length || notes.length){
       cart.push({
         key: p.id + '-cust-' + Date.now(),
         productId: p.id,
         name: p.name, price: p.price, type: p.type, qty: 1,
-        customNote: note || null,
+        customNotes: notes.length ? notes : null,
         customPhotoDataUrl: photos[0] || null,       // pehli photo — cart thumbnail ke liye
         customPhotoDataUrls: photos.length ? photos : null // saari photos — checkout upload ke liye
       });
