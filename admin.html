@@ -337,11 +337,27 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <textarea id="pf-description" placeholder="Short product description"></textarea>
     </div>
     <div class="field">
-      <div class="check-row"><input type="checkbox" id="pf-customisable"> Customisable product</div>
+      <div class="check-row"><input type="checkbox" id="pf-customisable" onchange="togglePersonaliseFields()"> Customisable product</div>
     </div>
     <div class="field">
       <label>Customisation fee (₹, agar customisable hai)</label>
       <input type="number" id="pf-custfee" placeholder="150">
+    </div>
+    <div id="pf-personalise-block">
+      <div class="field">
+        <div class="check-row"><input type="checkbox" id="pf-allowphoto" onchange="togglePersonaliseFields()"> Allow photo upload (customer apni photo upload kar sake)</div>
+      </div>
+      <div class="field" id="pf-maxphoto-row">
+        <label>Max photos allowed</label>
+        <input type="number" id="pf-maxphoto" min="1" max="6" placeholder="1">
+      </div>
+      <div class="field">
+        <div class="check-row"><input type="checkbox" id="pf-allownote" onchange="togglePersonaliseFields()"> Allow custom text/message</div>
+      </div>
+      <div class="field" id="pf-notetitle-row">
+        <label>Text field label (customer ko yeh dikhega)</label>
+        <input type="text" id="pf-notetitle" placeholder="e.g. Name to print / Message to add">
+      </div>
     </div>
     <div class="field">
       <div class="check-row"><input type="checkbox" id="pf-highlight"> Show on Highlight (Customised / Category tab ke top pe dikhega — new arrivals, occasion picks)</div>
@@ -643,6 +659,15 @@ function renderProductsGrid(){
   `).join('');
 }
 
+function togglePersonaliseFields(){
+  const customisable = document.getElementById('pf-customisable').checked;
+  const allowPhoto = document.getElementById('pf-allowphoto').checked;
+  const allowNote = document.getElementById('pf-allownote').checked;
+  document.getElementById('pf-personalise-block').style.display = customisable ? 'block' : 'none';
+  document.getElementById('pf-maxphoto-row').style.display = (customisable && allowPhoto) ? 'block' : 'none';
+  document.getElementById('pf-notetitle-row').style.display = (customisable && allowNote) ? 'block' : 'none';
+}
+
 function openProductModal(id){
   pendingProductPhotoFile = null;
   document.getElementById('pf-status').style.display = 'none';
@@ -657,6 +682,10 @@ function openProductModal(id){
     document.getElementById('pf-description').value = p.description || '';
     document.getElementById('pf-customisable').checked = p.customisable;
     document.getElementById('pf-custfee').value = p.customisation_fee || 0;
+    document.getElementById('pf-allowphoto').checked = !!p.photo_upload_enabled;
+    document.getElementById('pf-maxphoto').value = p.photo_upload_max || 1;
+    document.getElementById('pf-allownote').checked = !!p.note_enabled;
+    document.getElementById('pf-notetitle').value = p.note_title || 'Customisation Notes (optional)';
     document.getElementById('pf-highlight').checked = !!p.highlight;
     renderTagGroups(p.tags || []);
     document.getElementById('pf-active').checked = p.active;
@@ -670,10 +699,15 @@ function openProductModal(id){
     document.getElementById('pf-description').value = '';
     document.getElementById('pf-customisable').checked = (productsSubTab === 'customised');
     document.getElementById('pf-custfee').value = '';
+    document.getElementById('pf-allowphoto').checked = (productsSubTab === 'customised');
+    document.getElementById('pf-maxphoto').value = 1;
+    document.getElementById('pf-allownote').checked = false;
+    document.getElementById('pf-notetitle').value = 'Customisation Notes (optional)';
     document.getElementById('pf-highlight').checked = false;
     renderTagGroups([]);
     document.getElementById('pf-active').checked = true;
   }
+  togglePersonaliseFields();
   document.getElementById('productOverlay').classList.add('show');
 }
 function closeProductModal(){
@@ -716,6 +750,10 @@ async function saveProduct(){
     description: document.getElementById('pf-description').value.trim(),
     customisable: document.getElementById('pf-customisable').checked,
     customisation_fee: parseFloat(document.getElementById('pf-custfee').value) || 0,
+    photo_upload_enabled: document.getElementById('pf-allowphoto').checked,
+    photo_upload_max: Math.max(1, parseInt(document.getElementById('pf-maxphoto').value) || 1),
+    note_enabled: document.getElementById('pf-allownote').checked,
+    note_title: document.getElementById('pf-notetitle').value.trim() || 'Customisation Notes (optional)',
     highlight: document.getElementById('pf-highlight').checked,
     tags: getCheckedTags(),
     active: document.getElementById('pf-active').checked,
