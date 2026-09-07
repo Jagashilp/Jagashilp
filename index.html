@@ -63,13 +63,24 @@
   .icon-pill{display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; background:none; border:none; flex:0 0 auto; width:66px;}
   .icon-pill-avatar{width:52px; height:52px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(33,25,34,0.12); position:relative; transition:transform .15s ease;}
   .icon-pill-avatar svg{width:24px; height:24px;}
-  .icon-pill span{font-size:10.5px; font-weight:700; color:var(--ink); text-align:center; line-height:1.2; white-space:normal;}
+  .icon-pill span{font-size:10.5px; font-weight:700; color:var(--ink); text-align:center; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block;}
   .icon-pill.active .icon-pill-avatar{box-shadow:0 0 0 2.5px var(--c-red), 0 2px 6px rgba(33,25,34,0.12); transform:scale(1.05);}
   .icon-pill.active span{color:var(--c-red);}
   .icon-pill-badge{position:absolute; top:-6px; right:-6px; background:var(--c-red); color:#fff; font-size:7.5px; font-weight:800; text-transform:uppercase; padding:2px 5px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.25);}
+  #typeTabs .pill.icon-pill{background:none;} /* override generic .pill background */
+  #typeTabs .pill.icon-pill.active{background:none;} /* override generic .pill.active black fill */
+  .icon-pill-avatar img{width:26px; height:26px; object-fit:contain;}
   .pill.active{background:var(--ink); color:#fff;}
 
   /* ============ HERO BANNER ============ */
+  /* ============ PROMO BANNER GRID ============ */
+  .promo-section{background:linear-gradient(135deg, var(--c-red), var(--c-red-deep)); padding:16px 18px 22px; margin-top:2px;}
+  .promo-grid{display:grid; grid-template-columns:1.1fr 1fr 1fr; grid-auto-rows:108px; gap:10px;}
+  .promo-tile{border-radius:14px; overflow:hidden; cursor:pointer; background:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); transition:transform .12s ease;}
+  .promo-tile:active{transform:scale(0.96);}
+  .promo-tile.large{grid-row:span 2;}
+  .promo-tile img{width:100%; height:100%; object-fit:cover; display:block;}
+
   .hero{position:relative; margin:14px 18px 0; border-radius:26px; overflow:hidden; min-height:400px; display:flex; align-items:flex-end; padding:26px 22px 28px;}
   .hero-photo{position:absolute; inset:0;}
   .hero-cta{position:relative; z-index:2; background:var(--c-red); color:#fff; padding:14px 28px; border-radius:999px; font-weight:700; font-size:13.5px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 6px 20px rgba(0,0,0,0.25); animation:heroPulse 2.4s ease-in-out infinite;}
@@ -479,6 +490,11 @@
 <div id="searchOverlay" onclick="clearSearch()" style="display:none;position:fixed;inset:0;background:rgba(33,25,34,0.25);z-index:40;"></div>
 
 <div id="homeView">
+
+<!-- ============ PROMO BANNER GRID (admin-managed, top of homepage) ============ -->
+<div class="promo-section" id="promoSection" style="display:none;">
+  <div class="promo-grid" id="promoGrid"></div>
+</div>
 
 <!-- ============ HERO BANNER ============ -->
 <div class="hero">
@@ -903,14 +919,23 @@ const CATEGORIES = [
   {type:'T-Shirt', label:'T-Shirts'},
   {type:'Fridge Magnet', label:'Fridge Magnets'},
 ];
+/* SITE_IMAGES — har aur photo slot (hero, banner, feelings, occasions,
+   avatar style samples, type grid, addons, customise sections, category
+   icons) — admin.html ke "Site Images" tab se upload hoti hain. Yahaan,
+   CATEGORIES ke turant baad, define karna zaroori hai kyunki catChipsHtml()
+   (neeche hi) ise turant use karta hai — 'let' declaration se pehle use
+   karne par "Cannot access before initialization" error aake poori script
+   hi ruk jaati thi. */
+let SITE_IMAGES = {};
 function catChipsHtml(cls){
   const isIconStyle = cls === 'pill';
   const iconFor = { All: I.grid, Keychain: I.key, Mug: I.mug, 'Tote Bag': I.tote, 'T-Shirt': I.shirt, 'Fridge Magnet': I.gift };
+  const iconHtmlFor = (type) => SITE_IMAGES['cat_icon_' + type] ? `<img src="${SITE_IMAGES['cat_icon_' + type]}">` : (iconFor[type] || I.gift);
   if(isIconStyle){
-    const allBtn = `<button class="pill icon-pill active" data-type="All"><div class="icon-pill-avatar">${iconFor.All}</div><span>All</span></button>`;
+    const allBtn = `<button class="pill icon-pill active" data-type="All"><div class="icon-pill-avatar">${iconHtmlFor('All')}</div><span>All</span></button>`;
     return allBtn + CATEGORIES.map(c => `
       <button class="pill icon-pill" data-type="${c.type}">
-        <div class="icon-pill-avatar">${iconFor[c.type] || I.gift}${c.badge ? `<span class="icon-pill-badge">${c.badge}</span>` : ''}</div>
+        <div class="icon-pill-avatar">${iconHtmlFor(c.type)}${c.badge ? `<span class="icon-pill-badge">${c.badge}</span>` : ''}</div>
         <span>${c.label}</span>
       </button>`).join('');
   }
@@ -1075,10 +1100,6 @@ function renderHeroCta(){
 }
 renderHeroCta();
 
-/* SITE_IMAGES — har aur photo slot (hero, banner, feelings, occasions,
-   avatar style samples, type grid, addons, customise sections) —
-   admin.html ke "Site Images" tab se upload hoti hain */
-let SITE_IMAGES = {};
 /* Logo (topbar) + favicon (browser tab icon) — dono admin.html ke
    "Site Images" tab (Branding group) se upload hote hain, 'logo' aur
    'favicon' keys ke through. Jab tak upload nahi hota, default text
@@ -1202,6 +1223,35 @@ const OCCASIONS_FALLBACK = [
   {key:'retirement', title:'Retirement'},
 ];
 let OCCASIONS = OCCASIONS_FALLBACK;
+async function loadPromoTiles(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('promo_tiles').select('*').eq('active', true).order('sort_order', {ascending:true});
+    if(error) throw error;
+    renderPromoTiles(data || []);
+  }catch(err){
+    console.error('Promo tiles load failed:', err);
+  }
+}
+function renderPromoTiles(tiles){
+  const section = document.getElementById('promoSection');
+  if(!tiles.length){ section.style.display = 'none'; return; }
+  document.getElementById('promoGrid').innerHTML = tiles.map(t => `
+    <div class="promo-tile ${t.is_large ? 'large' : ''}" onclick="handlePromoTileTap('${t.link_type}', ${JSON.stringify(t.link_value)})">
+      <img src="${t.image_url}" alt="" onerror='imgFallback(this, "Offer")'>
+    </div>
+  `).join('');
+  section.style.display = 'block';
+}
+function handlePromoTileTap(linkType, linkValue){
+  if(linkType === 'product'){
+    openProductDetail(linkValue);
+  }else{
+    filterByType(linkValue);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+
 async function loadOccasions(){
   if(!sb) return;
   try{
@@ -3004,7 +3054,7 @@ function renderRestOfPage(){
 
 (async function init(){
   try{
-    await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions()]);
+    await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions(), loadPromoTiles()]);
     updateCartCount();
     renderBestsellers();
     renderProducts();
@@ -3014,6 +3064,11 @@ function renderRestOfPage(){
     renderCategoryView();
     checkCustomerAuth();
     enableAllHScroll();
+    // Category icons custom-uploaded ho sakte hain (SITE_IMAGES abhi load hui hai)
+    // — isliye icon strip ko ek baar refresh kar dete hain taaki wo dikh jaayen.
+    const activeType = document.querySelector('#typeTabs .pill.active')?.dataset.type || 'All';
+    document.getElementById('typeTabs').innerHTML = catChipsHtml('pill');
+    document.querySelectorAll('#typeTabs .pill').forEach(c => c.classList.toggle('active', c.dataset.type === activeType));
   }catch(err){
     console.error('Page failed to load fully:', err);
   }finally{
