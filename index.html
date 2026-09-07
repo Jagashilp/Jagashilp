@@ -52,23 +52,23 @@
   .top-icons{display:flex; align-items:center; gap:16px;}
   .icon-btn-plain{position:relative; color:var(--ink); display:flex;}
   .icon-badge{position:absolute; top:-7px; right:-8px; background:var(--c-red); color:#fff; font-size:9.5px; font-weight:800; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;}
-  .search-row{padding:0 18px 14px; display:flex; gap:8px;}
+  .search-row{padding:0 18px 6px; display:flex; gap:8px;}
   .search-box{flex:1; display:flex; align-items:center; gap:8px; background:#fff; border:none; border-radius:16px; padding:12px 15px; font-size:13.5px; color:var(--ink-soft); box-shadow:0 2px 8px rgba(33,25,34,0.08);}
   .search-box svg{flex-shrink:0; opacity:.6;}
   .finder-chip{display:flex; align-items:center; gap:6px; background:var(--ink); color:#fff; font-weight:700; font-size:12.5px; padding:0 14px; border-radius:16px; white-space:nowrap;}
-  .pill-tabs{display:flex; gap:14px; padding:4px 18px 16px; overflow-x:auto; scrollbar-width:none;}
+  .pill-tabs{display:flex; gap:14px; padding:0 18px 16px; overflow-x:auto; scrollbar-width:none;}
   .pill-tabs::-webkit-scrollbar{display:none;}
   .pill{flex:0 0 auto; padding:8px 16px; border-radius:999px; font-size:12.5px; font-weight:700; background:var(--paper-deep); color:var(--ink); border:none; white-space:nowrap;}
   /* Icon-strip category tabs (Blinkit-style: icon avatar + label, horizontal scroll) */
-  .icon-pill{display:flex; flex-direction:column; align-items:center; gap:6px; padding:0; background:none; border:none; flex:0 0 auto; width:66px;}
-  .icon-pill-avatar{width:52px; height:52px; border-radius:50%; background:none; display:flex; align-items:center; justify-content:center; box-shadow:none; position:relative;}
-  .icon-pill-avatar svg{width:34px; height:34px;}
-  .icon-pill span{font-size:10.5px; font-weight:700; color:var(--ink); text-align:center; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block; transition:color .15s ease;}
-  .icon-pill.active span{color:var(--c-red); font-weight:800;}
+  .icon-pill{display:flex; flex-direction:column; align-items:center; gap:2px; padding:0; background:none; border:none; flex:0 0 auto; width:60px; color:#fff;}
+  .icon-pill-avatar{width:44px; height:44px; border-radius:50%; background:none; display:flex; align-items:center; justify-content:center; box-shadow:none; position:relative;}
+  .icon-pill-avatar svg{width:28px; height:28px;}
+  .icon-pill span{font-size:9.5px; font-weight:700; color:#fff; text-align:center; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; display:block; transition:color .15s ease;}
+  .icon-pill.active span{color:#FFD447; font-weight:800;}
   .icon-pill-badge{position:absolute; top:-6px; right:-6px; background:var(--c-red); color:#fff; font-size:7.5px; font-weight:800; text-transform:uppercase; padding:2px 5px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.25);}
   #typeTabs .pill.icon-pill{background:none;} /* override generic .pill background */
   #typeTabs .pill.icon-pill.active{background:none;} /* override generic .pill.active black fill */
-  .icon-pill-avatar img{width:38px; height:38px; object-fit:contain;}
+  .icon-pill-avatar img{width:32px; height:32px; object-fit:contain;}
   .pill.active{background:var(--ink); color:#fff;}
 
   /* ============ HERO BANNER ============ */
