@@ -695,7 +695,8 @@ function switchTab(name){
 }
 
 /* ---------------- Image compression + upload helper ---------------- */
-function compressImage(file, maxWidth, quality){
+function compressImage(file, maxWidth, quality, format){
+  format = format || 'image/jpeg'; // PNG bhejo jab transparency preserve karni ho (jaise logo/icons)
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -706,7 +707,7 @@ function compressImage(file, maxWidth, quality){
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        canvas.toBlob(resolve, 'image/jpeg', quality);
+        canvas.toBlob(resolve, format, quality);
       };
       img.src = e.target.result;
     };
@@ -715,8 +716,10 @@ function compressImage(file, maxWidth, quality){
 }
 
 async function uploadToStorage(blob, pathPrefix){
-  const fileName = `${pathPrefix}-${Date.now()}.jpg`;
-  const { error } = await sb.storage.from(BUCKET).upload(fileName, blob, { contentType:'image/jpeg', upsert:true });
+  const isPng = blob.type === 'image/png';
+  const ext = isPng ? 'png' : 'jpg';
+  const fileName = `${pathPrefix}-${Date.now()}.${ext}`;
+  const { error } = await sb.storage.from(BUCKET).upload(fileName, blob, { contentType: blob.type || 'image/jpeg', upsert:true });
   if(error) throw error;
   const { data } = sb.storage.from(BUCKET).getPublicUrl(fileName);
   return data.publicUrl;
@@ -1229,7 +1232,13 @@ async function handleSiteImageUpload(key, event){
   if(!file) return;
   if(!sb){ alert('Supabase URL/key pehle daalo.'); return; }
   try{
-    const compressed = await compressImage(file, 900, 0.82);
+    // Logo, favicon aur category icons transparent PNG hote hain — inhe JPEG mein
+    // compress karne se transparent background black ban jaata tha. Ye keys PNG
+    // format mein hi save hongi taaki transparency safe rahe.
+    const needsTransparency = key === 'logo' || key === 'favicon' || key.startsWith('cat_icon_');
+    const compressed = needsTransparency
+      ? await compressImage(file, 900, 0.92, 'image/png')
+      : await compressImage(file, 900, 0.82);
     const safeName = key.replace(/[^a-zA-Z0-9_-]/g, '-'); // spaces/special chars filename ke liye safe nahi hote
     const url = await uploadToStorage(compressed, 'site-' + safeName);
     const { error } = await sb.from('site_images').upsert({ key, image_url: url });
