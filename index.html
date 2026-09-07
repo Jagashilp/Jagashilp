@@ -73,7 +73,7 @@
 
   /* ============ HERO BANNER ============ */
   /* ============ PROMO BANNER GRID ============ */
-  .promo-section{background:linear-gradient(135deg, var(--c-red), var(--c-red-deep)); padding:16px 18px 22px; margin-top:2px;}
+  .promo-section{background:#fff; padding:16px 18px 22px; margin-top:2px; background-size:cover; background-position:center; background-repeat:no-repeat;}
   .promo-grid{display:grid; grid-template-columns:1.1fr 1fr 1fr; grid-auto-rows:108px; gap:10px;}
   .promo-tile{border-radius:14px; overflow:hidden; cursor:pointer; background:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.15); transition:transform .12s ease;}
   .promo-tile:active{transform:scale(0.96);}
@@ -1126,6 +1126,17 @@ function applyBranding(){
       topbar.style.backgroundRepeat = 'no-repeat';
     }else{
       topbar.style.backgroundImage = 'none';
+    }
+  }
+  /* Promo banner row ka background photo — admin.html ke "Hero & Banner"
+     group se 'promo_section_bg' key ke through upload hota hai. Upload na
+     ho to plain white background hi dikhta rahega. */
+  const promoSection = document.getElementById('promoSection');
+  if(promoSection){
+    if(SITE_IMAGES.promo_section_bg){
+      promoSection.style.backgroundImage = `url("${SITE_IMAGES.promo_section_bg}")`;
+    }else{
+      promoSection.style.backgroundImage = 'none';
     }
   }
 }
