@@ -1114,6 +1114,20 @@ function applyBranding(){
     if(!link){ link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
     link.href = SITE_IMAGES.favicon;
   }
+  /* Topbar background photo — admin.html ke Branding group se 'topbar_bg'
+     key ke through upload hota hai. Upload na ho to plain cream (var(--c-cream))
+     background hi dikhta rahega, jo already CSS mein set hai. */
+  const topbar = document.querySelector('.topbar');
+  if(topbar){
+    if(SITE_IMAGES.topbar_bg){
+      topbar.style.backgroundImage = `url("${SITE_IMAGES.topbar_bg}")`;
+      topbar.style.backgroundSize = 'cover';
+      topbar.style.backgroundPosition = 'top center';
+      topbar.style.backgroundRepeat = 'no-repeat';
+    }else{
+      topbar.style.backgroundImage = 'none';
+    }
+  }
 }
 async function loadSiteImages(){
   if(!sb) return;
