@@ -223,6 +223,10 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
       Tickets
     </div>
+    <div class="tab" data-tab="promos" onclick="switchTab('promos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+      Promo Banners
+    </div>
   </div>
 
   <main>
@@ -308,6 +312,21 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
         </div>
       </div>
       <div id="ticketsList"></div>
+    </div>
+
+    <!-- PROMO BANNERS SECTION -->
+    <div class="section" id="section-promos">
+      <div class="bar">
+        <div>
+          <h2>Promo Banners</h2>
+          <div class="count">Top-of-homepage image grid — design each image fully in Canva, upload here, link it to a product or category. Tap opens the link on the storefront.</div>
+        </div>
+        <button class="btn" onclick="openPromoModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Banner
+        </button>
+      </div>
+      <div class="grid" id="promosGrid"></div>
     </div>
   </main>
 </div>
@@ -411,6 +430,49 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
   </div>
 </div>
 
+<!-- ============ PROMO BANNER ADD/EDIT MODAL ============ -->
+<div class="overlay" id="promoOverlay">
+  <div class="modal">
+    <h3 id="promoModalTitle">Add Banner</h3>
+    <input type="hidden" id="pm-id">
+    <div class="field">
+      <label>Image (design this fully in Canva — full column image, no extra text needed here)</label>
+      <label class="upload-box" for="pm-photo-input" id="pm-photo-box">Tap to upload image</label>
+      <input type="file" accept="image/*" id="pm-photo-input" style="display:none;" onchange="handlePromoPhoto(event)">
+    </div>
+    <div class="field">
+      <div class="check-row"><input type="checkbox" id="pm-large"> Large tile (this one shows bigger — use for the featured/left column)</div>
+    </div>
+    <div class="field">
+      <label>Tap this banner opens…</label>
+      <select id="pm-linktype" onchange="togglePromoLinkFields()">
+        <option value="product">A specific product</option>
+        <option value="category">A category</option>
+      </select>
+    </div>
+    <div class="field" id="pm-product-row">
+      <label>Choose product</label>
+      <select id="pm-product"></select>
+    </div>
+    <div class="field" id="pm-category-row" style="display:none;">
+      <label>Choose category</label>
+      <select id="pm-category">
+        <option value="Keychain">Keychain</option>
+        <option value="Mug">Mug</option>
+        <option value="Tote Bag">Tote Bag</option>
+        <option value="T-Shirt">T-Shirt</option>
+        <option value="Fridge Magnet">Fridge Magnet</option>
+        <option value="Hamper">Hamper</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closePromoModal()">Cancel</button>
+      <button class="btn" onclick="savePromoTile()">Save</button>
+    </div>
+    <div class="status-msg" id="pm-status"></div>
+  </div>
+</div>
+
 <script>
 /* ================= SUPABASE CONFIG =================
    Same values jo index.html mein daale — Project Settings -> API */
@@ -462,6 +524,15 @@ const SITE_IMAGE_GROUPS = [
   { title:'Hero & Banner', items:[
     {key:'hero', label:'Hero banner photo'},
     {key:'banner', label:'Festive banner photo'},
+  ]},
+  { title:'Category Icons (top bar) — transparent PNG, square, ~200×200px', items:[
+    {key:'cat_icon_All', label:'"All" icon'},
+    {key:'cat_icon_Keychain', label:'Keychain icon'},
+    {key:'cat_icon_Mug', label:'Mug icon'},
+    {key:'cat_icon_Tote Bag', label:'Tote Bag icon'},
+    {key:'cat_icon_T-Shirt', label:'T-Shirt icon'},
+    {key:'cat_icon_Fridge Magnet', label:'Fridge Magnet icon'},
+    {key:'cat_icon_Hamper', label:'Hamper icon'},
   ]},
   { title:'Gifts for Every Feeling', items:[
     {key:'feeling_love', label:'Love & Romance'},
@@ -600,6 +671,7 @@ async function checkSession(){
   loadSiteImages();
   loadOrders();
   loadTickets();
+  loadPromoTiles();
 }
 function showLogin(){
   document.getElementById('appShell').classList.add('hidden');
@@ -866,6 +938,163 @@ async function deleteProduct(id){
   loadProducts();
 }
 
+/* ---------------- Promo Banners (top-of-homepage image grid) ---------------- */
+let promoTilesCache = [];
+let pendingPromoPhotoFile = null;
+
+async function loadPromoTiles(){
+  if(!sb) return;
+  const { data, error } = await sb.from('promo_tiles').select('*').order('sort_order');
+  if(error){ console.error(error); return; }
+  promoTilesCache = data || [];
+  renderPromoTiles();
+}
+
+function renderPromoTiles(){
+  const grid = document.getElementById('promosGrid');
+  if(!promoTilesCache.length){
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1;">${ICON_BOX}<div><b>No promo banners yet.</b><br>Tap "Add Banner" to create the top homepage grid.</div></div>`;
+    return;
+  }
+  grid.innerHTML = promoTilesCache.map((t, idx) => {
+    const linkLabel = t.link_type === 'product'
+      ? ('Product: ' + (productsCache.find(p => p.id === t.link_value)?.name || 'Deleted product'))
+      : ('Category: ' + t.link_value);
+    return `
+    <div class="pcard">
+      <div class="pimg">${t.image_url ? `<img src="${t.image_url}">` : ICON_BOX}</div>
+      <div class="pbody">
+        <div class="pcat">${t.is_large ? '⭐ Large tile' : 'Small tile'}</div>
+        <div class="pname">${linkLabel}</div>
+        <div class="prow">
+          <button class="btn ghost small" onclick="movePromoTile('${t.id}', -1)" ${idx===0 ? 'disabled' : ''}>↑</button>
+          <button class="btn ghost small" onclick="movePromoTile('${t.id}', 1)" ${idx===promoTilesCache.length-1 ? 'disabled' : ''}>↓</button>
+          <button class="btn ghost small" onclick="openPromoModal('${t.id}')">Edit</button>
+          <button class="btn rose ghost small" onclick="deletePromoTile('${t.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePromoLinkFields(){
+  const isProduct = document.getElementById('pm-linktype').value === 'product';
+  document.getElementById('pm-product-row').style.display = isProduct ? 'block' : 'none';
+  document.getElementById('pm-category-row').style.display = isProduct ? 'none' : 'block';
+}
+
+function openPromoModal(id){
+  pendingPromoPhotoFile = null;
+  document.getElementById('pm-status').style.display = 'none';
+  document.getElementById('pm-photo-box').innerHTML = 'Tap to upload image';
+  const productSelect = document.getElementById('pm-product');
+  productSelect.innerHTML = productsCache.map(p => `<option value="${p.id}">${p.name} — ₹${p.price}</option>`).join('');
+
+  if(id){
+    const t = promoTilesCache.find(x => x.id === id);
+    document.getElementById('promoModalTitle').textContent = 'Edit Banner';
+    document.getElementById('pm-id').value = t.id;
+    document.getElementById('pm-large').checked = !!t.is_large;
+    document.getElementById('pm-linktype').value = t.link_type;
+    if(t.link_type === 'product') productSelect.value = t.link_value;
+    else document.getElementById('pm-category').value = t.link_value;
+    if(t.image_url) document.getElementById('pm-photo-box').innerHTML = `<img src="${t.image_url}">`;
+  }else{
+    document.getElementById('promoModalTitle').textContent = 'Add Banner';
+    document.getElementById('pm-id').value = '';
+    document.getElementById('pm-large').checked = false;
+    document.getElementById('pm-linktype').value = 'product';
+  }
+  togglePromoLinkFields();
+  document.getElementById('promoOverlay').classList.add('show');
+}
+function closePromoModal(){
+  document.getElementById('promoOverlay').classList.remove('show');
+}
+async function handlePromoPhoto(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  pendingPromoPhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => { document.getElementById('pm-photo-box').innerHTML = `<img src="${e.target.result}">`; };
+  reader.readAsDataURL(file);
+}
+
+async function savePromoTile(){
+  const statusEl = document.getElementById('pm-status');
+  const id = document.getElementById('pm-id').value;
+  const linkType = document.getElementById('pm-linktype').value;
+  const linkValue = linkType === 'product'
+    ? document.getElementById('pm-product').value
+    : document.getElementById('pm-category').value;
+
+  if(!id && !pendingPromoPhotoFile){
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Ek image upload karo.';
+    return;
+  }
+  if(linkType === 'product' && !linkValue){
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Pehle kam se kam ek product add karo, tabhi usse link kar paoge.';
+    return;
+  }
+
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--muted)';
+  statusEl.textContent = 'Saving...';
+
+  const payload = {
+    link_type: linkType,
+    link_value: linkValue,
+    is_large: document.getElementById('pm-large').checked,
+  };
+
+  try{
+    if(pendingPromoPhotoFile){
+      const compressed = await compressImage(pendingPromoPhotoFile, 900, 0.85);
+      payload.image_url = await uploadToStorage(compressed, 'promo');
+    }
+    let error;
+    if(id){
+      ({ error } = await sb.from('promo_tiles').update(payload).eq('id', id));
+    }else{
+      payload.sort_order = promoTilesCache.length;
+      ({ error } = await sb.from('promo_tiles').insert(payload));
+    }
+    if(error) throw error;
+    statusEl.style.color = 'var(--ink)';
+    statusEl.textContent = 'Saved!';
+    await loadPromoTiles();
+    setTimeout(closePromoModal, 400);
+  }catch(err){
+    console.error(err);
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Error: ' + (err.message || 'kuch galat ho gaya');
+  }
+}
+
+async function deletePromoTile(id){
+  if(!confirm('Ye banner delete karna hai?')) return;
+  const { error } = await sb.from('promo_tiles').delete().eq('id', id);
+  if(error){ alert('Delete fail: ' + error.message); return; }
+  loadPromoTiles();
+}
+
+async function movePromoTile(id, direction){
+  const idx = promoTilesCache.findIndex(t => t.id === id);
+  const swapIdx = idx + direction;
+  if(swapIdx < 0 || swapIdx >= promoTilesCache.length) return;
+  const a = promoTilesCache[idx], b = promoTilesCache[swapIdx];
+  const aOrder = a.sort_order, bOrder = b.sort_order;
+  await Promise.all([
+    sb.from('promo_tiles').update({ sort_order: bOrder }).eq('id', a.id),
+    sb.from('promo_tiles').update({ sort_order: aOrder }).eq('id', b.id),
+  ]);
+  loadPromoTiles();
+}
+
 /* ---------------- Gift Images ---------------- */
 async function loadGiftImages(){
   if(!sb){ renderGiftsGrid(); return; }
@@ -1000,7 +1229,8 @@ async function handleSiteImageUpload(key, event){
   if(!sb){ alert('Supabase URL/key pehle daalo.'); return; }
   try{
     const compressed = await compressImage(file, 900, 0.82);
-    const url = await uploadToStorage(compressed, 'site-' + key);
+    const safeName = key.replace(/[^a-zA-Z0-9_-]/g, '-'); // spaces/special chars filename ke liye safe nahi hote
+    const url = await uploadToStorage(compressed, 'site-' + safeName);
     const { error } = await sb.from('site_images').upsert({ key, image_url: url });
     if(error) throw error;
     await loadSiteImages();
