@@ -495,12 +495,6 @@
   <div class="promo-grid" id="promoGrid"></div>
 </div>
 
-<!-- ============ HERO BANNER ============ -->
-<div class="hero">
-  <div class="hero-photo"></div>
-  <a href="#" class="hero-cta" id="heroCta"></a>
-</div>
-
 <!-- ============ QUICK LINKS ============ -->
 <div class="quicklinks" id="quickLinks"></div>
 
@@ -1083,6 +1077,7 @@ let CURRENT_OCCASION = { key:'rakhi', label:'Rakhi Gifts', badge:"Rakhi is comin
 
 function renderHeroCta(){
   const ctaEl = document.getElementById('heroCta');
+  if(!ctaEl) return; // Hero banner section hataya gaya hai
   ctaEl.innerHTML = 'Shop Now ' + I.arrow;
   ctaEl.onclick = (e) => {
     e.preventDefault();
@@ -1158,7 +1153,7 @@ function siteImgSm(key){
   return SITE_IMAGES[key] ? `<img src="${SITE_IMAGES[key]}" style="width:100%;height:100%;object-fit:cover;">` : phCircle();
 }
 
-function renderHero(){ document.querySelector('.hero-photo').innerHTML = siteImg('hero', 'Hero banner photo — lifestyle shot of products / founder'); }
+function renderHero(){ const el = document.querySelector('.hero-photo'); if(el) el.innerHTML = siteImg('hero', 'Hero banner photo — lifestyle shot of products / founder'); }
 renderHero();
 
 /* ---------------- Gifts for Everyone ---------------- */
