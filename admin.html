@@ -373,6 +373,18 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
         <div class="check-row"><input type="checkbox" id="pf-bestseller"> Mark as Bestseller (badge shows on storefront)</div>
       </div>
       <div class="field">
+        <label>Product Badge (optional — extra tag shown on the photo, storefront pe dikhega)</label>
+        <select id="pf-badge">
+          <option value="">None</option>
+          <option value="limited">✨ Limited Edition</option>
+          <option value="new">🆕 New Arrival</option>
+          <option value="giftforall">🎁 Gift for All</option>
+          <option value="trending">📈 Trending</option>
+          <option value="handmade">🧵 Handmade with Love</option>
+          <option value="lastfew">⏳ Only Few Left</option>
+        </select>
+      </div>
+      <div class="field">
         <label>Description</label>
         <textarea id="pf-description" placeholder="Short product description"></textarea>
       </div>
@@ -814,6 +826,7 @@ function openProductModal(id){
     document.getElementById('pf-price').value = p.price;
     document.getElementById('pf-mrp').value = p.mrp && p.mrp > p.price ? p.mrp : '';
     document.getElementById('pf-bestseller').checked = !!p.best;
+    document.getElementById('pf-badge').value = p.product_badge || '';
     document.getElementById('pf-description').value = p.description || '';
     document.getElementById('pf-customisable').checked = p.customisable;
     document.getElementById('pf-custfee').value = p.customisation_fee || 0;
@@ -837,6 +850,7 @@ function openProductModal(id){
     document.getElementById('pf-price').value = '';
     document.getElementById('pf-mrp').value = '';
     document.getElementById('pf-bestseller').checked = false;
+    document.getElementById('pf-badge').value = '';
     document.getElementById('pf-description').value = '';
     document.getElementById('pf-customisable').checked = (productsSubTab === 'customised');
     document.getElementById('pf-custfee').value = '';
@@ -899,6 +913,7 @@ async function saveProduct(){
     name, category, price,
     mrp: parseFloat(document.getElementById('pf-mrp').value) || null,
     best: document.getElementById('pf-bestseller').checked,
+    product_badge: document.getElementById('pf-badge').value || null,
     description: document.getElementById('pf-description').value.trim(),
     customisable: document.getElementById('pf-customisable').checked,
     customisation_fee: parseFloat(document.getElementById('pf-custfee').value) || 0,
