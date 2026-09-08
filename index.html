@@ -209,7 +209,6 @@
   .best-tag{background:linear-gradient(135deg,var(--c-red),var(--c-red-deep)); color:#fff; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; padding:4px 9px; border-radius:20px; box-shadow:0 2px 8px rgba(230,0,35,0.35);}
   .deal-tag{display:inline-block; background:#2E8B4F; color:#fff; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:6px; margin-bottom:10px;}
   .top-seller-badge{display:inline-flex; align-items:center; gap:3px; background:var(--ink); color:#FFC107; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; padding:3px 8px 3px 6px; border-radius:3px 10px 10px 3px;}
-  .prod-badge-tag{color:#fff; font-size:10px; font-weight:700; padding:4px 9px; border-radius:20px; box-shadow:0 2px 6px rgba(0,0,0,0.2); white-space:nowrap;}
   @keyframes badgePop{0%{transform:scale(0.6); opacity:0;} 60%{transform:scale(1.12);} 100%{transform:scale(1); opacity:1;}}
   .badge-stack .custom-badge{position:static;}
   .hl-slide .wish-toggle{top:12px; right:12px;}
@@ -1497,18 +1496,22 @@ document.getElementById('navCategory').addEventListener('click', ()=>{ showView(
 
 /* ---------------- Product card (shared markup) ---------------- */
 // Admin ke "Product Badge" dropdown ki keys yahan match honi chahiye
+// Badge slot ek hi jagah dikhta hai (category ke bagal, black pill jaisi shape).
+// Priority: Bestseller checked ho to "Top Seller"; nahi to jo Product Badge
+// admin mein select kiya hai wo. Dono ek saath kabhi nahi dikhte — sirf ek.
 const PRODUCT_BADGES = {
-  limited:    { label: 'Limited Edition', bg: '#7C3AED' },
-  new:        { label: 'New Arrival',     bg: '#0EA5A5' },
-  giftforall: { label: 'Gift for All',    bg: '#DB2777' },
-  trending:   { label: 'Trending',        bg: '#EA580C' },
+  limited:    { label: 'Limited Edition',    bg: '#7C3AED' },
+  new:        { label: 'New Arrival',        bg: '#0EA5A5' },
+  giftforall: { label: 'Gift for All',       bg: '#DB2777' },
+  trending:   { label: 'Trending',           bg: '#EA580C' },
   handmade:   { label: 'Handmade with Love', bg: '#8D5B3F' },
-  lastfew:    { label: 'Only Few Left',   bg: '#B91C1C' },
+  lastfew:    { label: 'Only Few Left',      bg: '#B91C1C' },
 };
-function badgeHtml(key){
-  const b = PRODUCT_BADGES[key];
+function badgeHtml(p){
+  if(p.best) return `<span class="top-seller-badge">${I.star || '★'} Top Seller</span>`;
+  const b = PRODUCT_BADGES[p.product_badge];
   if(!b) return '';
-  return `<span class="prod-badge-tag" style="background:${b.bg};">${b.label}</span>`;
+  return `<span class="top-seller-badge" style="background:${b.bg}; color:#fff;">${b.label}</span>`;
 }
 function tagLabelFor(key){
   const all = [...GIFT_RECIPIENTS, ...FEELINGS_ROW2, ...FEELINGS_ROW3];
@@ -1525,7 +1528,6 @@ function productCardHtml(p){
       <div class="card-img">
         ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
         <div class="badge-stack">
-          ${badgeHtml(p.product_badge)}
           ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
         </div>
         <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
@@ -1533,7 +1535,7 @@ function productCardHtml(p){
       <div class="card-body">
         <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
           <div class="card-cat">${p.type}</div>
-          ${p.best ? `<span class="top-seller-badge">${I.star || '★'} Top Seller</span>` : ''}
+          ${badgeHtml(p)}
         </div>
         <div class="card-name">${p.name}</div>
         <div class="price-row">
@@ -2830,12 +2832,11 @@ function openProductDetail(id){
   document.getElementById('pdBody').innerHTML = `
     <div class="pd-img">
       ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
-      <div class="badge-stack">${badgeHtml(p.product_badge)}</div>
       <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}'); this.classList.toggle('active');">${I.heart}</button>
     </div>
     <div class="card-cat">${p.type}</div>
     <div class="card-name" style="font-size:18px; -webkit-line-clamp:unset; color:var(--ink); font-weight:700;">${p.name}</div>
-    ${p.best ? `<span class="top-seller-badge">${I.star || '★'} Top Seller</span>` : ''}
+    ${badgeHtml(p)}
     ${off ? `<span class="deal-tag">Hot Deal</span>` : ''}
     <div class="price-row">
       ${off ? `<span class="off-pct">↓${off}%</span><span class="mrp">₹${p.mrp}</span>` : ''}
