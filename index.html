@@ -245,6 +245,18 @@
   .cat-bottom-cta{margin:20px 18px 24px; border-radius:18px; overflow:hidden; cursor:pointer;}
   .cat-bottom-cta img{width:100%; display:block;}
   .cat-bottom-cta.cta-empty{display:none;}
+  .cat-layout{display:flex; align-items:flex-start;}
+  .cat-sidebar{width:78px; flex:0 0 78px; background:var(--paper-deep); overflow-y:auto; scrollbar-width:none; position:sticky; z-index:30;}
+  .cat-sidebar::-webkit-scrollbar{display:none;}
+  .cat-sidebar-item{display:flex; flex-direction:column; align-items:center; gap:5px; padding:14px 4px; text-align:center; cursor:pointer; border-left:3px solid transparent; background:none; border-top:none; border-right:none; border-bottom:none; width:100%;}
+  .cat-sidebar-item .csi-avatar{width:34px; height:34px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft);}
+  .cat-sidebar-item .csi-avatar svg{width:24px; height:24px;}
+  .cat-sidebar-item .csi-avatar img{width:28px; height:28px; object-fit:contain;}
+  .cat-sidebar-item span{font-size:10px; font-weight:600; color:var(--ink-soft); line-height:1.25;}
+  .cat-sidebar-item.active{background:var(--paper); border-left-color:var(--c-red);}
+  .cat-sidebar-item.active .csi-avatar, .cat-sidebar-item.active span{color:var(--c-red); font-weight:800;}
+  .cat-main{flex:1; min-width:0;}
+  .cat-main .grid{padding-left:14px; padding-right:14px;}
   .card{background:var(--card); border-radius:20px; overflow:hidden; border:none; box-shadow:0 3px 10px rgba(0,0,0,0.06); display:flex; flex-direction:column;}
   .card-img{aspect-ratio:1/1; overflow:hidden; position:relative;}
   .pd-img{aspect-ratio:1/1; overflow:hidden; position:relative; border-radius:16px; margin-bottom:14px;}
@@ -557,27 +569,31 @@
   <div class="grid" id="customisedGrid"></div>
 </div>
 
-<!-- ============ CATEGORY VIEW (Bottom Nav: Category) ============ -->
+<!-- ============ CATEGORY VIEW (Bottom Nav: Category) — Flipkart-style left sidebar + right content ============ -->
 <div id="categoryView" style="display:none;">
-  <div class="cat-hero" id="categoryHeroBanner"></div>
+  <div class="cat-layout">
+    <div class="cat-sidebar" id="categorySidebar"></div>
+    <div class="cat-main">
+      <div class="cat-hero" id="categoryHeroBanner"></div>
 
-  <div class="promo-section" id="categoryOffersSection" style="display:none;">
-    <div class="promo-grid" id="categoryOffersGrid"></div>
+      <div class="promo-section" id="categoryOffersSection" style="display:none;">
+        <div class="promo-grid" id="categoryOffersGrid"></div>
+      </div>
+
+      <div class="section-head" id="newLaunchesHead" style="display:none;"><div><div class="eyebrow">Just In</div><h2>New Launches</h2></div></div>
+      <div class="scroll-row" id="newLaunchesRow"></div>
+
+      <div class="section-head" id="trendingHead" style="display:none;"><div><div class="eyebrow">Loved by Many</div><h2>Trending Now</h2></div></div>
+      <div class="scroll-row" id="trendingRow"></div>
+
+      <div class="section-head"><div><div class="eyebrow">Fresh Picks</div><h2>Highlighted</h2></div></div>
+      <div class="hl-carousel" id="categoryHighlightRow"></div>
+
+      <div class="grid" id="categoryGrid"></div>
+
+      <div class="cat-bottom-cta" id="categoryBottomCta"></div>
+    </div>
   </div>
-
-  <div class="section-head" id="newLaunchesHead" style="display:none;"><div><div class="eyebrow">Just In</div><h2>New Launches</h2></div></div>
-  <div class="scroll-row" id="newLaunchesRow"></div>
-
-  <div class="section-head" id="trendingHead" style="display:none;"><div><div class="eyebrow">Loved by Many</div><h2>Trending Now</h2></div></div>
-  <div class="scroll-row" id="trendingRow"></div>
-
-  <div class="section-head"><div><div class="eyebrow">Fresh Picks</div><h2>Highlighted</h2></div></div>
-  <div class="hl-carousel" id="categoryHighlightRow"></div>
-
-  <div class="cat-strip" id="categoryCatStrip"></div>
-  <div class="grid" id="categoryGrid"></div>
-
-  <div class="cat-bottom-cta" id="categoryBottomCta"></div>
 </div>
 
 <!-- ============ PRODUCTS VIEW (Bottom Nav: Products) ============ -->
@@ -933,15 +949,17 @@ const CATEGORIES = [
    karne par "Cannot access before initialization" error aake poori script
    hi ruk jaati thi. */
 let SITE_IMAGES = {};
+const CAT_ICON_FALLBACK = { All: I.grid, Keychain: I.key, Mug: I.mug, 'Tote Bag': I.tote, 'T-Shirt': I.shirt, 'Fridge Magnet': I.gift, Hamper: I.gift };
+function catIconHtmlFor(type){
+  return SITE_IMAGES['cat_icon_' + type] ? `<img src="${SITE_IMAGES['cat_icon_' + type]}">` : (CAT_ICON_FALLBACK[type] || I.gift);
+}
 function catChipsHtml(cls){
   const isIconStyle = cls === 'pill';
-  const iconFor = { All: I.grid, Keychain: I.key, Mug: I.mug, 'Tote Bag': I.tote, 'T-Shirt': I.shirt, 'Fridge Magnet': I.gift };
-  const iconHtmlFor = (type) => SITE_IMAGES['cat_icon_' + type] ? `<img src="${SITE_IMAGES['cat_icon_' + type]}">` : (iconFor[type] || I.gift);
   if(isIconStyle){
-    const allBtn = `<button class="pill icon-pill active" data-type="All"><div class="icon-pill-avatar">${iconHtmlFor('All')}</div><span>All</span></button>`;
+    const allBtn = `<button class="pill icon-pill active" data-type="All"><div class="icon-pill-avatar">${catIconHtmlFor('All')}</div><span>All</span></button>`;
     return allBtn + CATEGORIES.map(c => `
       <button class="pill icon-pill" data-type="${c.type}">
-        <div class="icon-pill-avatar">${iconHtmlFor(c.type)}${c.badge ? `<span class="icon-pill-badge">${c.badge}</span>` : ''}</div>
+        <div class="icon-pill-avatar">${catIconHtmlFor(c.type)}${c.badge ? `<span class="icon-pill-badge">${c.badge}</span>` : ''}</div>
         <span>${c.label}</span>
       </button>`).join('');
   }
@@ -951,7 +969,6 @@ function catChipsHtml(cls){
 document.getElementById('typeTabs').innerHTML = catChipsHtml('pill');
 document.getElementById('catStrip').innerHTML = catChipsHtml('cat-chip');
 document.getElementById('customisedCatStrip').innerHTML = catChipsHtml('cat-chip');
-document.getElementById('categoryCatStrip').innerHTML = catChipsHtml('cat-chip');
 const CUSTOMISATION_FEE = 150;
 const MAKE_HAMPER_PRICE = 499;
 const CUSTOM_HAMPER_PRICE = 999;
@@ -1705,6 +1722,7 @@ function renderCategoryBottomCta(){
   }
 }
 function renderCategoryView(){
+  renderCategorySidebar();
   renderCategoryHero();
   renderCategoryBottomCta();
 
@@ -1725,12 +1743,28 @@ function renderCategoryView(){
   const grid = document.getElementById('categoryGrid');
   grid.innerHTML = list.length ? list.map(productCardHtml).join('') : `<div class="acct-empty-state" style="grid-column:1/-1;"><p>There are no products in this category yet.</p></div>`;
 }
-document.getElementById('categoryCatStrip').addEventListener('click', (e)=>{
-  const c = e.target.closest('.cat-chip'); if(!c) return;
+function renderCategorySidebar(){
+  const el = document.getElementById('categorySidebar');
+  if(!el) return;
+  const items = [{type:'All', label:'All'}, ...CATEGORIES.map(c => ({type:c.type, label:c.label}))];
+  el.innerHTML = items.map(c => `
+    <button class="cat-sidebar-item ${categoryActiveType === c.type ? 'active' : ''}" data-type="${c.type}">
+      <div class="csi-avatar">${catIconHtmlFor(c.type)}</div>
+      <span>${c.label}</span>
+    </button>`).join('');
+  // Sidebar topbar ke bilkul neeche se stick ho — height dynamic hai (background
+  // image/content ke hisaab se), isliye JS se measure karke top offset set karte hain.
+  const topbar = document.querySelector('.topbar');
+  el.style.top = (topbar ? topbar.offsetHeight : 0) + 'px';
+  el.style.maxHeight = 'calc(100vh - ' + (topbar ? topbar.offsetHeight : 0) + 'px)';
+}
+document.getElementById('categorySidebar').addEventListener('click', (e)=>{
+  const c = e.target.closest('.cat-sidebar-item'); if(!c) return;
   categoryActiveType = c.dataset.type;
-  document.querySelectorAll('#categoryCatStrip .cat-chip').forEach(x=>x.classList.toggle('active', x===c));
+  document.querySelectorAll('.cat-sidebar-item').forEach(x=>x.classList.toggle('active', x===c));
   renderCategoryView();
 });
+window.addEventListener('resize', renderCategorySidebar);
 
 /* ---------------- Bestsellers ---------------- */
 function renderBestsellers(){
