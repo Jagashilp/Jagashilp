@@ -208,6 +208,7 @@
   .off-badge{background:linear-gradient(135deg,var(--c-yellow),var(--c-yellow-deep)); color:var(--ink); font-size:10px; font-weight:900; padding:4px 9px; border-radius:6px; box-shadow:0 2px 8px rgba(232,196,102,0.5); animation:badgePop .35s ease;}
   .best-tag{background:linear-gradient(135deg,var(--c-red),var(--c-red-deep)); color:#fff; font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; padding:4px 9px; border-radius:20px; box-shadow:0 2px 8px rgba(230,0,35,0.35);}
   .deal-tag{display:inline-block; background:#2E8B4F; color:#fff; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:6px; margin-bottom:10px;}
+  .top-seller-badge{display:inline-flex; align-items:center; gap:3px; background:var(--ink); color:#FFC107; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.02em; padding:3px 8px 3px 6px; border-radius:3px 10px 10px 3px;}
   @keyframes badgePop{0%{transform:scale(0.6); opacity:0;} 60%{transform:scale(1.12);} 100%{transform:scale(1); opacity:1;}}
   .badge-stack .custom-badge{position:static;}
   .hl-slide .wish-toggle{top:12px; right:12px;}
@@ -1491,6 +1492,14 @@ document.getElementById('navCustomised').addEventListener('click', ()=>{ showVie
 document.getElementById('navCategory').addEventListener('click', ()=>{ showView('categoryView'); renderCategoryView(); });
 
 /* ---------------- Product card (shared markup) ---------------- */
+function tagLabelFor(key){
+  const all = [...GIFT_RECIPIENTS, ...FEELINGS_ROW2, ...FEELINGS_ROW3];
+  const found = all.find(t => t.key === key);
+  if(found) return found.label;
+  const occ = (OCCASIONS_FALLBACK || []).find(o => o.key === key);
+  if(occ) return occ.title;
+  return key.charAt(0).toUpperCase() + key.slice(1); // fallback: key ko hi capitalize kar do
+}
 function productCardHtml(p){
   const off = p.mrp && p.mrp > p.price ? Math.round((1 - p.price/p.mrp) * 100) : 0;
   return `
@@ -1498,17 +1507,21 @@ function productCardHtml(p){
       <div class="card-img">
         ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
         <div class="badge-stack">
-          ${p.best ? `<span class="best-tag">🔥 Bestseller</span>` : (p.customisable ? `<span class="custom-badge">Customised</span>` : '')}
+          ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
         </div>
         <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
       </div>
       <div class="card-body">
-        <div class="card-cat">${p.type}</div>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <div class="card-cat">${p.type}</div>
+          ${p.best ? `<span class="top-seller-badge">${I.star || '★'} Top Seller</span>` : ''}
+        </div>
         <div class="card-name">${p.name}</div>
         <div class="price-row">
           ${off > 0 ? `<span class="off-pct">↓${off}%</span><span class="mrp">₹${p.mrp}</span>` : ''}
           <span class="price">₹${p.price}</span>
         </div>
+        ${(p.tags && p.tags.length) ? `<span class="deal-tag" style="background:#3E7B3F;">#${tagLabelFor(p.tags[0])}</span>` : ''}
         <div class="btn-row">
           <button class="add-btn full" onclick="event.stopPropagation(); handleAddToCartClick('${p.id}')">${I.bag}<span>Add to Cart</span></button>
         </div>
