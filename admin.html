@@ -460,6 +460,14 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <div class="check-row"><input type="checkbox" id="pm-large"> Large tile (this one shows bigger — use for the featured/left column)</div>
     </div>
     <div class="field">
+      <label>Kahan dikhaye?</label>
+      <select id="pm-placement">
+        <option value="home">Home page (top banner row)</option>
+        <option value="category">Category tab (offers strip)</option>
+        <option value="both">Dono jagah</option>
+      </select>
+    </div>
+    <div class="field">
       <label>Tap this banner opens…</label>
       <select id="pm-linktype" onchange="togglePromoLinkFields()">
         <option value="product">A specific product</option>
@@ -551,6 +559,18 @@ const SITE_IMAGE_GROUPS = [
     {key:'cat_icon_T-Shirt', label:'T-Shirt icon'},
     {key:'cat_icon_Fridge Magnet', label:'Fridge Magnet icon'},
     {key:'cat_icon_Hamper', label:'Hamper icon'},
+  ]},
+  { title:'Category Tab — Hero Banners (wide, ~1080×500px — Category tab ke top pe dikhta hai, jo category select karo wahi banner badal jaata hai)', items:[
+    {key:'cat_banner_All', label:'"All" banner (default, jab koi specific category select na ho)'},
+    {key:'cat_banner_Keychain', label:'Keychain banner'},
+    {key:'cat_banner_Mug', label:'Mug banner'},
+    {key:'cat_banner_Tote Bag', label:'Tote Bag banner'},
+    {key:'cat_banner_T-Shirt', label:'T-Shirt banner'},
+    {key:'cat_banner_Fridge Magnet', label:'Fridge Magnet banner'},
+    {key:'cat_banner_Hamper', label:'Hamper banner'},
+  ]},
+  { title:'Category Tab — Bottom CTA Banner (wide, ~1080×400px — Category tab ke sabse neeche dikhta hai)', items:[
+    {key:'category_bottom_cta', label:'Bottom banner photo (jaise "Bulk/Corporate Gifting? Message us")'},
   ]},
   { title:'Gifts for Every Feeling', items:[
     {key:'feeling_love', label:'Love & Romance'},
@@ -991,7 +1011,7 @@ function renderPromoTiles(){
     <div class="pcard">
       <div class="pimg">${t.image_url ? `<img src="${t.image_url}">` : ICON_BOX}</div>
       <div class="pbody">
-        <div class="pcat">${t.is_large ? '⭐ Large tile' : 'Small tile'}</div>
+        <div class="pcat">${t.is_large ? '⭐ Large tile' : 'Small tile'} · ${t.placement === 'category' ? 'Category tab' : t.placement === 'both' ? 'Home + Category' : 'Home page'}</div>
         <div class="pname">${linkLabel}</div>
         <div class="prow">
           <button class="btn ghost small" onclick="movePromoTile('${t.id}', -1)" ${idx===0 ? 'disabled' : ''}>↑</button>
@@ -1022,6 +1042,7 @@ function openPromoModal(id){
     document.getElementById('promoModalTitle').textContent = 'Edit Banner';
     document.getElementById('pm-id').value = t.id;
     document.getElementById('pm-large').checked = !!t.is_large;
+    document.getElementById('pm-placement').value = t.placement || 'home';
     document.getElementById('pm-linktype').value = t.link_type;
     if(t.link_type === 'product') productSelect.value = t.link_value;
     else document.getElementById('pm-category').value = t.link_value;
@@ -1030,6 +1051,7 @@ function openPromoModal(id){
     document.getElementById('promoModalTitle').textContent = 'Add Banner';
     document.getElementById('pm-id').value = '';
     document.getElementById('pm-large').checked = false;
+    document.getElementById('pm-placement').value = 'home';
     document.getElementById('pm-linktype').value = 'product';
   }
   togglePromoLinkFields();
@@ -1076,6 +1098,7 @@ async function savePromoTile(){
     link_type: linkType,
     link_value: linkValue,
     is_large: document.getElementById('pm-large').checked,
+    placement: document.getElementById('pm-placement').value,
   };
 
   try{
