@@ -430,6 +430,10 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
         <div id="pfTagGroups"></div>
       </div>
       <div class="field">
+        <label>Storefront Tag Pill (optional — card ke neeche jo green "#..." pill dikhta hai, uska text yahan free-type karo. Khaali chhodo to upar wale tags mein se pehla khud-b-khud dikh jaayega)</label>
+        <input type="text" id="pf-customtag" placeholder="e.g. Girlfriend, Trending, Diwali Special">
+      </div>
+      <div class="field">
         <div class="check-row"><input type="checkbox" id="pf-active" checked> Active (storefront pe dikhega)</div>
       </div>
     </div>
@@ -839,6 +843,7 @@ function openProductModal(id){
       : (p.note_title ? [p.note_title] : []);
     renderNoteFieldsList();
     document.getElementById('pf-highlight').checked = !!p.highlight;
+    document.getElementById('pf-customtag').value = p.custom_tag_label || '';
     renderTagGroups(p.tags || []);
     document.getElementById('pf-active').checked = p.active;
     if(p.image_url) document.getElementById('pf-photo-box').innerHTML = `<img src="${p.image_url}">`;
@@ -860,6 +865,7 @@ function openProductModal(id){
     pfNoteFieldsState = [];
     renderNoteFieldsList();
     document.getElementById('pf-highlight').checked = false;
+    document.getElementById('pf-customtag').value = '';
     renderTagGroups([]);
     document.getElementById('pf-active').checked = true;
   }
@@ -923,6 +929,7 @@ async function saveProduct(){
     note_fields: cleanNoteFields,
     highlight: document.getElementById('pf-highlight').checked,
     tags: getCheckedTags(),
+    custom_tag_label: document.getElementById('pf-customtag').value.trim() || null,
     active: document.getElementById('pf-active').checked,
   };
 
