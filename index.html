@@ -741,8 +741,9 @@
 <div class="drawer" id="productDetailDrawer">
   <div class="drawer-head"><h3>Product Details</h3><button class="close-btn" onclick="closeAllPanels()" id="productDetailCloseBtn"></button></div>
   <div class="drawer-body" id="pdBody"></div>
-  <div class="drawer-foot">
-    <button class="checkout-btn" id="pdAddBtn">Add to Cart</button>
+  <div class="drawer-foot" style="display:flex; gap:10px;">
+    <button class="checkout-btn" id="pdAddBtn" style="flex:1;">Add to Cart</button>
+    <button class="checkout-btn" id="pdBuyNowBtn" style="flex:1; background:#FFC107; color:#211922;">Buy Now</button>
   </div>
 </div>
 
@@ -999,6 +1000,7 @@ async function loadProducts(){
         id:p.id, name:p.name, type:p.category, price:p.price,
         mrp: (p.mrp && p.mrp > p.price) ? p.mrp : p.price,
         best: !!p.best, image_url:p.image_url,
+        description: p.description || '',
         customisable:p.customisable, customisation_fee:p.customisation_fee,
         weight_grams: p.weight_grams || 150,
         photo_upload_enabled: !!p.photo_upload_enabled, photo_upload_max: p.photo_upload_max || 1,
@@ -2825,14 +2827,15 @@ function openProductDetail(id){
     ${noteHtml}
   `;
 
-  document.getElementById('pdAddBtn').onclick = () => {
+  function addCurrentProductToCart(){
+    // true return karta hai agar successfully add ho gaya, false agar photo required tha aur missing hai
     if(showPhoto && pdPhotoState.filter(Boolean).length === 0){
       alert('Please upload ' + (maxPhotos > 1 ? 'at least one photo.' : 'your photo.'));
-      return;
+      return false;
     }
     if(!showPhoto && !showNote){
       addToCart(p.id);
-      return;
+      return true;
     }
     const photos = pdPhotoState.filter(Boolean);
     const notes = showNote
@@ -2849,11 +2852,18 @@ function openProductDetail(id){
         customPhotoDataUrl: photos[0] || null,       // pehli photo — cart thumbnail ke liye
         customPhotoDataUrls: photos.length ? photos : null // saari photos — checkout upload ke liye
       });
-      saveCart(); openCart();
-      showToast('Added to cart!');
+      saveCart();
     }else{
       addToCart(p.id);
     }
+    return true;
+  }
+
+  document.getElementById('pdAddBtn').onclick = () => {
+    if(addCurrentProductToCart()){ openCart(); showToast('Added to cart!'); }
+  };
+  document.getElementById('pdBuyNowBtn').onclick = () => {
+    if(addCurrentProductToCart()){ closeAllPanels(); openCheckoutDrawer(); }
   };
 }
 function handlePdPhoto(slot, event){
