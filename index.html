@@ -1498,12 +1498,12 @@ document.getElementById('navCategory').addEventListener('click', ()=>{ showView(
 /* ---------------- Product card (shared markup) ---------------- */
 // Admin ke "Product Badge" dropdown ki keys yahan match honi chahiye
 const PRODUCT_BADGES = {
-  limited:    { label: '✨ Limited Edition', bg: '#7C3AED' },
-  new:        { label: '🆕 New Arrival',     bg: '#0EA5A5' },
-  giftforall: { label: '🎁 Gift for All',    bg: '#DB2777' },
-  trending:   { label: '📈 Trending',        bg: '#EA580C' },
-  handmade:   { label: '🧵 Handmade',        bg: '#8D5B3F' },
-  lastfew:    { label: '⏳ Only Few Left',   bg: '#B91C1C' },
+  limited:    { label: 'Limited Edition', bg: '#7C3AED' },
+  new:        { label: 'New Arrival',     bg: '#0EA5A5' },
+  giftforall: { label: 'Gift for All',    bg: '#DB2777' },
+  trending:   { label: 'Trending',        bg: '#EA580C' },
+  handmade:   { label: 'Handmade with Love', bg: '#8D5B3F' },
+  lastfew:    { label: 'Only Few Left',   bg: '#B91C1C' },
 };
 function badgeHtml(key){
   const b = PRODUCT_BADGES[key];
