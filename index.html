@@ -1475,7 +1475,8 @@ function showView(view){
   ['homeView','productsView','customisedView','categoryView'].forEach(id=>{
     document.getElementById(id).style.display = (id === view) ? '' : 'none';
   });
-  document.getElementById('typeTabs').style.display = (view === 'homeView') ? '' : 'none';
+  // Category icon-strip (typeTabs) ab sabhi tabs pe visible rahega — pehle
+  // sirf Home tab pe dikhta tha, Products/Customised/Category pe hide ho jaata tha.
   document.querySelectorAll('#bottomNav .nav-item').forEach(x=>x.classList.remove('active'));
   const navMap = {homeView:'navHome', productsView:'navProducts', customisedView:'navCustomised', categoryView:'navCategory'};
   const activeNav = document.getElementById(navMap[view]);
