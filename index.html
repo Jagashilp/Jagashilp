@@ -1116,9 +1116,16 @@ function applyBranding(){
   if(topbar){
     if(SITE_IMAGES.topbar_bg){
       topbar.style.backgroundImage = `url("${SITE_IMAGES.topbar_bg}")`;
-      topbar.style.backgroundSize = 'cover';
-      topbar.style.backgroundPosition = 'top center';
+      // 'cover' ki jagah width-based scaling: image apna asli aspect-ratio
+      // maintain karti hai aur bottom se anchor rehti hai, isliye border/pattern
+      // panel ki height chahe kuch bhi ho (mobile/desktop), hamesha bottom edge
+      // pe hi fix rahega — beech mein shift nahi hoga.
+      topbar.style.backgroundSize = '100% auto';
+      topbar.style.backgroundPosition = 'bottom center';
       topbar.style.backgroundRepeat = 'no-repeat';
+      // Agar panel image se lambi ho (mobile pe zyada content), upar khaali
+      // jagah bhi isi red se bhar jaayegi taaki gap na dikhe.
+      topbar.style.backgroundColor = 'var(--c-red)';
     }else{
       topbar.style.backgroundImage = 'none';
     }
