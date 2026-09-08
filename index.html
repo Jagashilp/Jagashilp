@@ -1001,6 +1001,7 @@ async function loadProducts(){
         mrp: (p.mrp && p.mrp > p.price) ? p.mrp : p.price,
         best: !!p.best, image_url:p.image_url,
         product_badge: p.product_badge || '',
+        custom_tag_label: p.custom_tag_label || '',
         description: p.description || '',
         customisable:p.customisable, customisation_fee:p.customisation_fee,
         weight_grams: p.weight_grams || 150,
@@ -1542,7 +1543,7 @@ function productCardHtml(p){
           ${off > 0 ? `<span class="off-pct">↓${off}%</span><span class="mrp">₹${p.mrp}</span>` : ''}
           <span class="price">₹${p.price}</span>
         </div>
-        ${(p.tags && p.tags.length) ? `<span class="deal-tag" style="background:#3E7B3F;">#${tagLabelFor(p.tags[0])}</span>` : ''}
+        ${(p.custom_tag_label || (p.tags && p.tags.length)) ? `<span class="deal-tag" style="background:#3E7B3F;">#${p.custom_tag_label || tagLabelFor(p.tags[0])}</span>` : ''}
       </div>
     </div>`;
 }
