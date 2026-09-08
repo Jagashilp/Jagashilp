@@ -238,6 +238,13 @@
   .cat-chip{flex:0 0 auto; padding:9px 18px; border-radius:999px; background:var(--card); border:1.5px solid rgba(43,31,23,0.12); font-size:13px; font-weight:600; white-space:nowrap;}
   .cat-chip.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
   .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; padding:16px 18px 10px;}
+  .scroll-row .card{width:150px; flex:0 0 auto;}
+  .cat-hero{aspect-ratio:2.2/1; margin:14px 18px; border-radius:20px; overflow:hidden; background:linear-gradient(135deg,var(--c-red),var(--c-red-deep)); box-shadow:0 6px 18px rgba(0,0,0,0.12); position:relative;}
+  .cat-hero img{width:100%; height:100%; object-fit:cover; display:block;}
+  .cat-hero.cat-hero-empty{display:none;}
+  .cat-bottom-cta{margin:20px 18px 24px; border-radius:18px; overflow:hidden; cursor:pointer;}
+  .cat-bottom-cta img{width:100%; display:block;}
+  .cat-bottom-cta.cta-empty{display:none;}
   .card{background:var(--card); border-radius:20px; overflow:hidden; border:none; box-shadow:0 3px 10px rgba(0,0,0,0.06); display:flex; flex-direction:column;}
   .card-img{aspect-ratio:1/1; overflow:hidden; position:relative;}
   .pd-img{aspect-ratio:1/1; overflow:hidden; position:relative; border-radius:16px; margin-bottom:14px;}
@@ -552,11 +559,25 @@
 
 <!-- ============ CATEGORY VIEW (Bottom Nav: Category) ============ -->
 <div id="categoryView" style="display:none;">
+  <div class="cat-hero" id="categoryHeroBanner"></div>
+
+  <div class="promo-section" id="categoryOffersSection" style="display:none;">
+    <div class="promo-grid" id="categoryOffersGrid"></div>
+  </div>
+
+  <div class="section-head" id="newLaunchesHead" style="display:none;"><div><div class="eyebrow">Just In</div><h2>New Launches</h2></div></div>
+  <div class="scroll-row" id="newLaunchesRow"></div>
+
+  <div class="section-head" id="trendingHead" style="display:none;"><div><div class="eyebrow">Loved by Many</div><h2>Trending Now</h2></div></div>
+  <div class="scroll-row" id="trendingRow"></div>
+
   <div class="section-head"><div><div class="eyebrow">Fresh Picks</div><h2>Highlighted</h2></div></div>
   <div class="hl-carousel" id="categoryHighlightRow"></div>
 
   <div class="cat-strip" id="categoryCatStrip"></div>
   <div class="grid" id="categoryGrid"></div>
+
+  <div class="cat-bottom-cta" id="categoryBottomCta"></div>
 </div>
 
 <!-- ============ PRODUCTS VIEW (Bottom Nav: Products) ============ -->
@@ -1255,14 +1276,32 @@ async function loadPromoTiles(){
   }
 }
 function renderPromoTiles(tiles){
+  const homeTiles = tiles.filter(t => !t.placement || t.placement === 'home' || t.placement === 'both');
+  const categoryTiles = tiles.filter(t => t.placement === 'category' || t.placement === 'both');
+
   const section = document.getElementById('promoSection');
-  if(!tiles.length){ section.style.display = 'none'; return; }
-  document.getElementById('promoGrid').innerHTML = tiles.map(t => `
-    <div class="promo-tile ${t.is_large ? 'large' : ''}" onclick="handlePromoTileTap('${t.link_type}', ${JSON.stringify(t.link_value)})">
-      <img src="${t.image_url}" alt="" onerror='imgFallback(this, "Offer")'>
-    </div>
-  `).join('');
-  section.style.display = 'block';
+  if(!homeTiles.length){ section.style.display = 'none'; }
+  else{
+    document.getElementById('promoGrid').innerHTML = homeTiles.map(t => `
+      <div class="promo-tile ${t.is_large ? 'large' : ''}" onclick="handlePromoTileTap('${t.link_type}', ${JSON.stringify(t.link_value)})">
+        <img src="${t.image_url}" alt="" onerror='imgFallback(this, "Offer")'>
+      </div>
+    `).join('');
+    section.style.display = 'block';
+  }
+
+  const catSection = document.getElementById('categoryOffersSection');
+  if(catSection){
+    if(!categoryTiles.length){ catSection.style.display = 'none'; }
+    else{
+      document.getElementById('categoryOffersGrid').innerHTML = categoryTiles.map(t => `
+        <div class="promo-tile ${t.is_large ? 'large' : ''}" onclick="handlePromoTileTap('${t.link_type}', ${JSON.stringify(t.link_value)})">
+          <img src="${t.image_url}" alt="" onerror='imgFallback(this, "Offer")'>
+        </div>
+      `).join('');
+      catSection.style.display = 'block';
+    }
+  }
 }
 function handlePromoTileTap(linkType, linkValue){
   if(linkType === 'product'){
@@ -1639,9 +1678,50 @@ document.getElementById('customisedCatStrip').addEventListener('click', (e)=>{
 
 /* ---------------- Category View (non-customisable products) ---------------- */
 let categoryActiveType = 'All';
+function renderCategoryHero(){
+  const el = document.getElementById('categoryHeroBanner');
+  if(!el) return;
+  const key = 'cat_banner_' + categoryActiveType; // categoryActiveType 'All' hone par cat_banner_All try hota hai
+  const url = SITE_IMAGES[key] || SITE_IMAGES['cat_banner_All'];
+  if(url){
+    el.classList.remove('cat-hero-empty');
+    el.innerHTML = `<img src="${url}" alt="">`;
+  }else{
+    el.classList.add('cat-hero-empty');
+    el.innerHTML = '';
+  }
+}
+function renderCategoryBottomCta(){
+  const el = document.getElementById('categoryBottomCta');
+  if(!el) return;
+  const url = SITE_IMAGES['category_bottom_cta'];
+  if(url){
+    el.classList.remove('cta-empty');
+    el.innerHTML = `<img src="${url}" alt="">`;
+    el.onclick = () => showView('productsView');
+  }else{
+    el.classList.add('cta-empty');
+    el.innerHTML = '';
+  }
+}
 function renderCategoryView(){
+  renderCategoryHero();
+  renderCategoryBottomCta();
+
+  const inCategory = p => !p.customisable && (categoryActiveType === 'All' || p.type === categoryActiveType);
+
+  // New Launches — jin products pe admin ne "New Arrival" badge lagaya hai
+  const newLaunches = PRODUCTS.filter(p => inCategory(p) && p.product_badge === 'new');
+  document.getElementById('newLaunchesHead').style.display = newLaunches.length ? '' : 'none';
+  document.getElementById('newLaunchesRow').innerHTML = newLaunches.length ? newLaunches.map(productCardHtml).join('') : '';
+
+  // Trending — Bestseller ya "Trending" badge wale products
+  const trending = PRODUCTS.filter(p => inCategory(p) && (p.best || p.product_badge === 'trending'));
+  document.getElementById('trendingHead').style.display = trending.length ? '' : 'none';
+  document.getElementById('trendingRow').innerHTML = trending.length ? trending.map(productCardHtml).join('') : '';
+
   renderHighlightRow('categoryHighlightRow', p => !p.customisable);
-  const list = PRODUCTS.filter(p => !p.customisable && (categoryActiveType === 'All' || p.type === categoryActiveType));
+  const list = PRODUCTS.filter(inCategory);
   const grid = document.getElementById('categoryGrid');
   grid.innerHTML = list.length ? list.map(productCardHtml).join('') : `<div class="acct-empty-state" style="grid-column:1/-1;"><p>There are no products in this category yet.</p></div>`;
 }
