@@ -227,6 +227,10 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
       Promo Banners
     </div>
+    <div class="tab" data-tab="catpage" onclick="switchTab('catpage')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Category Page
+    </div>
   </div>
 
   <main>
@@ -327,6 +331,21 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
         </button>
       </div>
       <div class="grid" id="promosGrid"></div>
+    </div>
+
+    <!-- CATEGORY PAGE BUILDER SECTION -->
+    <div class="section" id="section-catpage">
+      <div class="bar">
+        <div>
+          <h2>Category Page Builder</h2>
+          <div class="count">App ke bottom-nav "Category" tab pe jo sections aur image-tiles dikhte hain (jaise "Shop by Category", "Gifts for Everyone") — sab yahan se control hota hai. Naya section banao, usme tiles (photo + naam + link) add karo, order badlo — sab kuch storefront pe turant reflect hoga, koi code change nahi chahiye.</div>
+        </div>
+        <button class="btn" onclick="openCatSectionModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add Section
+        </button>
+      </div>
+      <div id="catSectionsList"></div>
     </div>
   </main>
 </div>
@@ -494,6 +513,68 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <button class="btn" onclick="savePromoTile()">Save</button>
     </div>
     <div class="status-msg" id="pm-status"></div>
+  </div>
+</div>
+
+<!-- ============ CATEGORY SECTION ADD/EDIT MODAL ============ -->
+<div class="overlay" id="catSectionOverlay">
+  <div class="modal">
+    <h3 id="catSectionModalTitle">Add Section</h3>
+    <input type="hidden" id="cs-id">
+    <div class="field">
+      <label>Section Heading (jaise "Shop by Category", "Gifts for Everyone")</label>
+      <input type="text" id="cs-name" placeholder="e.g. Gifts for Every Occasion">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeCatSectionModal()">Cancel</button>
+      <button class="btn" onclick="saveCatSection()">Save</button>
+    </div>
+    <div class="status-msg" id="cs-status"></div>
+  </div>
+</div>
+
+<!-- ============ CATEGORY TILE ADD/EDIT MODAL ============ -->
+<div class="overlay" id="catTileOverlay">
+  <div class="modal">
+    <h3 id="catTileModalTitle">Add Tile</h3>
+    <input type="hidden" id="ct-id">
+    <input type="hidden" id="ct-section-id">
+    <div class="field">
+      <label>Photo (square image, jaisa card mein dikhega)</label>
+      <label class="upload-box" for="ct-photo-input" id="ct-photo-box">Tap to upload photo</label>
+      <input type="file" accept="image/*" id="ct-photo-input" style="display:none;" onchange="handleCatTilePhoto(event)">
+    </div>
+    <div class="field">
+      <label>Tile Name (card ke neeche yeh text dikhega)</label>
+      <input type="text" id="ct-name" placeholder="e.g. Girlfriend, Birthday, Keychain">
+    </div>
+    <div class="field">
+      <label>Tap karne par kya khule?</label>
+      <select id="ct-linktype" onchange="toggleCatTileLinkFields()">
+        <option value="category">Product Category (Keychain/Mug/etc)</option>
+        <option value="tag">Custom Tag (Person/Occasion/Mood)</option>
+      </select>
+    </div>
+    <div class="field" id="ct-category-row">
+      <label>Choose category</label>
+      <select id="ct-category">
+        <option value="Keychain">Keychain</option>
+        <option value="Mug">Mug</option>
+        <option value="Tote Bag">Tote Bag</option>
+        <option value="T-Shirt">T-Shirt</option>
+        <option value="Fridge Magnet">Fridge Magnet</option>
+        <option value="Hamper">Hamper</option>
+      </select>
+    </div>
+    <div class="field" id="ct-tag-row" style="display:none;">
+      <label>Tag key (Products mein jo tag assign kiya hai, wahi yahan type karo — jaise "girlfriend", "birthday". Case-sensitive match hona chahiye)</label>
+      <input type="text" id="ct-tagkey" placeholder="e.g. girlfriend">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeCatTileModal()">Cancel</button>
+      <button class="btn" onclick="saveCatTile()">Save</button>
+    </div>
+    <div class="status-msg" id="ct-status"></div>
   </div>
 </div>
 
@@ -710,6 +791,7 @@ async function checkSession(){
   loadOrders();
   loadTickets();
   loadPromoTiles();
+  loadCategoryPage();
 }
 function showLogin(){
   document.getElementById('appShell').classList.add('hidden');
@@ -1143,6 +1225,235 @@ async function movePromoTile(id, direction){
     sb.from('promo_tiles').update({ sort_order: aOrder }).eq('id', b.id),
   ]);
   loadPromoTiles();
+}
+
+/* ---------------- Category Page Builder ---------------- */
+let catSectionsCache = [];
+let catTilesCache = [];
+
+async function loadCategoryPage(){
+  if(!sb) return;
+  const [secRes, tileRes] = await Promise.all([
+    sb.from('category_sections').select('*').order('sort_order'),
+    sb.from('category_tiles').select('*').order('sort_order'),
+  ]);
+  if(secRes.error){ console.error(secRes.error); return; }
+  if(tileRes.error){ console.error(tileRes.error); return; }
+  catSectionsCache = secRes.data || [];
+  catTilesCache = tileRes.data || [];
+  renderCatSections();
+}
+
+function renderCatSections(){
+  const list = document.getElementById('catSectionsList');
+  if(!catSectionsCache.length){
+    list.innerHTML = `<div class="empty">${ICON_BOX}<div><b>Koi section nahi bana abhi tak.</b><br>"Add Section" dabao — jaise tak koi section nahi banega, storefront pe purana default (Shop by Category / Gifts for Everyone / Occasion / Mood) hi dikhta rahega.</div></div>`;
+    return;
+  }
+  list.innerHTML = catSectionsCache.map((s, sIdx) => {
+    const tiles = catTilesCache.filter(t => t.section_id === s.id);
+    return `
+    <div class="pcard" style="width:100%; margin-bottom:18px;">
+      <div class="pbody" style="width:100%;">
+        <div class="prow" style="justify-content:space-between; margin-bottom:6px;">
+          <div class="pname" style="font-size:16px;">${s.name}</div>
+          <div class="prow">
+            <button class="btn ghost small" onclick="moveCatSection('${s.id}', -1)" ${sIdx===0 ? 'disabled' : ''}>↑</button>
+            <button class="btn ghost small" onclick="moveCatSection('${s.id}', 1)" ${sIdx===catSectionsCache.length-1 ? 'disabled' : ''}>↓</button>
+            <button class="btn ghost small" onclick="openCatSectionModal('${s.id}')">Edit</button>
+            <button class="btn rose ghost small" onclick="deleteCatSection('${s.id}')">Delete</button>
+          </div>
+        </div>
+        <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; padding:6px 0 0;">
+          ${tiles.map((t, tIdx) => `
+            <div class="pcard" style="width:100%;">
+              <div class="pimg" style="aspect-ratio:1/1;">${t.image_url ? `<img src="${t.image_url}">` : ICON_BOX}</div>
+              <div class="pbody">
+                <div class="pcat">${t.link_type === 'tag' ? 'Tag: ' + t.link_value : 'Category: ' + t.link_value}</div>
+                <div class="pname">${t.name}</div>
+                <div class="prow">
+                  <button class="btn ghost small" onclick="moveCatTile('${t.id}', -1)" ${tIdx===0 ? 'disabled' : ''}>↑</button>
+                  <button class="btn ghost small" onclick="moveCatTile('${t.id}', 1)" ${tIdx===tiles.length-1 ? 'disabled' : ''}>↓</button>
+                  <button class="btn ghost small" onclick="openCatTileModal('${s.id}','${t.id}')">Edit</button>
+                  <button class="btn rose ghost small" onclick="deleteCatTile('${t.id}')">Delete</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+          <button class="upload-box" style="aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;" onclick="openCatTileModal('${s.id}')">+ Add Tile</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openCatSectionModal(id){
+  document.getElementById('cs-status').style.display = 'none';
+  if(id){
+    const s = catSectionsCache.find(x => x.id === id);
+    document.getElementById('catSectionModalTitle').textContent = 'Edit Section';
+    document.getElementById('cs-id').value = s.id;
+    document.getElementById('cs-name').value = s.name;
+  }else{
+    document.getElementById('catSectionModalTitle').textContent = 'Add Section';
+    document.getElementById('cs-id').value = '';
+    document.getElementById('cs-name').value = '';
+  }
+  document.getElementById('catSectionOverlay').classList.add('show');
+}
+function closeCatSectionModal(){ document.getElementById('catSectionOverlay').classList.remove('show'); }
+
+async function saveCatSection(){
+  const statusEl = document.getElementById('cs-status');
+  const id = document.getElementById('cs-id').value;
+  const name = document.getElementById('cs-name').value.trim();
+  if(!name){
+    statusEl.style.display = 'block'; statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Section ka naam daalo.';
+    return;
+  }
+  statusEl.style.display = 'block'; statusEl.style.color = 'var(--muted)'; statusEl.textContent = 'Saving...';
+  try{
+    let error;
+    if(id){
+      ({ error } = await sb.from('category_sections').update({ name }).eq('id', id));
+    }else{
+      ({ error } = await sb.from('category_sections').insert({ name, sort_order: catSectionsCache.length }));
+    }
+    if(error) throw error;
+    await loadCategoryPage();
+    setTimeout(closeCatSectionModal, 300);
+  }catch(err){
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Error: ' + (err.message || 'kuch galat ho gaya');
+  }
+}
+
+async function deleteCatSection(id){
+  if(!confirm('Ye poora section aur uske andar ke saare tiles delete honge. Pakka?')) return;
+  const { error } = await sb.from('category_sections').delete().eq('id', id);
+  if(error){ alert('Delete fail: ' + error.message); return; }
+  loadCategoryPage();
+}
+
+async function moveCatSection(id, direction){
+  const idx = catSectionsCache.findIndex(s => s.id === id);
+  const swapIdx = idx + direction;
+  if(swapIdx < 0 || swapIdx >= catSectionsCache.length) return;
+  const a = catSectionsCache[idx], b = catSectionsCache[swapIdx];
+  await Promise.all([
+    sb.from('category_sections').update({ sort_order: b.sort_order }).eq('id', a.id),
+    sb.from('category_sections').update({ sort_order: a.sort_order }).eq('id', b.id),
+  ]);
+  loadCategoryPage();
+}
+
+let pendingCatTilePhotoFile = null;
+function toggleCatTileLinkFields(){
+  const isCategory = document.getElementById('ct-linktype').value === 'category';
+  document.getElementById('ct-category-row').style.display = isCategory ? 'block' : 'none';
+  document.getElementById('ct-tag-row').style.display = isCategory ? 'none' : 'block';
+}
+function openCatTileModal(sectionId, tileId){
+  pendingCatTilePhotoFile = null;
+  document.getElementById('ct-status').style.display = 'none';
+  document.getElementById('ct-photo-box').innerHTML = 'Tap to upload photo';
+  document.getElementById('ct-section-id').value = sectionId;
+  if(tileId){
+    const t = catTilesCache.find(x => x.id === tileId);
+    document.getElementById('catTileModalTitle').textContent = 'Edit Tile';
+    document.getElementById('ct-id').value = t.id;
+    document.getElementById('ct-name').value = t.name;
+    document.getElementById('ct-linktype').value = t.link_type;
+    if(t.link_type === 'category') document.getElementById('ct-category').value = t.link_value;
+    else document.getElementById('ct-tagkey').value = t.link_value;
+    if(t.image_url) document.getElementById('ct-photo-box').innerHTML = `<img src="${t.image_url}">`;
+  }else{
+    document.getElementById('catTileModalTitle').textContent = 'Add Tile';
+    document.getElementById('ct-id').value = '';
+    document.getElementById('ct-name').value = '';
+    document.getElementById('ct-linktype').value = 'category';
+    document.getElementById('ct-tagkey').value = '';
+  }
+  toggleCatTileLinkFields();
+  document.getElementById('catTileOverlay').classList.add('show');
+}
+function closeCatTileModal(){ document.getElementById('catTileOverlay').classList.remove('show'); }
+function handleCatTilePhoto(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  pendingCatTilePhotoFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => { document.getElementById('ct-photo-box').innerHTML = `<img src="${e.target.result}">`; };
+  reader.readAsDataURL(file);
+}
+
+async function saveCatTile(){
+  const statusEl = document.getElementById('ct-status');
+  const id = document.getElementById('ct-id').value;
+  const sectionId = document.getElementById('ct-section-id').value;
+  const name = document.getElementById('ct-name').value.trim();
+  const linkType = document.getElementById('ct-linktype').value;
+  const linkValue = linkType === 'category'
+    ? document.getElementById('ct-category').value
+    : document.getElementById('ct-tagkey').value.trim();
+
+  if(!name){
+    statusEl.style.display = 'block'; statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Tile ka naam daalo.'; return;
+  }
+  if(!id && !pendingCatTilePhotoFile){
+    statusEl.style.display = 'block'; statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Ek photo upload karo.'; return;
+  }
+  if(linkType === 'tag' && !linkValue){
+    statusEl.style.display = 'block'; statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Tag key daalo.'; return;
+  }
+
+  statusEl.style.display = 'block'; statusEl.style.color = 'var(--muted)'; statusEl.textContent = 'Saving...';
+  try{
+    const payload = { section_id: sectionId, name, link_type: linkType, link_value: linkValue };
+    if(pendingCatTilePhotoFile){
+      const compressed = await compressImage(pendingCatTilePhotoFile, 700, 0.85);
+      payload.image_url = await uploadToStorage(compressed, 'cattile');
+    }
+    let error;
+    if(id){
+      ({ error } = await sb.from('category_tiles').update(payload).eq('id', id));
+    }else{
+      const existingCount = catTilesCache.filter(t => t.section_id === sectionId).length;
+      payload.sort_order = existingCount;
+      ({ error } = await sb.from('category_tiles').insert(payload));
+    }
+    if(error) throw error;
+    await loadCategoryPage();
+    setTimeout(closeCatTileModal, 300);
+  }catch(err){
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Error: ' + (err.message || 'kuch galat ho gaya');
+  }
+}
+
+async function deleteCatTile(id){
+  if(!confirm('Ye tile delete karna hai?')) return;
+  const { error } = await sb.from('category_tiles').delete().eq('id', id);
+  if(error){ alert('Delete fail: ' + error.message); return; }
+  loadCategoryPage();
+}
+
+async function moveCatTile(id, direction){
+  const t = catTilesCache.find(x => x.id === id);
+  const siblings = catTilesCache.filter(x => x.section_id === t.section_id).sort((a,b) => a.sort_order - b.sort_order);
+  const idx = siblings.findIndex(x => x.id === id);
+  const swapIdx = idx + direction;
+  if(swapIdx < 0 || swapIdx >= siblings.length) return;
+  const a = siblings[idx], b = siblings[swapIdx];
+  await Promise.all([
+    sb.from('category_tiles').update({ sort_order: b.sort_order }).eq('id', a.id),
+    sb.from('category_tiles').update({ sort_order: a.sort_order }).eq('id', b.id),
+  ]);
+  loadCategoryPage();
 }
 
 /* ---------------- Gift Images ---------------- */
