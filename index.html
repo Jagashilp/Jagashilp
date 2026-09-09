@@ -250,6 +250,10 @@
   .cat-section-wrap{background-size:cover; background-position:center; background-repeat:no-repeat; padding-bottom:6px;}
   .cat-section-wrap .section-head h2{text-shadow:0 1px 4px rgba(255,255,255,0.85);}
   .cat-section-wrap .tile-4 span{text-shadow:0 1px 4px rgba(255,255,255,0.85);}
+  .shop-by-cat-heading{text-align:center; font-size:16px; font-weight:700; color:#fff; padding:16px 18px 4px;}
+  .no-icon-box .tile-4-img{background:none; padding:0;}
+  .no-icon-box .tile-4-img svg{color:#fff; width:70%; height:70%;}
+  .no-icon-box .tile-4 span{color:#fff;}
   .card{background:var(--card); border-radius:20px; overflow:hidden; border:none; box-shadow:none; display:flex; flex-direction:column;}
   .card-img{aspect-ratio:1/1; overflow:hidden; position:relative;}
   .pd-img{aspect-ratio:1/1; overflow:hidden; position:relative; border-radius:16px; margin-bottom:14px;}
@@ -1727,9 +1731,9 @@ function renderCategoryView(){
   // (existing Home page data reuse karke) dikhta rehta hai taaki page khaali na ho.
   const allFeelings = [...FEELINGS_ROW2, ...FEELINGS_ROW3];
   container.innerHTML = `
-    <div class="cat-section-wrap" ${SITE_IMAGES.catpage_shopbycategory_bg ? `style="background-image:url('${SITE_IMAGES.catpage_shopbycategory_bg}');"` : ''}>
-      <div class="section-head"><div><div class="eyebrow">Browse</div><h2>Shop by Category</h2></div></div>
-      <div class="tile-grid-4" id="catShopByCategoryGrid"></div>
+    <div class="cat-section-wrap shop-by-cat-wrap" ${SITE_IMAGES.catpage_shopbycategory_bg ? `style="background-image:url('${SITE_IMAGES.catpage_shopbycategory_bg}');"` : ''}>
+      <div class="shop-by-cat-heading">हमारे पास क्या-क्या है</div>
+      <div class="tile-grid-4 no-icon-box" id="catShopByCategoryGrid"></div>
     </div>
 
     <div class="section-head"><div><div class="eyebrow">Pick a Person</div><h2>Gifts for Everyone</h2></div></div>
