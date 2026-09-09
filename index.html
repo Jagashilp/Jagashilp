@@ -247,6 +247,9 @@
   .tile-4-img.photo{padding:0;}
   .tile-4-img.photo img{object-fit:cover;}
   .tile-4 span{font-size:10.5px; font-weight:700; color:var(--ink); line-height:1.25;}
+  .cat-section-wrap{background-size:cover; background-position:center; background-repeat:no-repeat; padding-bottom:6px;}
+  .cat-section-wrap .section-head h2{text-shadow:0 1px 4px rgba(255,255,255,0.85);}
+  .cat-section-wrap .tile-4 span{text-shadow:0 1px 4px rgba(255,255,255,0.85);}
   .card{background:var(--card); border-radius:20px; overflow:hidden; border:none; box-shadow:none; display:flex; flex-direction:column;}
   .card-img{aspect-ratio:1/1; overflow:hidden; position:relative;}
   .pd-img{aspect-ratio:1/1; overflow:hidden; position:relative; border-radius:16px; margin-bottom:14px;}
@@ -1698,13 +1701,15 @@ function renderCategoryView(){
   // to wahi CMS data dikhao (fully dynamic, koi hardcoded text/image nahi).
   if(CATEGORY_SECTIONS_CMS.length){
     container.innerHTML = CATEGORY_SECTIONS_CMS.map(s => `
-      <div class="section-head"><div><h2>${s.name}</h2></div></div>
-      <div class="tile-grid-4" data-section="${s.id}">
-        ${s.tiles.map(t => `
-          <div class="tile-4" data-tile="${t.id}">
-            <div class="tile-4-img photo">${t.image_url ? `<img src="${t.image_url}">` : I.gift}</div>
-            <span>${t.name}</span>
-          </div>`).join('')}
+      <div class="cat-section-wrap" ${s.bg_image_url ? `style="background-image:url('${s.bg_image_url}');"` : ''}>
+        <div class="section-head"><div><h2>${s.name}</h2></div></div>
+        <div class="tile-grid-4" data-section="${s.id}">
+          ${s.tiles.map(t => `
+            <div class="tile-4" data-tile="${t.id}">
+              <div class="tile-4-img photo">${t.image_url ? `<img src="${t.image_url}">` : I.gift}</div>
+              <span>${t.name}</span>
+            </div>`).join('')}
+        </div>
       </div>
     `).join('');
     container.querySelectorAll('.tile-grid-4').forEach(grid => {
