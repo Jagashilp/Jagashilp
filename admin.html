@@ -525,6 +525,12 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <label>Section Heading (jaise "Shop by Category", "Gifts for Everyone")</label>
       <input type="text" id="cs-name" placeholder="e.g. Gifts for Every Occasion">
     </div>
+    <div class="field">
+      <label>Section Background Image (optional — poore section area ke peeche full-width dikhega, jaise Canva se design karke; icons/tiles uske upar dikhenge)</label>
+      <label class="upload-box" for="cs-bg-input" id="cs-bg-box">Tap to upload background</label>
+      <input type="file" accept="image/*" id="cs-bg-input" style="display:none;" onchange="handleCatSectionBg(event)">
+      <button class="btn ghost small" style="margin-top:8px;" onclick="clearCatSectionBg()">Remove background</button>
+    </div>
     <div class="modal-actions">
       <button class="btn ghost" onclick="closeCatSectionModal()">Cancel</button>
       <button class="btn" onclick="saveCatSection()">Save</button>
@@ -1256,7 +1262,7 @@ function renderCatSections(){
     <div class="pcard" style="width:100%; margin-bottom:18px;">
       <div class="pbody" style="width:100%;">
         <div class="prow" style="justify-content:space-between; margin-bottom:6px;">
-          <div class="pname" style="font-size:16px;">${s.name}</div>
+          <div class="pname" style="font-size:16px;">${s.name}${s.bg_image_url ? ' 🖼️' : ''}</div>
           <div class="prow">
             <button class="btn ghost small" onclick="moveCatSection('${s.id}', -1)" ${sIdx===0 ? 'disabled' : ''}>↑</button>
             <button class="btn ghost small" onclick="moveCatSection('${s.id}', 1)" ${sIdx===catSectionsCache.length-1 ? 'disabled' : ''}>↓</button>
@@ -1289,17 +1295,37 @@ function renderCatSections(){
 
 function openCatSectionModal(id){
   document.getElementById('cs-status').style.display = 'none';
+  pendingCatSectionBgFile = null;
+  pendingCatSectionBgCleared = false;
   if(id){
     const s = catSectionsCache.find(x => x.id === id);
     document.getElementById('catSectionModalTitle').textContent = 'Edit Section';
     document.getElementById('cs-id').value = s.id;
     document.getElementById('cs-name').value = s.name;
+    document.getElementById('cs-bg-box').innerHTML = s.bg_image_url ? `<img src="${s.bg_image_url}">` : 'Tap to upload background';
   }else{
     document.getElementById('catSectionModalTitle').textContent = 'Add Section';
     document.getElementById('cs-id').value = '';
     document.getElementById('cs-name').value = '';
+    document.getElementById('cs-bg-box').innerHTML = 'Tap to upload background';
   }
   document.getElementById('catSectionOverlay').classList.add('show');
+}
+let pendingCatSectionBgFile = null;
+let pendingCatSectionBgCleared = false;
+function handleCatSectionBg(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  pendingCatSectionBgFile = file;
+  pendingCatSectionBgCleared = false;
+  const reader = new FileReader();
+  reader.onload = (e) => { document.getElementById('cs-bg-box').innerHTML = `<img src="${e.target.result}">`; };
+  reader.readAsDataURL(file);
+}
+function clearCatSectionBg(){
+  pendingCatSectionBgFile = null;
+  pendingCatSectionBgCleared = true;
+  document.getElementById('cs-bg-box').innerHTML = 'Tap to upload background';
 }
 function closeCatSectionModal(){ document.getElementById('catSectionOverlay').classList.remove('show'); }
 
@@ -1314,11 +1340,19 @@ async function saveCatSection(){
   }
   statusEl.style.display = 'block'; statusEl.style.color = 'var(--muted)'; statusEl.textContent = 'Saving...';
   try{
+    const payload = { name };
+    if(pendingCatSectionBgFile){
+      const compressed = await compressImage(pendingCatSectionBgFile, 1080, 0.85);
+      payload.bg_image_url = await uploadToStorage(compressed, 'catsectionbg');
+    }else if(pendingCatSectionBgCleared){
+      payload.bg_image_url = null;
+    }
     let error;
     if(id){
-      ({ error } = await sb.from('category_sections').update({ name }).eq('id', id));
+      ({ error } = await sb.from('category_sections').update(payload).eq('id', id));
     }else{
-      ({ error } = await sb.from('category_sections').insert({ name, sort_order: catSectionsCache.length }));
+      payload.sort_order = catSectionsCache.length;
+      ({ error } = await sb.from('category_sections').insert(payload));
     }
     if(error) throw error;
     await loadCategoryPage();
