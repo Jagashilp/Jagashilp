@@ -1080,6 +1080,7 @@ async function checkSession(){
   loadProducts();
   loadMainCats();
   loadGiftRecipients();
+  loadLegacyGiftImages();
   loadFeelingCards();
   loadOccasionCards();
   loadSiteImages();
@@ -1932,9 +1933,11 @@ async function loadGiftRecipients(){
 function renderGiftRecipients(){
   const grid = document.getElementById('giftRecipientsGrid');
   if(!grid) return;
-  grid.innerHTML = GIFT_RECIPIENTS.map((g, idx) => `
+  grid.innerHTML = GIFT_RECIPIENTS.map((g, idx) => {
+    const img = g.image_url || legacyGiftImagesCache[g.key];
+    return `
     <div class="content-card ${g.active ? '' : 'inactive'}">
-      <div class="cc-img">${g.image_url ? `<img src="${g.image_url}">` : ICON_PHOTO}</div>
+      <div class="cc-img">${img ? `<img src="${img}">` : ICON_PHOTO}</div>
       <div class="cc-body">
         <div class="cc-key">${g.key}</div>
         <div class="cc-label">${g.label}</div>
@@ -1945,8 +1948,8 @@ function renderGiftRecipients(){
         </div>
         <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteGiftRecipient('${g.id}')">Delete</button></div>
       </div>
-    </div>
-  `).join('') + `<button class="add-content-card" onclick="openGiftRecipientModal()">${ICON_PLUS}Add Recipient</button>`;
+    </div>`;
+  }).join('') + `<button class="add-content-card" onclick="openGiftRecipientModal()">${ICON_PLUS}Add Recipient</button>`;
 }
 let pendingGrPhotoFile=null;
 function openGiftRecipientModal(id){
@@ -1959,7 +1962,7 @@ function openGiftRecipientModal(id){
     document.getElementById('gr-key').value=g.key;
     document.getElementById('gr-label').value=g.label;
     document.getElementById('gr-active').checked=g.active;
-    document.getElementById('gr-photo-box').innerHTML=g.image_url?`<img src="${g.image_url}">`:'Tap to upload photo';
+    document.getElementById('gr-photo-box').innerHTML=(g.image_url || legacyGiftImagesCache[g.key])?`<img src="${g.image_url || legacyGiftImagesCache[g.key]}">`:'Tap to upload photo';
   }else{
     document.getElementById('grModalTitle').textContent='Add Recipient';
     document.getElementById('gr-id').value=''; document.getElementById('gr-key').value='';
@@ -2019,9 +2022,11 @@ async function loadFeelingCards(){
 function renderFeelingCards(){
   const grid = document.getElementById('feelingsGrid');
   if(!grid) return;
-  grid.innerHTML = FEELING_CARDS.map((f, idx) => `
+  grid.innerHTML = FEELING_CARDS.map((f, idx) => {
+    const img = f.image_url || siteImagesCache['feeling_' + f.key];
+    return `
     <div class="content-card ${f.active ? '' : 'inactive'}">
-      <div class="cc-img">${f.image_url ? `<img src="${f.image_url}">` : ICON_PHOTO}</div>
+      <div class="cc-img">${img ? `<img src="${img}">` : ICON_PHOTO}</div>
       <div class="cc-body">
         <div class="cc-key">${f.key}</div>
         <div class="cc-label">${f.label}</div>
@@ -2032,8 +2037,8 @@ function renderFeelingCards(){
         </div>
         <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteFeelingCard('${f.id}')">Delete</button></div>
       </div>
-    </div>
-  `).join('') + `<button class="add-content-card" onclick="openFeelingModal()">${ICON_PLUS}Add Feeling</button>`;
+    </div>`;
+  }).join('') + `<button class="add-content-card" onclick="openFeelingModal()">${ICON_PLUS}Add Feeling</button>`;
 }
 let pendingFcPhotoFile=null;
 function openFeelingModal(id){
@@ -2046,7 +2051,7 @@ function openFeelingModal(id){
     document.getElementById('fc-key').value=f.key;
     document.getElementById('fc-label').value=f.label;
     document.getElementById('fc-active').checked=f.active;
-    document.getElementById('fc-photo-box').innerHTML=f.image_url?`<img src="${f.image_url}">`:'Tap to upload photo';
+    document.getElementById('fc-photo-box').innerHTML=(f.image_url || siteImagesCache['feeling_' + f.key])?`<img src="${f.image_url || siteImagesCache['feeling_' + f.key]}">`:'Tap to upload photo';
   }else{
     document.getElementById('fcModalTitle').textContent='Add Feeling';
     document.getElementById('fc-id').value=''; document.getElementById('fc-key').value='';
@@ -2106,9 +2111,11 @@ async function loadOccasionCards(){
 function renderOccasionCards(){
   const grid = document.getElementById('occasionsGrid');
   if(!grid) return;
-  grid.innerHTML = OCCASION_CARDS.map((o, idx) => `
+  grid.innerHTML = OCCASION_CARDS.map((o, idx) => {
+    const img = o.image_url || siteImagesCache['occasion_' + o.key];
+    return `
     <div class="content-card ${o.active ? '' : 'inactive'}">
-      <div class="cc-img">${o.badge ? `<div class="cc-badge">${o.badge}</div>` : ''}${o.image_url ? `<img src="${o.image_url}">` : ICON_PHOTO}</div>
+      <div class="cc-img">${o.badge ? `<div class="cc-badge">${o.badge}</div>` : ''}${img ? `<img src="${img}">` : ICON_PHOTO}</div>
       <div class="cc-body">
         <div class="cc-key">${o.key}</div>
         <div class="cc-label">${o.title}</div>
@@ -2119,8 +2126,8 @@ function renderOccasionCards(){
         </div>
         <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteOccasionCard('${o.id}')">Delete</button></div>
       </div>
-    </div>
-  `).join('') + `<button class="add-content-card" onclick="openOccasionModal()">${ICON_PLUS}Add Occasion</button>`;
+    </div>`;
+  }).join('') + `<button class="add-content-card" onclick="openOccasionModal()">${ICON_PLUS}Add Occasion</button>`;
 }
 let pendingOcPhotoFile=null;
 function openOccasionModal(id){
@@ -2134,7 +2141,7 @@ function openOccasionModal(id){
     document.getElementById('oc-title').value=o.title;
     document.getElementById('oc-badge').value=o.badge || '';
     document.getElementById('oc-active').checked=o.active;
-    document.getElementById('oc-photo-box').innerHTML=o.image_url?`<img src="${o.image_url}">`:'Tap to upload photo';
+    document.getElementById('oc-photo-box').innerHTML=(o.image_url || siteImagesCache['occasion_' + o.key])?`<img src="${o.image_url || siteImagesCache['occasion_' + o.key]}">`:'Tap to upload photo';
   }else{
     document.getElementById('ocModalTitle').textContent='Add Occasion';
     document.getElementById('oc-id').value=''; document.getElementById('oc-key').value='';
@@ -2194,6 +2201,26 @@ async function loadSiteImages(){
   siteImagesCache = {};
   (data || []).forEach(row => { siteImagesCache[row.key] = row.image_url; });
   renderSiteImagesGroups();
+  // Purani photos jo pehle "Site Images" tab se upload hui thi (feeling_<key>,
+  // occasion_<key>) unhi ka fallback nayi Feeling/Occasion CRUD grid mein bhi
+  // dikhana hai jab tak admin naye form se dobara upload na kare — isliye in
+  // dono grids ko yahan bhi refresh kar dete hain (siteImagesCache abhi load hui hai).
+  renderFeelingCards();
+  renderOccasionCards();
+}
+
+/* Purana 'gift_images' table (key -> image_url) — "Gifts for Everyone" ke
+   liye pehle isi se photo upload hoti thi. Naya 'gift_recipients' table
+   apna khud ka image_url column rakhta hai, par jab tak admin dobara upload
+   na kare, purani photo yahi se fallback ke taur pe dikhti rahegi. */
+let legacyGiftImagesCache = {};
+async function loadLegacyGiftImages(){
+  if(!sb) return;
+  const { data, error } = await sb.from('gift_images').select('*');
+  if(error){ console.error(error); return; }
+  legacyGiftImagesCache = {};
+  (data || []).forEach(row => { legacyGiftImagesCache[row.key] = row.image_url; });
+  renderGiftRecipients();
 }
 
 function renderSiteImagesGroups(){
