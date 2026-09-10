@@ -168,6 +168,94 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
 .pay-badge.paid{background:var(--ok-tint);color:var(--ok);}
 .pay-badge.pending{background:var(--warn-tint);color:var(--warn);}
 .pay-badge.failed{background:var(--rose-tint);color:var(--rose-deep);}
+
+/* ================================================================
+   DASHBOARD SHELL — sidebar (desktop) / off-canvas drawer (mobile)
+   ================================================================ */
+#appShell{min-height:100vh;display:flex;align-items:stretch;}
+
+/* ---- Sidebar ---- */
+.sidebar{width:252px;flex-shrink:0;background:var(--paper);border-right:1px solid var(--line);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:60;transform:translateX(-100%);transition:transform .22s ease;overflow-y:auto;}
+.sidebar.open{transform:translateX(0);box-shadow:20px 0 40px rgba(23,19,19,0.18);}
+.sidebar-brand{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.sidebar-brand .name{font-size:15px;font-weight:700;font-family:'Syne',sans-serif;}
+.sidebar-brand .tag{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.03em;}
+.sidebar-close{margin-left:auto;background:none;color:var(--muted);padding:4px;display:flex;}
+.sidebar-nav{padding:14px 10px;flex:1;}
+.nav-group-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:14px 10px 6px;}
+.nav-group-title:first-child{padding-top:4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:10px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;margin-bottom:2px;transition:background .15s,color .15s;position:relative;}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;color:var(--muted);transition:color .15s;}
+.nav-item:hover{background:var(--surface);}
+.nav-item.active{background:var(--ink);color:#fff;}
+.nav-item.active svg{color:#fff;}
+.nav-item .nav-badge{margin-left:auto;background:var(--rose);color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:20px;font-family:'JetBrains Mono',monospace;}
+.nav-item.active .nav-badge{background:#fff;color:var(--ink);}
+.sidebar-foot{padding:14px 16px;border-top:1px solid var(--line);flex-shrink:0;}
+.sidebar-foot .email-pill{display:block;font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:7px 11px;border-radius:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:8px;}
+.sidebar-foot button{width:100%;background:none;border:1.5px solid var(--line-strong);color:var(--rose);font-weight:700;font-size:12px;padding:9px;border-radius:9px;}
+.sidebar-foot button:hover{background:var(--rose-tint);}
+
+.sidebar-overlay{position:fixed;inset:0;background:rgba(23,19,19,0.45);z-index:55;display:none;}
+.sidebar-overlay.show{display:block;}
+
+/* ---- Top bar (mobile hamburger + page title) ---- */
+.topbar-admin{display:flex;align-items:center;gap:12px;padding:13px 18px;background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+.hamburger-btn{background:none;color:var(--ink);padding:4px;display:flex;flex-shrink:0;}
+.topbar-admin .page-title{font-size:15.5px;font-weight:700;font-family:'Syne',sans-serif;flex:1;min-width:0;}
+
+.content-area{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+@media(min-width:960px){
+  .sidebar{position:sticky;transform:none;height:100vh;box-shadow:none;}
+  .sidebar-close{display:none;}
+  .hamburger-btn{display:none;}
+  .sidebar-overlay{display:none !important;}
+  main{max-width:1180px;padding:26px 32px 70px;}
+  .grid{grid-template-columns:repeat(4,1fr);}
+}
+@media(min-width:1200px){
+  .grid{grid-template-columns:repeat(5,1fr);}
+}
+
+/* ---- Overview / dashboard stat cards ---- */
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;}
+@media(min-width:680px){.stat-grid{grid-template-columns:repeat(4,1fr);}}
+.stat-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px 17px;box-shadow:var(--shadow);}
+.stat-card .stat-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+.stat-card .stat-value{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;}
+.stat-card .stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.stat-card.rose .stat-value{color:var(--rose);}
+.dash-welcome{margin-bottom:22px;}
+.dash-welcome h2{font-size:20px;margin-bottom:4px;}
+.dash-welcome p{color:var(--muted);font-size:13px;}
+.quick-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
+
+/* ---- Reusable content-card CRUD grid (categories/recipients/feelings/occasions) ---- */
+.content-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative;transition:transform .15s;}
+.content-card:hover{transform:translateY(-2px);}
+.content-card.inactive{opacity:0.5;}
+.content-card .cc-img{aspect-ratio:1/0.9;background:linear-gradient(135deg,var(--surface),#F0E9E8);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);}
+.content-card .cc-img svg{width:24px;height:24px;opacity:0.35;}
+.content-card .cc-img img{width:100%;height:100%;object-fit:cover;}
+.content-card .cc-badge{position:absolute;top:8px;left:8px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15);font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;z-index:2;}
+.content-card .cc-body{padding:10px 11px 11px;}
+.content-card .cc-key{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.content-card .cc-label{font-size:13px;font-weight:700;margin:3px 0 8px;}
+.content-card .cc-row{display:flex;gap:6px;}
+.content-card .cc-row .btn{flex:1;padding:6px 8px;font-size:10.5px;}
+.add-content-card{border:1.5px dashed var(--line-strong);border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-weight:700;font-size:12.5px;cursor:pointer;min-height:180px;background:none;text-align:center;padding:16px;}
+.add-content-card:hover{border-color:var(--rose);color:var(--rose);}
+.add-content-card svg{width:26px;height:26px;opacity:.6;}
+
+/* ---- Toggle switch (active/inactive) ---- */
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:600;}
+.switch{position:relative;width:38px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch .slider{position:absolute;inset:0;background:var(--line-strong);border-radius:20px;cursor:pointer;transition:.15s;}
+.switch .slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+.switch input:checked + .slider{background:var(--ok);}
+.switch input:checked + .slider::before{transform:translateX(16px);}
 </style>
 </head>
 <body>
@@ -186,56 +274,130 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
   <div class="denied hidden" id="deniedMsg">Invalid email/password, or this account isn't on the admin list.</div>
 </div>
 
-<!-- ============ APP SHELL ============ -->
+<!-- ============ APP SHELL (sidebar dashboard) ============ -->
 <div id="appShell" class="hidden">
-  <header>
-    <div class="brand">
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
       <div class="mark">J</div>
       <div class="brand-text">
         <div class="name">Jagashilp</div>
         <div class="tag">Admin Console</div>
       </div>
+      <button class="sidebar-close" onclick="closeSidebar()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
-    <div class="who">
+    <nav class="sidebar-nav" id="sidebarNav">
+      <div class="nav-group-title">Overview</div>
+      <div class="nav-item active" data-tab="overview" onclick="switchTab('overview')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Dashboard
+      </div>
+
+      <div class="nav-group-title">Catalog</div>
+      <div class="nav-item" data-tab="products" onclick="switchTab('products')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7 12 3 4 7v10l8 4 8-4V7Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
+        Products
+      </div>
+      <div class="nav-item" data-tab="maincats" onclick="switchTab('maincats')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Main Categories
+      </div>
+
+      <div class="nav-group-title">Homepage Sections</div>
+      <div class="nav-item" data-tab="giftrecipients" onclick="switchTab('giftrecipients')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+        Gifts for Everyone
+      </div>
+      <div class="nav-item" data-tab="feelings" onclick="switchTab('feelings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+        Gifts for Every Feeling
+      </div>
+      <div class="nav-item" data-tab="occasions" onclick="switchTab('occasions')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+        Gifts for Every Occasion
+      </div>
+      <div class="nav-item" data-tab="promos" onclick="switchTab('promos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+        Promo Banners
+      </div>
+      <div class="nav-item" data-tab="catpage" onclick="switchTab('catpage')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Category Page
+      </div>
+      <div class="nav-item" data-tab="site" onclick="switchTab('site')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3.5"/><path d="M3 12h2m14 0h2M12 3v2m0 14v2M5.6 5.6l1.4 1.4m10 10 1.4 1.4M18.4 5.6 17 7m-10 10-1.4 1.4"/></svg>
+        Site Images
+      </div>
+
+      <div class="nav-group-title">Orders &amp; Support</div>
+      <div class="nav-item" data-tab="orders" onclick="switchTab('orders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        Orders
+        <span class="nav-badge hidden" id="navBadgeOrders"></span>
+      </div>
+      <div class="nav-item" data-tab="tickets" onclick="switchTab('tickets')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
+        Tickets
+        <span class="nav-badge hidden" id="navBadgeTickets"></span>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
       <span class="email-pill" id="whoEmail"></span>
       <button onclick="signOut()">Sign out</button>
     </div>
-  </header>
+  </aside>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="products" onclick="switchTab('products')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7 12 3 4 7v10l8 4 8-4V7Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>
-      Products
+  <div class="content-area">
+    <div class="topbar-admin">
+      <button class="hamburger-btn" onclick="openSidebar()">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="page-title" id="pageTitle">Dashboard</div>
     </div>
-    <div class="tab" data-tab="gifts" onclick="switchTab('gifts')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
-      Gift Images
-    </div>
-    <div class="tab" data-tab="site" onclick="switchTab('site')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Site Images
-    </div>
-    <div class="tab" data-tab="orders" onclick="switchTab('orders')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
-      Orders
-    </div>
-    <div class="tab" data-tab="tickets" onclick="switchTab('tickets')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z"/></svg>
-      Tickets
-    </div>
-    <div class="tab" data-tab="promos" onclick="switchTab('promos')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
-      Promo Banners
-    </div>
-    <div class="tab" data-tab="catpage" onclick="switchTab('catpage')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Category Page
-    </div>
-  </div>
 
-  <main>
+    <main>
+    <!-- OVERVIEW / DASHBOARD -->
+    <div class="section active" id="section-overview">
+      <div class="dash-welcome">
+        <h2>Namaste 👋</h2>
+        <p>Yahan se poora Jagashilp storefront — products, homepage sections, orders aur tickets — sab manage hota hai.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Products</div>
+          <div class="stat-value" id="statProducts">—</div>
+          <div class="stat-sub">Live on storefront</div>
+        </div>
+        <div class="stat-card rose">
+          <div class="stat-label">New Orders</div>
+          <div class="stat-value" id="statNewOrders">—</div>
+          <div class="stat-sub">Status: New</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Open Tickets</div>
+          <div class="stat-value" id="statOpenTickets">—</div>
+          <div class="stat-sub">Replace / Refund / Return</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Main Categories</div>
+          <div class="stat-value" id="statCategories">—</div>
+          <div class="stat-sub">Active on storefront</div>
+        </div>
+      </div>
+      <div class="bar"><div><h2>Quick Actions</h2></div></div>
+      <div class="quick-actions">
+        <button class="btn" onclick="switchTab('products');openProductModal()">+ Add Product</button>
+        <button class="btn ghost" onclick="switchTab('maincats')">Manage Categories</button>
+        <button class="btn ghost" onclick="switchTab('orders')">View Orders</button>
+        <button class="btn ghost" onclick="switchTab('promos')">Promo Banners</button>
+      </div>
+    </div>
+
     <!-- PRODUCTS SECTION -->
-    <div class="section active" id="section-products">
+    <div class="section" id="section-products">
       <div class="bar">
         <div>
           <h2>Products</h2>
@@ -253,15 +415,48 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       <div class="grid" id="productsGrid"></div>
     </div>
 
-    <!-- GIFT IMAGES SECTION -->
-    <div class="section" id="section-gifts">
+    <!-- MAIN CATEGORIES SECTION -->
+    <div class="section" id="section-maincats">
+      <div class="bar">
+        <div>
+          <h2>Main Categories</h2>
+          <div class="count">Top category strip + Category tab pe dikhne wale product types. Naya add karoge to woh turant product-form ke "Category" dropdown mein bhi aa jaayega.</div>
+        </div>
+      </div>
+      <div class="grid" id="maincatsGrid"></div>
+    </div>
+
+    <!-- GIFTS FOR EVERYONE SECTION -->
+    <div class="section" id="section-giftrecipients">
       <div class="bar">
         <div>
           <h2>Gifts for Everyone</h2>
-          <div class="count">Recipient photos shown on the storefront</div>
+          <div class="count">Home page "Pick a Person" row — Him/Her/Kids jaise recipient cards. Add/remove/reorder karo, storefront turant update hoga.</div>
         </div>
       </div>
-      <div class="grid" id="giftsGrid"></div>
+      <div class="grid" id="giftRecipientsGrid"></div>
+    </div>
+
+    <!-- GIFTS FOR EVERY FEELING SECTION -->
+    <div class="section" id="section-feelings">
+      <div class="bar">
+        <div>
+          <h2>Gifts for Every Feeling</h2>
+          <div class="count">Home page "Pick a Moment" row — Love, Apology, Miss You jaise mood cards.</div>
+        </div>
+      </div>
+      <div class="grid" id="feelingsGrid"></div>
+    </div>
+
+    <!-- GIFTS FOR EVERY OCCASION SECTION -->
+    <div class="section" id="section-occasions">
+      <div class="bar">
+        <div>
+          <h2>Gifts for Every Occasion</h2>
+          <div class="count">Home page "Pick an Occasion" row — Birthday, Rakhi, Anniversary jaise occasion cards. Optional badge text (e.g. "28TH AUG") bhi laga sakte ho.</div>
+        </div>
+      </div>
+      <div class="grid" id="occasionsGrid"></div>
     </div>
 
     <!-- SITE IMAGES SECTION -->
@@ -347,7 +542,8 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
       </div>
       <div id="catSectionsList"></div>
     </div>
-  </main>
+    </main>
+  </div>
 </div>
 
 <!-- ============ PRODUCT ADD/EDIT MODAL ============ -->
@@ -584,6 +780,122 @@ main{padding:20px 16px 70px;max-width:960px;margin:0 auto;}
   </div>
 </div>
 
+<!-- ============ MAIN CATEGORY ADD/EDIT MODAL ============ -->
+<div class="overlay" id="mcOverlay">
+  <div class="modal">
+    <h3 id="mcModalTitle">Add Category</h3>
+    <input type="hidden" id="mc-id">
+    <div class="field">
+      <label>Icon (square, top category strip mein dikhega)</label>
+      <label class="upload-box" for="mc-icon-input" id="mc-icon-box">Tap to upload icon</label>
+      <input type="file" accept="image/*" id="mc-icon-input" style="display:none;" onchange="handleMainCatIcon(event)">
+    </div>
+    <div class="field">
+      <label>Banner (wide, Category tab pe is category ke top pe dikhega — optional)</label>
+      <label class="upload-box" for="mc-banner-input" id="mc-banner-box">Tap to upload banner</label>
+      <input type="file" accept="image/*" id="mc-banner-input" style="display:none;" onchange="handleMainCatBanner(event)">
+    </div>
+    <div class="field">
+      <label>Category Type (Product form ke "Category" dropdown mein exactly yahi value dikhegi — e.g. Keychain)</label>
+      <input type="text" id="mc-type" placeholder="e.g. Coasters">
+    </div>
+    <div class="field">
+      <label>Display Label (customer ko yeh dikhega — e.g. Coasters)</label>
+      <input type="text" id="mc-label" placeholder="e.g. Coasters">
+    </div>
+    <div class="field">
+      <div class="check-row"><input type="checkbox" id="mc-active" checked> Active (storefront pe dikhega)</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeMainCatModal()">Cancel</button>
+      <button class="btn" onclick="saveMainCat()">Save</button>
+    </div>
+    <div class="status-msg" id="mc-status"></div>
+  </div>
+</div>
+
+<!-- ============ GIFT RECIPIENT ADD/EDIT MODAL ============ -->
+<div class="overlay" id="grOverlay">
+  <div class="modal">
+    <h3 id="grModalTitle">Add Recipient</h3>
+    <input type="hidden" id="gr-id">
+    <input type="hidden" id="gr-key">
+    <div class="field">
+      <label>Photo (square)</label>
+      <label class="upload-box" for="gr-photo-input" id="gr-photo-box">Tap to upload photo</label>
+      <input type="file" accept="image/*" id="gr-photo-input" style="display:none;" onchange="handleGiftRecipientPhoto(event)">
+    </div>
+    <div class="field">
+      <label>Label (e.g. Him, Her, Kids, Mother)</label>
+      <input type="text" id="gr-label" placeholder="e.g. Mother">
+    </div>
+    <div class="field">
+      <div class="check-row"><input type="checkbox" id="gr-active" checked> Active (storefront pe dikhega)</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeGiftRecipientModal()">Cancel</button>
+      <button class="btn" onclick="saveGiftRecipient()">Save</button>
+    </div>
+    <div class="status-msg" id="gr-status"></div>
+  </div>
+</div>
+
+<!-- ============ FEELING CARD ADD/EDIT MODAL ============ -->
+<div class="overlay" id="fcOverlay">
+  <div class="modal">
+    <h3 id="fcModalTitle">Add Feeling</h3>
+    <input type="hidden" id="fc-id">
+    <input type="hidden" id="fc-key">
+    <div class="field">
+      <label>Photo (square)</label>
+      <label class="upload-box" for="fc-photo-input" id="fc-photo-box">Tap to upload photo</label>
+      <input type="file" accept="image/*" id="fc-photo-input" style="display:none;" onchange="handleFeelingPhoto(event)">
+    </div>
+    <div class="field">
+      <label>Label (e.g. Love &amp; Romance, Apology, Get Well Soon)</label>
+      <input type="text" id="fc-label" placeholder="e.g. Get Well Soon">
+    </div>
+    <div class="field">
+      <div class="check-row"><input type="checkbox" id="fc-active" checked> Active (storefront pe dikhega)</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeFeelingModal()">Cancel</button>
+      <button class="btn" onclick="saveFeeling()">Save</button>
+    </div>
+    <div class="status-msg" id="fc-status"></div>
+  </div>
+</div>
+
+<!-- ============ OCCASION CARD ADD/EDIT MODAL ============ -->
+<div class="overlay" id="ocOverlay">
+  <div class="modal">
+    <h3 id="ocModalTitle">Add Occasion</h3>
+    <input type="hidden" id="oc-id">
+    <input type="hidden" id="oc-key">
+    <div class="field">
+      <label>Photo</label>
+      <label class="upload-box" for="oc-photo-input" id="oc-photo-box">Tap to upload photo</label>
+      <input type="file" accept="image/*" id="oc-photo-input" style="display:none;" onchange="handleOccasionPhoto(event)">
+    </div>
+    <div class="field">
+      <label>Title (e.g. Birthday, Rakhi Gifts, Diwali)</label>
+      <input type="text" id="oc-title" placeholder="e.g. Diwali">
+    </div>
+    <div class="field">
+      <label>Badge text (optional — small white pill on the card, e.g. "28TH AUG")</label>
+      <input type="text" id="oc-badge" placeholder="optional">
+    </div>
+    <div class="field">
+      <div class="check-row"><input type="checkbox" id="oc-active" checked> Active (storefront pe dikhega)</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeOccasionModal()">Cancel</button>
+      <button class="btn" onclick="saveOccasion()">Save</button>
+    </div>
+    <div class="status-msg" id="oc-status"></div>
+  </div>
+</div>
+
 <script>
 /* ================= SUPABASE CONFIG =================
    Same values jo index.html mein daale — Project Settings -> API */
@@ -614,14 +926,17 @@ let productsCache = [];
 let productsSubTab = 'customised';
 let ordersCache = [];
 let ordersSubTab = 'customised';
-let GIFT_RECIPIENTS = [
-  {key:'him', label:'Him'}, {key:'her', label:'Her'}, {key:'kids', label:'Kids'},
-  {key:'friend', label:'Friend'}, {key:'sister', label:'Sister'}, {key:'brother', label:'Brother'},
-  {key:'girlfriend', label:'Girlfriend'}, {key:'boyfriend', label:'Boyfriend'},
-];
-let giftImagesCache = {};
+/* ---------------- Homepage content CMS caches ----------------
+   Main Categories / Gift Recipients / Feeling Cards / Occasion Cards —
+   sab 4 ab Supabase-backed hain (main_categories, gift_recipients,
+   feeling_cards, occasion_cards tables — homepage_content_migration.sql
+   chalao pehli baar). Har ek same add/edit/delete/reorder/active-toggle
+   pattern follow karta hai jaise Category Page Builder ka category_tiles. */
+let MAIN_CATS = [];
+let GIFT_RECIPIENTS = [];   // Gifts for Everyone (used by TAG_GROUPS + product form category list)
+let FEELING_CARDS = [];     // Gifts for Every Feeling
+let OCCASION_CARDS = [];    // Gifts for Every Occasion
 let pendingProductPhotoFile = null;
-let pendingGiftPhotoKey = null;
 
 /* Har group index.html ke jis section se match karta hai, aur keys
    wahi hain jo index.html khud generate karta hai (type.toLowerCase()
@@ -641,43 +956,8 @@ const SITE_IMAGE_GROUPS = [
   { title:'Category Tab', items:[
     {key:'catpage_shopbycategory_bg', label:'"Shop by Category" section — background photo (Canva se design karke, poore section ke peeche dikhega)'},
   ]},
-  { title:'Category Icons (top bar) — transparent PNG, square, ~200×200px', items:[
-    {key:'cat_icon_All', label:'"All" icon'},
-    {key:'cat_icon_Keychain', label:'Keychain icon'},
-    {key:'cat_icon_Mug', label:'Mug icon'},
-    {key:'cat_icon_Tote Bag', label:'Tote Bag icon'},
-    {key:'cat_icon_T-Shirt', label:'T-Shirt icon'},
-    {key:'cat_icon_Fridge Magnet', label:'Fridge Magnet icon'},
-    {key:'cat_icon_Hamper', label:'Hamper icon'},
-  ]},
-  { title:'Category Tab — Hero Banners (wide, ~1080×500px — Category tab ke top pe dikhta hai, jo category select karo wahi banner badal jaata hai)', items:[
-    {key:'cat_banner_All', label:'"All" banner (default, jab koi specific category select na ho)'},
-    {key:'cat_banner_Keychain', label:'Keychain banner'},
-    {key:'cat_banner_Mug', label:'Mug banner'},
-    {key:'cat_banner_Tote Bag', label:'Tote Bag banner'},
-    {key:'cat_banner_T-Shirt', label:'T-Shirt banner'},
-    {key:'cat_banner_Fridge Magnet', label:'Fridge Magnet banner'},
-    {key:'cat_banner_Hamper', label:'Hamper banner'},
-  ]},
   { title:'Category Tab — Bottom CTA Banner (wide, ~1080×400px — Category tab ke sabse neeche dikhta hai)', items:[
     {key:'category_bottom_cta', label:'Bottom banner photo (jaise "Bulk/Corporate Gifting? Message us")'},
-  ]},
-  { title:'Gifts for Every Feeling', items:[
-    {key:'feeling_love', label:'Love & Romance'},
-    {key:'feeling_thinking', label:'Thinking Of You'},
-    {key:'feeling_apology', label:'Apology'},
-    {key:'feeling_missyou', label:'Miss You'},
-    {key:'feeling_congrats', label:'Congratulations'},
-  ]},
-  { title:'Gifts for Every Occasion', items:[
-    {key:'occasion_birthday', label:'Birthday'},
-    {key:'occasion_rakhi', label:'Rakhi Gifts'},
-    {key:'occasion_anniversary', label:'Anniversary'},
-    {key:'occasion_congrats', label:'Congratulations'},
-    {key:'occasion_thankyou', label:'Thank You'},
-    {key:'occasion_housewarming', label:'Housewarming'},
-    {key:'occasion_babyshower', label:'Baby Shower'},
-    {key:'occasion_retirement', label:'Retirement'},
   ]},
   { title:'Customisation Styles', items:[
     {key:'avatarstyle_ghibli', label:'Ghibli Style'},
@@ -709,17 +989,19 @@ const SITE_IMAGE_GROUPS = [
 ];
 let siteImagesCache = {};
 
-/* Product tags — derived from the same groups above so keys always stay in
-   sync with the Person/Feeling/Occasion cards on the storefront home page.
-   Ek product multiple tags le sakta hai (e.g. 'rakhi' + 'brother' + 'love'). */
-const TAG_GROUPS = [
-  { title:'Person', tags: GIFT_RECIPIENTS },
-  { title:'Mood / Feeling', tags: SITE_IMAGE_GROUPS.find(g => g.title === 'Gifts for Every Feeling').items.map(i => ({key:i.key.replace('feeling_',''), label:i.label})) },
-  { title:'Occasion', tags: SITE_IMAGE_GROUPS.find(g => g.title === 'Gifts for Every Occasion').items.map(i => ({key:i.key.replace('occasion_',''), label:i.label})) },
-];
+/* Product tags — derived live from the Gifts for Everyone / Feeling / Occasion
+   CMS lists above, so keys always stay in sync with whatever admin has added/
+   removed there. Ek product multiple tags le sakta hai (e.g. 'rakhi' + 'brother' + 'love'). */
+function getTagGroups(){
+  return [
+    { title:'Person', tags: GIFT_RECIPIENTS.map(g => ({key:g.key, label:g.label})) },
+    { title:'Mood / Feeling', tags: FEELING_CARDS.map(f => ({key:f.key, label:f.label})) },
+    { title:'Occasion', tags: OCCASION_CARDS.map(o => ({key:o.key, label:o.title})) },
+  ];
+}
 function renderTagGroups(selectedKeys){
   const sel = new Set(selectedKeys || []);
-  document.getElementById('pfTagGroups').innerHTML = TAG_GROUPS.map(g => `
+  document.getElementById('pfTagGroups').innerHTML = getTagGroups().map(g => `
     <div class="tag-group">
       <div class="tag-group-title">${g.title}</div>
       <div class="tag-chips">
@@ -741,6 +1023,7 @@ function getCheckedTags(){
 /* Shared inline icons */
 const ICON_PHOTO = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>`;
 const ICON_BOX = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 7 12 3 4 7v10l8 4 8-4V7Z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>`;
+const ICON_PLUS = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>`;
 function photoSlot(url, label){
   return url ? `<img src="${url}" alt="${label}">` : `${ICON_PHOTO}<span>No photo</span>`;
 }
@@ -795,7 +1078,10 @@ async function checkSession(){
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appShell').classList.remove('hidden');
   loadProducts();
-  loadGiftImages();
+  loadMainCats();
+  loadGiftRecipients();
+  loadFeelingCards();
+  loadOccasionCards();
   loadSiteImages();
   loadOrders();
   loadTickets();
@@ -815,11 +1101,27 @@ sb.auth.onAuthStateChange((event, session)=>{
   if(event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED'){ checkSession(); }
 });
 
-/* ---------------- Tabs ---------------- */
+/* ---------------- Sidebar navigation ---------------- */
+const TAB_TITLES = {
+  overview:'Dashboard', products:'Products', maincats:'Main Categories',
+  giftrecipients:'Gifts for Everyone', feelings:'Gifts for Every Feeling',
+  occasions:'Gifts for Every Occasion', promos:'Promo Banners', catpage:'Category Page Builder',
+  site:'Site Images', orders:'Orders', tickets:'Support Tickets',
+};
 function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('section-' + name).classList.add('active');
+  document.getElementById('pageTitle').textContent = TAB_TITLES[name] || '';
+  closeSidebar();
+}
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
 }
 
 /* ---------------- Image compression + upload helper ---------------- */
@@ -865,6 +1167,8 @@ async function loadProducts(){
   productsCache = data || [];
   renderProductsGrid();
   renderSiteImagesGroups(); // hero "Shop Now" product picker options refresh
+  const statEl = document.getElementById('statProducts');
+  if(statEl) statEl.textContent = productsCache.length;
 }
 
 function switchProductsSubTab(name){
@@ -1493,54 +1797,392 @@ async function moveCatTile(id, direction){
   loadCategoryPage();
 }
 
-/* ---------------- Gift Images ---------------- */
-async function loadGiftImages(){
-  if(!sb){ renderGiftsGrid(); return; }
-  const { data, error } = await sb.from('gift_images').select('*');
-  if(error){ console.error(error); return; }
-  giftImagesCache = {};
-  (data || []).forEach(row => { giftImagesCache[row.key] = row.image_url; });
-  renderGiftsGrid();
+/* ================================================================
+   HOMEPAGE CONTENT CMS — Main Categories / Gift Recipients /
+   Feeling Cards / Occasion Cards. Sabka pattern same hai:
+   load -> render (content-card grid + trailing "+Add" card) ->
+   open modal (add ya edit) -> save (insert/update) -> delete -> move
+   (sort_order swap with neighbour) -> toggle active.
+   ================================================================ */
+function slugifyKey(label){
+  return (label || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '').slice(0, 40) || ('x' + Date.now());
 }
 
-function renderGiftsGrid(){
-  const grid = document.getElementById('giftsGrid');
-  grid.innerHTML = GIFT_RECIPIENTS.map(g => `
-    <div class="pcard">
-      <label class="pimg" for="gift-file-${g.key}" style="cursor:pointer;">
-        ${photoSlot(giftImagesCache[g.key], g.label)}
-      </label>
-      <input type="file" accept="image/*" id="gift-file-${g.key}" style="display:none;" onchange="handleGiftUpload('${g.key}', event)">
-      <div class="pbody">
-        <div class="pname">${g.label}</div>
-        <div class="prow">
-          <label class="btn ghost small" for="gift-file-${g.key}" style="flex:1;text-align:center;cursor:pointer;">${giftImagesCache[g.key] ? 'Change' : 'Upload'}</label>
-          ${giftImagesCache[g.key] ? `<button class="btn rose ghost small" onclick="removeGiftImage('${g.key}')">Remove</button>` : ''}
+/* ---------------- Main Categories ---------------- */
+async function loadMainCats(){
+  if(!sb) return;
+  const { data, error } = await sb.from('main_categories').select('*').order('sort_order');
+  if(error){ console.error(error); return; }
+  MAIN_CATS = data || [];
+  renderMainCats();
+  populateProductCategoryOptions();
+  document.getElementById('statCategories').textContent = MAIN_CATS.filter(c => c.active).length;
+}
+function renderMainCats(){
+  const grid = document.getElementById('maincatsGrid');
+  if(!grid) return;
+  grid.innerHTML = MAIN_CATS.map((c, idx) => `
+    <div class="content-card ${c.active ? '' : 'inactive'}">
+      <div class="cc-img">${c.icon_url ? `<img src="${c.icon_url}">` : ICON_BOX}</div>
+      <div class="cc-body">
+        <div class="cc-key">${c.type}</div>
+        <div class="cc-label">${c.label}</div>
+        <div class="cc-row" style="margin-bottom:7px;">
+          <button class="btn ghost small" onclick="moveMainCat('${c.id}', -1)" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn ghost small" onclick="moveMainCat('${c.id}', 1)" ${idx===MAIN_CATS.length-1?'disabled':''}>↓</button>
+          <button class="btn ghost small" onclick="openMainCatModal('${c.id}')">Edit</button>
         </div>
+        <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteMainCat('${c.id}')">Delete</button></div>
       </div>
     </div>
-  `).join('');
+  `).join('') + `<button class="add-content-card" onclick="openMainCatModal()">${ICON_PLUS}Add Category</button>`;
 }
-
-async function handleGiftUpload(key, event){
-  const file = event.target.files[0];
-  if(!file) return;
-  try{
-    const compressed = await compressImage(file, 700, 0.8);
-    const url = await uploadToStorage(compressed, 'gift-' + key);
-    const { error } = await sb.from('gift_images').upsert({ key, image_url: url });
-    if(error) throw error;
-    await loadGiftImages();
-  }catch(err){
-    alert('Upload fail: ' + err.message);
+let pendingMcIconFile=null, pendingMcBannerFile=null;
+function openMainCatModal(id){
+  document.getElementById('mc-status').style.display='none';
+  pendingMcIconFile=null; pendingMcBannerFile=null;
+  if(id){
+    const c = MAIN_CATS.find(x=>x.id===id);
+    document.getElementById('mcModalTitle').textContent='Edit Category';
+    document.getElementById('mc-id').value=c.id;
+    document.getElementById('mc-type').value=c.type;
+    document.getElementById('mc-label').value=c.label;
+    document.getElementById('mc-active').checked=c.active;
+    document.getElementById('mc-icon-box').innerHTML = c.icon_url ? `<img src="${c.icon_url}">` : 'Tap to upload icon';
+    document.getElementById('mc-banner-box').innerHTML = c.banner_url ? `<img src="${c.banner_url}">` : 'Tap to upload banner';
+  }else{
+    document.getElementById('mcModalTitle').textContent='Add Category';
+    document.getElementById('mc-id').value='';
+    document.getElementById('mc-type').value='';
+    document.getElementById('mc-label').value='';
+    document.getElementById('mc-active').checked=true;
+    document.getElementById('mc-icon-box').innerHTML='Tap to upload icon';
+    document.getElementById('mc-banner-box').innerHTML='Tap to upload banner';
   }
+  document.getElementById('mcOverlay').classList.add('show');
+}
+function closeMainCatModal(){ document.getElementById('mcOverlay').classList.remove('show'); }
+function handleMainCatIcon(e){
+  const file=e.target.files[0]; if(!file) return;
+  pendingMcIconFile=file;
+  const r=new FileReader(); r.onload=(ev)=>{document.getElementById('mc-icon-box').innerHTML=`<img src="${ev.target.result}">`;}; r.readAsDataURL(file);
+}
+function handleMainCatBanner(e){
+  const file=e.target.files[0]; if(!file) return;
+  pendingMcBannerFile=file;
+  const r=new FileReader(); r.onload=(ev)=>{document.getElementById('mc-banner-box').innerHTML=`<img src="${ev.target.result}">`;}; r.readAsDataURL(file);
+}
+async function saveMainCat(){
+  const statusEl=document.getElementById('mc-status');
+  const id=document.getElementById('mc-id').value;
+  const type=document.getElementById('mc-type').value.trim();
+  const label=document.getElementById('mc-label').value.trim();
+  if(!type || !label){ statusEl.style.display='block'; statusEl.style.color='var(--rose)'; statusEl.textContent='Type aur Label dono bharo.'; return; }
+  statusEl.style.display='block'; statusEl.style.color='var(--muted)'; statusEl.textContent='Saving...';
+  try{
+    const payload={ type, label, active: document.getElementById('mc-active').checked };
+    if(pendingMcIconFile){ const c=await compressImage(pendingMcIconFile,400,0.85,'image/png'); payload.icon_url=await uploadToStorage(c,'catIcon'); }
+    if(pendingMcBannerFile){ const c=await compressImage(pendingMcBannerFile,1080,0.85); payload.banner_url=await uploadToStorage(c,'catBanner'); }
+    let error;
+    if(id){ ({error}=await sb.from('main_categories').update(payload).eq('id',id)); }
+    else{ payload.sort_order=MAIN_CATS.length; ({error}=await sb.from('main_categories').insert(payload)); }
+    if(error) throw error;
+    await loadMainCats();
+    setTimeout(closeMainCatModal,300);
+  }catch(err){ statusEl.style.color='var(--rose)'; statusEl.textContent='Error: '+(err.message||'kuch galat ho gaya'); }
+}
+async function deleteMainCat(id){
+  if(!confirm('Ye category delete karni hai? Isse bane products apne aap delete nahi honge, par category list se hat jaayegi.')) return;
+  const { error } = await sb.from('main_categories').delete().eq('id', id);
+  if(error){ alert('Delete fail: '+error.message); return; }
+  loadMainCats();
+}
+async function moveMainCat(id, dir){
+  const idx=MAIN_CATS.findIndex(x=>x.id===id); const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=MAIN_CATS.length) return;
+  const a=MAIN_CATS[idx], b=MAIN_CATS[swapIdx];
+  await Promise.all([
+    sb.from('main_categories').update({sort_order:b.sort_order}).eq('id',a.id),
+    sb.from('main_categories').update({sort_order:a.sort_order}).eq('id',b.id),
+  ]);
+  loadMainCats();
+}
+function populateProductCategoryOptions(){
+  if(!MAIN_CATS.length) return; // static fallback options already in the HTML
+  // Product form, Promo Banner link-target, and Category Tile link-target
+  // dropdowns all list the same set of categories — keep them in sync here
+  // so a newly added Main Category shows up everywhere automatically.
+  ['pf-category', 'pm-category', 'ct-category'].forEach(id => {
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const current = sel.value;
+    sel.innerHTML = MAIN_CATS.map(c => `<option value="${c.type}">${c.type}</option>`).join('');
+    if([...sel.options].some(o=>o.value===current)) sel.value = current;
+  });
 }
 
-async function removeGiftImage(key){
-  if(!confirm('Ye photo remove karni hai?')) return;
-  const { error } = await sb.from('gift_images').delete().eq('key', key);
-  if(error){ alert('Fail: ' + error.message); return; }
-  loadGiftImages();
+/* ---------------- Gift Recipients ("Gifts for Everyone") ---------------- */
+async function loadGiftRecipients(){
+  if(!sb) return;
+  const { data, error } = await sb.from('gift_recipients').select('*').order('sort_order');
+  if(error){ console.error(error); return; }
+  GIFT_RECIPIENTS = data || [];
+  renderGiftRecipients();
+}
+function renderGiftRecipients(){
+  const grid = document.getElementById('giftRecipientsGrid');
+  if(!grid) return;
+  grid.innerHTML = GIFT_RECIPIENTS.map((g, idx) => `
+    <div class="content-card ${g.active ? '' : 'inactive'}">
+      <div class="cc-img">${g.image_url ? `<img src="${g.image_url}">` : ICON_PHOTO}</div>
+      <div class="cc-body">
+        <div class="cc-key">${g.key}</div>
+        <div class="cc-label">${g.label}</div>
+        <div class="cc-row" style="margin-bottom:7px;">
+          <button class="btn ghost small" onclick="moveGiftRecipient('${g.id}', -1)" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn ghost small" onclick="moveGiftRecipient('${g.id}', 1)" ${idx===GIFT_RECIPIENTS.length-1?'disabled':''}>↓</button>
+          <button class="btn ghost small" onclick="openGiftRecipientModal('${g.id}')">Edit</button>
+        </div>
+        <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteGiftRecipient('${g.id}')">Delete</button></div>
+      </div>
+    </div>
+  `).join('') + `<button class="add-content-card" onclick="openGiftRecipientModal()">${ICON_PLUS}Add Recipient</button>`;
+}
+let pendingGrPhotoFile=null;
+function openGiftRecipientModal(id){
+  document.getElementById('gr-status').style.display='none';
+  pendingGrPhotoFile=null;
+  if(id){
+    const g=GIFT_RECIPIENTS.find(x=>x.id===id);
+    document.getElementById('grModalTitle').textContent='Edit Recipient';
+    document.getElementById('gr-id').value=g.id;
+    document.getElementById('gr-key').value=g.key;
+    document.getElementById('gr-label').value=g.label;
+    document.getElementById('gr-active').checked=g.active;
+    document.getElementById('gr-photo-box').innerHTML=g.image_url?`<img src="${g.image_url}">`:'Tap to upload photo';
+  }else{
+    document.getElementById('grModalTitle').textContent='Add Recipient';
+    document.getElementById('gr-id').value=''; document.getElementById('gr-key').value='';
+    document.getElementById('gr-label').value=''; document.getElementById('gr-active').checked=true;
+    document.getElementById('gr-photo-box').innerHTML='Tap to upload photo';
+  }
+  document.getElementById('grOverlay').classList.add('show');
+}
+function closeGiftRecipientModal(){ document.getElementById('grOverlay').classList.remove('show'); }
+function handleGiftRecipientPhoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  pendingGrPhotoFile=file;
+  const r=new FileReader(); r.onload=(ev)=>{document.getElementById('gr-photo-box').innerHTML=`<img src="${ev.target.result}">`;}; r.readAsDataURL(file);
+}
+async function saveGiftRecipient(){
+  const statusEl=document.getElementById('gr-status');
+  const id=document.getElementById('gr-id').value;
+  const label=document.getElementById('gr-label').value.trim();
+  if(!label){ statusEl.style.display='block'; statusEl.style.color='var(--rose)'; statusEl.textContent='Label bharo.'; return; }
+  statusEl.style.display='block'; statusEl.style.color='var(--muted)'; statusEl.textContent='Saving...';
+  try{
+    const payload={ label, active: document.getElementById('gr-active').checked };
+    if(pendingGrPhotoFile){ const c=await compressImage(pendingGrPhotoFile,700,0.8); payload.image_url=await uploadToStorage(c,'giftRecipient'); }
+    let error;
+    if(id){ ({error}=await sb.from('gift_recipients').update(payload).eq('id',id)); }
+    else{ payload.key=slugifyKey(label); payload.sort_order=GIFT_RECIPIENTS.length; ({error}=await sb.from('gift_recipients').insert(payload)); }
+    if(error) throw error;
+    await loadGiftRecipients();
+    setTimeout(closeGiftRecipientModal,300);
+  }catch(err){ statusEl.style.color='var(--rose)'; statusEl.textContent='Error: '+(err.message||'kuch galat ho gaya'); }
+}
+async function deleteGiftRecipient(id){
+  if(!confirm('Ye recipient card delete karni hai?')) return;
+  const { error } = await sb.from('gift_recipients').delete().eq('id', id);
+  if(error){ alert('Delete fail: '+error.message); return; }
+  loadGiftRecipients();
+}
+async function moveGiftRecipient(id, dir){
+  const idx=GIFT_RECIPIENTS.findIndex(x=>x.id===id); const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=GIFT_RECIPIENTS.length) return;
+  const a=GIFT_RECIPIENTS[idx], b=GIFT_RECIPIENTS[swapIdx];
+  await Promise.all([
+    sb.from('gift_recipients').update({sort_order:b.sort_order}).eq('id',a.id),
+    sb.from('gift_recipients').update({sort_order:a.sort_order}).eq('id',b.id),
+  ]);
+  loadGiftRecipients();
+}
+
+/* ---------------- Feeling Cards ("Gifts for Every Feeling") ---------------- */
+async function loadFeelingCards(){
+  if(!sb) return;
+  const { data, error } = await sb.from('feeling_cards').select('*').order('sort_order');
+  if(error){ console.error(error); return; }
+  FEELING_CARDS = data || [];
+  renderFeelingCards();
+}
+function renderFeelingCards(){
+  const grid = document.getElementById('feelingsGrid');
+  if(!grid) return;
+  grid.innerHTML = FEELING_CARDS.map((f, idx) => `
+    <div class="content-card ${f.active ? '' : 'inactive'}">
+      <div class="cc-img">${f.image_url ? `<img src="${f.image_url}">` : ICON_PHOTO}</div>
+      <div class="cc-body">
+        <div class="cc-key">${f.key}</div>
+        <div class="cc-label">${f.label}</div>
+        <div class="cc-row" style="margin-bottom:7px;">
+          <button class="btn ghost small" onclick="moveFeelingCard('${f.id}', -1)" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn ghost small" onclick="moveFeelingCard('${f.id}', 1)" ${idx===FEELING_CARDS.length-1?'disabled':''}>↓</button>
+          <button class="btn ghost small" onclick="openFeelingModal('${f.id}')">Edit</button>
+        </div>
+        <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteFeelingCard('${f.id}')">Delete</button></div>
+      </div>
+    </div>
+  `).join('') + `<button class="add-content-card" onclick="openFeelingModal()">${ICON_PLUS}Add Feeling</button>`;
+}
+let pendingFcPhotoFile=null;
+function openFeelingModal(id){
+  document.getElementById('fc-status').style.display='none';
+  pendingFcPhotoFile=null;
+  if(id){
+    const f=FEELING_CARDS.find(x=>x.id===id);
+    document.getElementById('fcModalTitle').textContent='Edit Feeling';
+    document.getElementById('fc-id').value=f.id;
+    document.getElementById('fc-key').value=f.key;
+    document.getElementById('fc-label').value=f.label;
+    document.getElementById('fc-active').checked=f.active;
+    document.getElementById('fc-photo-box').innerHTML=f.image_url?`<img src="${f.image_url}">`:'Tap to upload photo';
+  }else{
+    document.getElementById('fcModalTitle').textContent='Add Feeling';
+    document.getElementById('fc-id').value=''; document.getElementById('fc-key').value='';
+    document.getElementById('fc-label').value=''; document.getElementById('fc-active').checked=true;
+    document.getElementById('fc-photo-box').innerHTML='Tap to upload photo';
+  }
+  document.getElementById('fcOverlay').classList.add('show');
+}
+function closeFeelingModal(){ document.getElementById('fcOverlay').classList.remove('show'); }
+function handleFeelingPhoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  pendingFcPhotoFile=file;
+  const r=new FileReader(); r.onload=(ev)=>{document.getElementById('fc-photo-box').innerHTML=`<img src="${ev.target.result}">`;}; r.readAsDataURL(file);
+}
+async function saveFeeling(){
+  const statusEl=document.getElementById('fc-status');
+  const id=document.getElementById('fc-id').value;
+  const label=document.getElementById('fc-label').value.trim();
+  if(!label){ statusEl.style.display='block'; statusEl.style.color='var(--rose)'; statusEl.textContent='Label bharo.'; return; }
+  statusEl.style.display='block'; statusEl.style.color='var(--muted)'; statusEl.textContent='Saving...';
+  try{
+    const payload={ label, active: document.getElementById('fc-active').checked };
+    if(pendingFcPhotoFile){ const c=await compressImage(pendingFcPhotoFile,700,0.8); payload.image_url=await uploadToStorage(c,'feeling'); }
+    let error;
+    if(id){ ({error}=await sb.from('feeling_cards').update(payload).eq('id',id)); }
+    else{ payload.key=slugifyKey(label); payload.sort_order=FEELING_CARDS.length; ({error}=await sb.from('feeling_cards').insert(payload)); }
+    if(error) throw error;
+    await loadFeelingCards();
+    setTimeout(closeFeelingModal,300);
+  }catch(err){ statusEl.style.color='var(--rose)'; statusEl.textContent='Error: '+(err.message||'kuch galat ho gaya'); }
+}
+async function deleteFeelingCard(id){
+  if(!confirm('Ye feeling card delete karni hai?')) return;
+  const { error } = await sb.from('feeling_cards').delete().eq('id', id);
+  if(error){ alert('Delete fail: '+error.message); return; }
+  loadFeelingCards();
+}
+async function moveFeelingCard(id, dir){
+  const idx=FEELING_CARDS.findIndex(x=>x.id===id); const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=FEELING_CARDS.length) return;
+  const a=FEELING_CARDS[idx], b=FEELING_CARDS[swapIdx];
+  await Promise.all([
+    sb.from('feeling_cards').update({sort_order:b.sort_order}).eq('id',a.id),
+    sb.from('feeling_cards').update({sort_order:a.sort_order}).eq('id',b.id),
+  ]);
+  loadFeelingCards();
+}
+
+/* ---------------- Occasion Cards ("Gifts for Every Occasion") ---------------- */
+async function loadOccasionCards(){
+  if(!sb) return;
+  const { data, error } = await sb.from('occasion_cards').select('*').order('sort_order');
+  if(error){ console.error(error); return; }
+  OCCASION_CARDS = data || [];
+  renderOccasionCards();
+}
+function renderOccasionCards(){
+  const grid = document.getElementById('occasionsGrid');
+  if(!grid) return;
+  grid.innerHTML = OCCASION_CARDS.map((o, idx) => `
+    <div class="content-card ${o.active ? '' : 'inactive'}">
+      <div class="cc-img">${o.badge ? `<div class="cc-badge">${o.badge}</div>` : ''}${o.image_url ? `<img src="${o.image_url}">` : ICON_PHOTO}</div>
+      <div class="cc-body">
+        <div class="cc-key">${o.key}</div>
+        <div class="cc-label">${o.title}</div>
+        <div class="cc-row" style="margin-bottom:7px;">
+          <button class="btn ghost small" onclick="moveOccasionCard('${o.id}', -1)" ${idx===0?'disabled':''}>↑</button>
+          <button class="btn ghost small" onclick="moveOccasionCard('${o.id}', 1)" ${idx===OCCASION_CARDS.length-1?'disabled':''}>↓</button>
+          <button class="btn ghost small" onclick="openOccasionModal('${o.id}')">Edit</button>
+        </div>
+        <div class="cc-row"><button class="btn rose ghost small" style="flex:1;" onclick="deleteOccasionCard('${o.id}')">Delete</button></div>
+      </div>
+    </div>
+  `).join('') + `<button class="add-content-card" onclick="openOccasionModal()">${ICON_PLUS}Add Occasion</button>`;
+}
+let pendingOcPhotoFile=null;
+function openOccasionModal(id){
+  document.getElementById('oc-status').style.display='none';
+  pendingOcPhotoFile=null;
+  if(id){
+    const o=OCCASION_CARDS.find(x=>x.id===id);
+    document.getElementById('ocModalTitle').textContent='Edit Occasion';
+    document.getElementById('oc-id').value=o.id;
+    document.getElementById('oc-key').value=o.key;
+    document.getElementById('oc-title').value=o.title;
+    document.getElementById('oc-badge').value=o.badge || '';
+    document.getElementById('oc-active').checked=o.active;
+    document.getElementById('oc-photo-box').innerHTML=o.image_url?`<img src="${o.image_url}">`:'Tap to upload photo';
+  }else{
+    document.getElementById('ocModalTitle').textContent='Add Occasion';
+    document.getElementById('oc-id').value=''; document.getElementById('oc-key').value='';
+    document.getElementById('oc-title').value=''; document.getElementById('oc-badge').value='';
+    document.getElementById('oc-active').checked=true;
+    document.getElementById('oc-photo-box').innerHTML='Tap to upload photo';
+  }
+  document.getElementById('ocOverlay').classList.add('show');
+}
+function closeOccasionModal(){ document.getElementById('ocOverlay').classList.remove('show'); }
+function handleOccasionPhoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  pendingOcPhotoFile=file;
+  const r=new FileReader(); r.onload=(ev)=>{document.getElementById('oc-photo-box').innerHTML=`<img src="${ev.target.result}">`;}; r.readAsDataURL(file);
+}
+async function saveOccasion(){
+  const statusEl=document.getElementById('oc-status');
+  const id=document.getElementById('oc-id').value;
+  const title=document.getElementById('oc-title').value.trim();
+  if(!title){ statusEl.style.display='block'; statusEl.style.color='var(--rose)'; statusEl.textContent='Title bharo.'; return; }
+  statusEl.style.display='block'; statusEl.style.color='var(--muted)'; statusEl.textContent='Saving...';
+  try{
+    const badge=document.getElementById('oc-badge').value.trim();
+    const payload={ title, badge: badge || null, active: document.getElementById('oc-active').checked };
+    if(pendingOcPhotoFile){ const c=await compressImage(pendingOcPhotoFile,700,0.8); payload.image_url=await uploadToStorage(c,'occasion'); }
+    let error;
+    if(id){ ({error}=await sb.from('occasion_cards').update(payload).eq('id',id)); }
+    else{ payload.key=slugifyKey(title); payload.sort_order=OCCASION_CARDS.length; ({error}=await sb.from('occasion_cards').insert(payload)); }
+    if(error) throw error;
+    await loadOccasionCards();
+    setTimeout(closeOccasionModal,300);
+  }catch(err){ statusEl.style.color='var(--rose)'; statusEl.textContent='Error: '+(err.message||'kuch galat ho gaya'); }
+}
+async function deleteOccasionCard(id){
+  if(!confirm('Ye occasion card delete karni hai?')) return;
+  const { error } = await sb.from('occasion_cards').delete().eq('id', id);
+  if(error){ alert('Delete fail: '+error.message); return; }
+  loadOccasionCards();
+}
+async function moveOccasionCard(id, dir){
+  const idx=OCCASION_CARDS.findIndex(x=>x.id===id); const swapIdx=idx+dir;
+  if(swapIdx<0||swapIdx>=OCCASION_CARDS.length) return;
+  const a=OCCASION_CARDS[idx], b=OCCASION_CARDS[swapIdx];
+  await Promise.all([
+    sb.from('occasion_cards').update({sort_order:b.sort_order}).eq('id',a.id),
+    sb.from('occasion_cards').update({sort_order:a.sort_order}).eq('id',b.id),
+  ]);
+  loadOccasionCards();
 }
 
 /* ---------------- Site Images (hero, banner, feelings, occasions,
@@ -1660,6 +2302,11 @@ async function loadOrders(){
   if(error){ console.error(error); listEl.innerHTML = `<div class="empty">${ICON_INBOX}<div><b>Couldn't load orders.</b><br>Try refreshing.</div></div>`; return; }
   ordersCache = data || [];
   renderOrders();
+  const newCount = ordersCache.filter(o => o.order_status === 'new').length;
+  const statEl = document.getElementById('statNewOrders');
+  if(statEl) statEl.textContent = newCount;
+  const badgeEl = document.getElementById('navBadgeOrders');
+  if(badgeEl){ badgeEl.textContent = newCount; badgeEl.classList.toggle('hidden', !newCount); }
 }
 
 /* Ek order 'Customised' tab mein tab aata hai jab uske kisi bhi item mein
@@ -1768,6 +2415,13 @@ async function loadTickets(){
   const { data, error } = await query;
   if(error){ console.error(error); el.innerHTML = `<div class="empty">${ICON_INBOX}<div><b>Couldn't load tickets.</b></div></div>`; return; }
   renderTickets(data || []);
+  if(!filterType){
+    const openCount = (data || []).filter(t => t.status === 'open').length;
+    const statEl = document.getElementById('statOpenTickets');
+    if(statEl) statEl.textContent = openCount;
+    const badgeEl = document.getElementById('navBadgeTickets');
+    if(badgeEl){ badgeEl.textContent = openCount; badgeEl.classList.toggle('hidden', !openCount); }
+  }
 }
 
 function renderTickets(tickets){
