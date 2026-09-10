@@ -106,15 +106,13 @@
   .gift-card .glabel{font-size:13px; font-weight:700;}
 
   /* ============ GIFTS FOR EVERY FEELING ============ */
-  .feelings-row2{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:14px 18px 4px;}
-  .feelings-row3{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:12px 18px 6px;}
-  .feeling-card{display:flex; flex-direction:column; gap:8px; cursor:pointer;}
-  .feeling-photo{border-radius:20px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+  .feelings-scroll{display:flex; gap:12px; padding:14px 18px 6px; overflow-x:auto; scrollbar-width:none;}
+  .feelings-scroll::-webkit-scrollbar{display:none;}
+  .feeling-card{flex:0 0 auto; width:128px; display:flex; flex-direction:column; gap:8px; cursor:pointer;}
+  .feeling-photo{border-radius:20px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,0.06); aspect-ratio:1/1;}
   .feeling-card:nth-child(3n+1) .feeling-photo .img-ph{background:var(--c-red); color:#fff;}
   .feeling-card:nth-child(3n+2) .feeling-photo .img-ph{background:var(--c-yellow); color:var(--ink);}
   .feeling-card:nth-child(3n+3) .feeling-photo .img-ph{background:var(--c-teal); color:#fff;}
-  .feelings-row2 .feeling-photo{aspect-ratio:1/0.82;}
-  .feelings-row3 .feeling-photo{aspect-ratio:1/1;}
   .feeling-card .flabel{font-size:13px; font-weight:700;}
 
   /* ============ GIFTS FOR EVERY OCCASION ============ */
@@ -514,8 +512,7 @@
 
 <!-- ============ GIFTS FOR EVERY FEELING ============ -->
 <div class="section-head"><div><div class="eyebrow">Pick a Moment</div><h2>Gifts for Every Feeling</h2></div></div>
-<div class="feelings-row2" id="feelingsRow2"></div>
-<div class="feelings-row3" id="feelingsRow3"></div>
+<div class="feelings-scroll" id="feelingsScroll"></div>
 
 <!-- ============ GIFTS FOR EVERY OCCASION ============ -->
 <div class="section-head"><div><div class="eyebrow">Pick an Occasion</div><h2>Gifts for Every Occasion</h2></div></div>
@@ -911,26 +908,35 @@ const TYPE_ICON = {Keychain:I.key, Mug:I.mug, "Tote Bag":I.tote, "T-Shirt":I.shi
 
 /* CATEGORIES — actual product categories (Keychain, Mug, etc.). Ye category
    filter chips (typeTabs / catStrip / customisedCatStrip / categoryCatStrip)
-   sab yahin se ek jagah generate hote hain — naya category (e.g. "Fridge
-   Magnet") add karna ho to bas neeche is ek list mein add karo. */
-const CATEGORIES = [
+   sab yahin se ek jagah generate hote hain. Ab admin panel (Main Categories
+   tab) se Supabase 'main_categories' table ke through add/remove/edit hoti
+   hai — connection na ho ya table khaali ho to niche wali fallback list
+   dikhti hai (loadMainCategories() neeche define hai). */
+const CATEGORIES_FALLBACK = [
   {type:'Keychain', label:'Keychains'},
   {type:'Mug', label:'Mugs'},
   {type:'Tote Bag', label:'Tote Bags'},
   {type:'T-Shirt', label:'T-Shirts'},
   {type:'Fridge Magnet', label:'Fridge Magnets'},
 ];
-/* SITE_IMAGES — har aur photo slot (hero, banner, feelings, occasions,
-   avatar style samples, type grid, addons, customise sections, category
-   icons) — admin.html ke "Site Images" tab se upload hoti hain. Yahaan,
-   CATEGORIES ke turant baad, define karna zaroori hai kyunki catChipsHtml()
-   (neeche hi) ise turant use karta hai — 'let' declaration se pehle use
-   karne par "Cannot access before initialization" error aake poori script
-   hi ruk jaati thi. */
+let CATEGORIES = CATEGORIES_FALLBACK;
+/* SITE_IMAGES — har aur photo slot (hero, banner, avatar style samples, type
+   grid, addons, customise sections) — admin.html ke "Site Images" tab se
+   upload hoti hain. Yahaan, CATEGORIES ke turant baad, define karna zaroori
+   hai kyunki catChipsHtml() (neeche hi) ise turant use karta hai — 'let'
+   declaration se pehle use karne par "Cannot access before initialization"
+   error aake poori script hi ruk jaati thi. */
 let SITE_IMAGES = {};
 const CAT_ICON_FALLBACK = { All: I.grid, Keychain: I.key, Mug: I.mug, 'Tote Bag': I.tote, 'T-Shirt': I.shirt, 'Fridge Magnet': I.gift, Hamper: I.gift };
 function catIconHtmlFor(type){
-  return SITE_IMAGES['cat_icon_' + type] ? `<img src="${SITE_IMAGES['cat_icon_' + type]}">` : (CAT_ICON_FALLBACK[type] || I.gift);
+  const cat = CATEGORIES.find(c => c.type === type);
+  if(cat && cat.icon_url) return `<img src="${cat.icon_url}">`;
+  if(SITE_IMAGES['cat_icon_' + type]) return `<img src="${SITE_IMAGES['cat_icon_' + type]}">`;
+  return CAT_ICON_FALLBACK[type] || I.gift;
+}
+function catBannerUrlFor(type){
+  const cat = CATEGORIES.find(c => c.type === type);
+  return (cat && cat.banner_url) || SITE_IMAGES['cat_banner_' + type] || '';
 }
 function catChipsHtml(cls){
   const isIconStyle = cls === 'pill';
@@ -945,10 +951,24 @@ function catChipsHtml(cls){
   return `<button class="${cls} active" data-type="All">All</button>`
     + CATEGORIES.map(c => `<button class="${cls}" data-type="${c.type}">${c.label}</button>`).join('');
 }
-document.getElementById('typeTabs').innerHTML = catChipsHtml('pill');
-document.getElementById('catStrip').innerHTML = catChipsHtml('cat-chip');
-document.getElementById('customisedCatStrip').innerHTML = catChipsHtml('cat-chip');
-const CUSTOMISATION_FEE = 150;
+function renderAllCatChips(){
+  const activeType = document.querySelector('#typeTabs .pill.active')?.dataset.type || 'All';
+  document.getElementById('typeTabs').innerHTML = catChipsHtml('pill');
+  document.getElementById('catStrip').innerHTML = catChipsHtml('cat-chip');
+  document.getElementById('customisedCatStrip').innerHTML = catChipsHtml('cat-chip');
+  document.querySelectorAll('#typeTabs .pill').forEach(c => c.classList.toggle('active', c.dataset.type === activeType));
+}
+renderAllCatChips();
+async function loadMainCategories(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('main_categories').select('*').eq('active', true).order('sort_order', {ascending:true});
+    if(error) throw error;
+    if(data && data.length) CATEGORIES = data;
+  }catch(err){
+    console.error('Main categories load failed:', err);
+  }
+}
 const MAKE_HAMPER_PRICE = 499;
 const CUSTOM_HAMPER_PRICE = 999;
 const ADDONS = { card:{label:"Thank You Card", price:49}, choco:{label:"Box of Chocolates", price:99}, wrap:{label:"Gift Wrapping", price:39} };
@@ -1189,7 +1209,7 @@ async function loadGiftImages(){
   }
 }
 
-const GIFT_RECIPIENTS = [
+const GIFT_RECIPIENTS_FALLBACK = [
   {key:'him', label:'Him', icon:I.user},
   {key:'her', label:'Her', icon:I.heart},
   {key:'kids', label:'Kids', icon:I.gift},
@@ -1199,12 +1219,23 @@ const GIFT_RECIPIENTS = [
   {key:'girlfriend', label:'Girlfriend', icon:I.heart},
   {key:'boyfriend', label:'Boyfriend', icon:I.heart},
 ];
+let GIFT_RECIPIENTS = GIFT_RECIPIENTS_FALLBACK;
+async function loadGiftRecipients(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('gift_recipients').select('*').eq('active', true).order('sort_order', {ascending:true});
+    if(error) throw error;
+    if(data && data.length) GIFT_RECIPIENTS = data;
+  }catch(err){
+    console.error('Gift recipients load failed:', err);
+  }
+}
 function renderGiftsGrid(){
   document.getElementById('giftsGrid').innerHTML = GIFT_RECIPIENTS.map(g => `
     <div class="gift-card" data-key="${g.key}">
       <div class="gift-photo-wrap">
-        ${GIFT_IMAGES[g.key] ? `<img src="${GIFT_IMAGES[g.key]}" style="width:100%;height:100%;object-fit:cover;">` : phBox(g.label + ' photo')}
-        <div class="gift-bgicon">${g.icon}</div>
+        ${g.image_url || GIFT_IMAGES[g.key] ? `<img src="${g.image_url || GIFT_IMAGES[g.key]}" style="width:100%;height:100%;object-fit:cover;">` : phBox(g.label + ' photo')}
+        <div class="gift-bgicon">${g.icon || I.gift}</div>
       </div>
       <div class="glabel">${g.label}</div>
     </div>
@@ -1216,33 +1247,43 @@ document.getElementById('giftsGrid').addEventListener('click', (e)=>{
   applyTagFilter(g.key, g.label);
 });
 
-/* ---------------- Gifts for Every Feeling ---------------- */
-const FEELINGS_ROW2 = [
+/* ---------------- Gifts for Every Feeling ----------------
+   Ab 'feeling_cards' table se load hoti hai (admin panel -> Gifts for Every
+   Feeling), same pattern jaise Occasions. Supabase na ho to fallback list
+   dikhti hai. */
+const FEELINGS_FALLBACK = [
   {key:'love', label:'Love & Romance'},
   {key:'thinking', label:'Thinking Of You'},
-];
-const FEELINGS_ROW3 = [
   {key:'apology', label:'Apology'},
   {key:'missyou', label:'Miss You'},
   {key:'congrats', label:'Congratulations'},
 ];
-function feelingCard(f){
+let FEELINGS = FEELINGS_FALLBACK;
+async function loadFeelings(){
+  if(!sb) return;
+  try{
+    const { data, error } = await sb.from('feeling_cards').select('*').eq('active', true).order('sort_order', {ascending:true});
+    if(error) throw error;
+    if(data && data.length) FEELINGS = data;
+  }catch(err){
+    console.error('Feelings load failed:', err);
+  }
+}
+function feelingCard(f, idx){
+  const url = f.image_url || SITE_IMAGES['feeling_' + f.key];
   return `<div class="feeling-card" data-key="${f.key}">
-    <div class="feeling-photo">${siteImg('feeling_' + f.key, f.label + ' gift photo')}</div>
+    <div class="feeling-photo">${url ? `<img src="${url}" style="width:100%;height:100%;object-fit:cover;">` : phBox(f.label + ' gift photo')}</div>
     <div class="flabel">${f.label}</div>
   </div>`;
 }
 function renderFeelings(){
-  document.getElementById('feelingsRow2').innerHTML = FEELINGS_ROW2.map(feelingCard).join('');
-  document.getElementById('feelingsRow3').innerHTML = FEELINGS_ROW3.map(feelingCard).join('');
+  document.getElementById('feelingsScroll').innerHTML = FEELINGS.map(feelingCard).join('');
 }
 renderFeelings();
-[document.getElementById('feelingsRow2'), document.getElementById('feelingsRow3')].forEach(el=>{
-  el.addEventListener('click', (e)=>{
-    const c = e.target.closest('.feeling-card'); if(!c) return;
-    const f = [...FEELINGS_ROW2, ...FEELINGS_ROW3].find(x => x.key === c.dataset.key);
-    applyTagFilter(f.key, f.label);
-  });
+document.getElementById('feelingsScroll').addEventListener('click', (e)=>{
+  const c = e.target.closest('.feeling-card'); if(!c) return;
+  const f = FEELINGS.find(x => x.key === c.dataset.key);
+  applyTagFilter(f.key, f.label);
 });
 
 /* ---------------- Gifts for Every Occasion ----------------
@@ -1319,7 +1360,7 @@ async function loadOccasions(){
   }
 }
 function occasionCard(o){
-  const imgUrl = SITE_IMAGES['occasion_' + o.key];
+  const imgUrl = o.image_url || SITE_IMAGES['occasion_' + o.key];
   return `<div class="occasion-card" data-key="${o.key}">
     <div class="oc-bg">${imgUrl ? `<img src="${imgUrl}" alt="${o.title}">` : ''}</div>
     <div class="oc-scrim"></div>
@@ -1552,10 +1593,10 @@ function badgeHtml(p){
   return `<span class="top-seller-badge" style="background:${b.bg}; color:#fff;">${b.label}</span>`;
 }
 function tagLabelFor(key){
-  const all = [...GIFT_RECIPIENTS, ...FEELINGS_ROW2, ...FEELINGS_ROW3];
+  const all = [...GIFT_RECIPIENTS, ...FEELINGS];
   const found = all.find(t => t.key === key);
   if(found) return found.label;
-  const occ = (OCCASIONS_FALLBACK || []).find(o => o.key === key);
+  const occ = (OCCASIONS || []).find(o => o.key === key);
   if(occ) return occ.title;
   return key.charAt(0).toUpperCase() + key.slice(1); // fallback: key ko hi capitalize kar do
 }
@@ -1732,7 +1773,6 @@ function renderCategoryView(){
 
   // Fallback — jab tak admin CMS mein koi section nahi banata, purana default
   // (existing Home page data reuse karke) dikhta rehta hai taaki page khaali na ho.
-  const allFeelings = [...FEELINGS_ROW2, ...FEELINGS_ROW3];
   container.innerHTML = `
     <div class="cat-section-wrap shop-by-cat-wrap" ${SITE_IMAGES.catpage_shopbycategory_bg ? `style="background-image:url('${SITE_IMAGES.catpage_shopbycategory_bg}');"` : ''}>
       <div class="shop-by-cat-heading">हमारे पास क्या-क्या है</div>
@@ -1756,18 +1796,18 @@ function renderCategoryView(){
     </div>`).join('');
   document.getElementById('catPersonGrid').innerHTML = GIFT_RECIPIENTS.map(g => `
     <div class="tile-4" data-key="${g.key}" data-label="${g.label}">
-      <div class="tile-4-img photo">${GIFT_IMAGES[g.key] ? `<img src="${GIFT_IMAGES[g.key]}">` : g.icon}</div>
+      <div class="tile-4-img photo">${(g.image_url || GIFT_IMAGES[g.key]) ? `<img src="${g.image_url || GIFT_IMAGES[g.key]}">` : (g.icon || I.gift)}</div>
       <span>${g.label}</span>
     </div>`).join('');
   document.getElementById('catOccasionGrid').innerHTML = OCCASIONS.map(o => {
-    const url = SITE_IMAGES['occasion_' + o.key];
+    const url = o.image_url || SITE_IMAGES['occasion_' + o.key];
     return `<div class="tile-4" data-key="${o.key}" data-label="${o.title}">
       <div class="tile-4-img photo">${url ? `<img src="${url}">` : I.gift}</div>
       <span>${o.title}</span>
     </div>`;
   }).join('');
-  document.getElementById('catFeelingGrid').innerHTML = allFeelings.map(f => {
-    const url = SITE_IMAGES['feeling_' + f.key];
+  document.getElementById('catFeelingGrid').innerHTML = FEELINGS.map(f => {
+    const url = f.image_url || SITE_IMAGES['feeling_' + f.key];
     return `<div class="tile-4" data-key="${f.key}" data-label="${f.label}">
       <div class="tile-4-img photo">${url ? `<img src="${url}">` : I.gift}</div>
       <span>${f.label}</span>
@@ -3225,7 +3265,7 @@ function enableHScroll(el){
   }, true);
 }
 function enableAllHScroll(){
-  document.querySelectorAll('.pill-tabs, .quicklinks, .gifts-grid, .occasion-scroll, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll, .banner-carousel').forEach(enableHScroll);
+  document.querySelectorAll('.pill-tabs, .quicklinks, .gifts-grid, .feelings-scroll, .occasion-scroll, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll, .banner-carousel').forEach(enableHScroll);
 }
 
 /* ---------------- Init ---------------- */
@@ -3241,7 +3281,10 @@ function renderRestOfPage(){
 
 (async function init(){
   try{
-    await Promise.all([loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions(), loadPromoTiles()]);
+    await Promise.all([
+      loadProducts(), loadGiftImages(), loadSiteImages(), loadOccasions(), loadPromoTiles(),
+      loadMainCategories(), loadGiftRecipients(), loadFeelings(),
+    ]);
     updateCartCount();
     renderBestsellers();
     renderProducts();
@@ -3251,11 +3294,10 @@ function renderRestOfPage(){
     loadCategoryPageCms();
     checkCustomerAuth();
     enableAllHScroll();
-    // Category icons custom-uploaded ho sakte hain (SITE_IMAGES abhi load hui hai)
-    // — isliye icon strip ko ek baar refresh kar dete hain taaki wo dikh jaayen.
-    const activeType = document.querySelector('#typeTabs .pill.active')?.dataset.type || 'All';
-    document.getElementById('typeTabs').innerHTML = catChipsHtml('pill');
-    document.querySelectorAll('#typeTabs .pill').forEach(c => c.classList.toggle('active', c.dataset.type === activeType));
+    // Category icons custom-uploaded ho sakte hain aur Main Categories admin
+    // se add/remove/reorder ho sakti hain — isliye poori chip strip ko ek
+    // baar refresh kar dete hain taaki sab turant dikh jaaye.
+    renderAllCatChips();
   }catch(err){
     console.error('Page failed to load fully:', err);
   }finally{
