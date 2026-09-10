@@ -1,0 +1,32 @@
+name: Generate SEO pages
+
+on:
+  schedule:
+    - cron: '30 21 * * *'   # roz raat ~3:00 AM IST pe (21:30 UTC) apne aap chalega
+  workflow_dispatch: {}       # GitHub -> Actions tab se "Run workflow" button se turant bhi chala sakte ho
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate product pages + sitemap.xml
+        run: node scripts/generate-seo.mjs
+
+      - name: Commit changes (if any)
+        run: |
+          git config user.name "jagashilp-seo-bot"
+          git config user.email "actions@github.com"
+          git add product sitemap.xml
+          git diff --staged --quiet || git commit -m "chore: regenerate SEO product pages + sitemap"
+          git push
