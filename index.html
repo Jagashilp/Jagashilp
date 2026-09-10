@@ -2442,7 +2442,32 @@ async function confirmAndPay(){
    (verified, secure) popup se hi hota hai — "fallbackToStandardCheckout()".
    Kisi bhi wajah se UPI-apps list na mile (desktop, purana browser, koi
    error) to seedha wahi purana standard popup khul jaata hai — payment
-   kabhi block nahi hota. */
+   kabhi block nahi hota.
+
+   ZAROORI (pichli baar yahi toota tha): Standard Checkout (checkout.js) aur
+   Custom Checkout (razorpay.js) — dono alag JS files hain jo dono hi global
+   `window.Razorpay` naam use karte hain, aur dono ke methods poori tarah
+   alag hain (Standard mein sirf .open() hai; Custom mein sirf
+   getSupportedUpiIntentApps()/createPayment() hai — ek doosre ke paas nahi).
+   Isliye dono ko turant load hote hi apne-apne alag variable mein "capture"
+   kar lete hain (StandardRazorpayCtor / loadCustomCheckoutScript se milne
+   wala constructor) — taaki baad mein `window.Razorpay` kuch bhi ho, humara
+   code hamesha sahi wala object use kare. Fallback button ("Card/Netbanking/
+   Wallet/Other") hamesha StandardRazorpayCtor se hi chalta hai, UPI-tap
+   hamesha Custom Checkout instance se — dono kabhi mix nahi hote. */
+const StandardRazorpayCtor = window.Razorpay; // checkout.js <head> mein page load ke waqt hi load ho chuka hota hai
+let customCheckoutScriptPromise = null;
+function loadCustomCheckoutScript(){
+  if(customCheckoutScriptPromise) return customCheckoutScriptPromise;
+  customCheckoutScriptPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/razorpay.js';
+    s.onload = () => resolve(window.Razorpay); // is waqt window.Razorpay Custom Checkout ka constructor ban chuka hai — turant capture
+    s.onerror = () => reject(new Error('Custom checkout script load failed'));
+    document.head.appendChild(s);
+  });
+  return customCheckoutScriptPromise;
+}
 function isMobileDevice(){
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
@@ -2462,8 +2487,8 @@ function upiAppStyleFor(app){
   const label = app.name || 'UPI App';
   return { label, color: '#8B5CF6', initial: label.charAt(0).toUpperCase() };
 }
-let currentRzpInstance = null;
-let currentPaymentContext = null;
+let currentCustomRzp = null;      // Custom Checkout instance — sirf UPI-app-tap ke liye
+let currentPaymentContext = null; // {orderId, razorpayOrderId, amountRupees, customer, statusEl, btn}
 let currentUpiApps = [];
 function showUpiPicker(apps){
   currentUpiApps = apps;
@@ -2486,11 +2511,11 @@ function closeUpiPicker(){
 }
 function payWithUpiApp(idx){
   const app = currentUpiApps[idx];
-  if(!app || !currentRzpInstance || !currentPaymentContext) return;
+  if(!app || !currentCustomRzp || !currentPaymentContext) return;
   document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.add('loading'));
   const { orderId, razorpayOrderId, amountRupees, customer } = currentPaymentContext;
   try{
-    currentRzpInstance.createPayment({
+    currentCustomRzp.createPayment({
       amount: Math.round(amountRupees * 100),
       currency: 'INR',
       order_id: razorpayOrderId,
@@ -2512,16 +2537,16 @@ function payWithUpiApp(idx){
 }
 function fallbackToStandardCheckout(){
   document.getElementById('upiPickerDrawer').classList.remove('show');
-  if(currentRzpInstance) currentRzpInstance.open();
+  if(currentPaymentContext) openStandardCheckoutPopup(currentPaymentContext);
 }
 
-function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
-  const statusEl = document.getElementById('review-status');
-  const btn = document.getElementById('review-pay-btn');
-  btn.textContent = 'Waiting for payment...';
-  btn.disabled = true;
-
-  const rzp = new Razorpay({
+/* Standard Checkout (checkout.js, StandardRazorpayCtor) — Card/Netbanking/
+   Wallet/Desktop-UPI/QR sab isi ek popup mein hai. Custom UPI-picker se
+   bilkul independent; isko koi bhi call kar sakta hai bina UPI flow ke baare
+   mein kuch jaane. */
+function openStandardCheckoutPopup(ctx){
+  const { orderId, razorpayOrderId, amountRupees, customer, statusEl, btn } = ctx;
+  const rzp = new StandardRazorpayCtor({
     key: RAZORPAY_KEY_ID,
     amount: Math.round(amountRupees * 100), // paise
     currency: 'INR',
@@ -2554,27 +2579,49 @@ function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
     btn.disabled = false;
     btn.dataset.retryOrderId = orderId;
   });
-  // Custom UPI-app-picker flow (createPayment) bhi isi 'rzp' object se payment
-  // karta hai, isliye uska success bhi yahin 'payment.success' event se pakadte hain.
-  rzp.on('payment.success', function(response){
-    verifyAndCompletePayment(orderId, response);
-  });
+  rzp.open();
+}
 
-  currentRzpInstance = rzp;
-  currentPaymentContext = { orderId, razorpayOrderId, amountRupees, customer };
+function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
+  const statusEl = document.getElementById('review-status');
+  const btn = document.getElementById('review-pay-btn');
+  btn.textContent = 'Waiting for payment...';
+  btn.disabled = true;
+
+  currentPaymentContext = { orderId, razorpayOrderId, amountRupees, customer, statusEl, btn };
 
   // Mobile pe pehle apna custom "kis UPI app se pay karna hai" screen dikhate
-  // hain. Desktop pe (ya UPI app detect na ho to) seedha Razorpay ka standard
-  // popup khulta hai — usme UPI QR/Card/Netbanking/Wallet sab already hai.
-  if(isMobileDevice() && typeof rzp.getSupportedUpiIntentApps === 'function'){
-    rzp.getSupportedUpiIntentApps().then(apps => {
-      if(apps && apps.length) showUpiPicker(apps);
-      else rzp.open();
+  // hain (Custom Checkout script alag se load hoti hai, Standard flow ko
+  // bilkul touch nahi karti). Desktop pe, ya koi bhi dikkat aaye to, seedha
+  // Standard Checkout popup khulta hai — payment kabhi block nahi hoti.
+  if(isMobileDevice()){
+    loadCustomCheckoutScript().then(CustomRazorpayCtor => {
+      const customRzp = new CustomRazorpayCtor({ key: RAZORPAY_KEY_ID });
+      if(typeof customRzp.getSupportedUpiIntentApps !== 'function'){
+        openStandardCheckoutPopup(currentPaymentContext);
+        return;
+      }
+      customRzp.on('payment.success', function(response){ verifyAndCompletePayment(orderId, response); });
+      customRzp.on('payment.failed', function(response){
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--rose)';
+        statusEl.textContent = 'Payment failed: ' + ((response.error && response.error.description) || 'please try again.');
+        btn.textContent = 'Retry Payment';
+        btn.disabled = false;
+        btn.dataset.retryOrderId = orderId;
+      });
+      currentCustomRzp = customRzp;
+      customRzp.getSupportedUpiIntentApps().then(apps => {
+        if(apps && apps.length) showUpiPicker(apps);
+        else openStandardCheckoutPopup(currentPaymentContext);
+      }).catch(() => {
+        openStandardCheckoutPopup(currentPaymentContext); // koi bhi dikkat aaye to seedha standard popup — payment kabhi block nahi hona chahiye
+      });
     }).catch(() => {
-      rzp.open(); // koi bhi dikkat aaye to seedha standard popup — payment kabhi block nahi hona chahiye
+      openStandardCheckoutPopup(currentPaymentContext); // Custom Checkout script load hi na ho paayi to bhi standard popup se payment ho jaayegi
     });
   }else{
-    rzp.open();
+    openStandardCheckoutPopup(currentPaymentContext);
   }
 }
 
