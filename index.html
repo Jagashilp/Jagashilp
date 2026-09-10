@@ -3,7 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jagashilp — Handmade Doodle Gifts</title>
+<title>Jagashilp — Handmade Doodle Gifts | Personalised Keychains, Mugs & Gifts</title>
+<meta name="description" content="Shop handmade, hand-painted personalised gifts from Jagashilp — custom keychains, mugs, tote bags, T-shirts & fridge magnets. Perfect gifts for birthdays, anniversaries, Rakhi & every occasion. Free shipping, COD available.">
+<meta name="keywords" content="handmade gifts, personalised keychains, custom mugs, hand painted gifts, gifts for him, gifts for her, birthday gifts India, Rakhi gifts, Jagashilp">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://jagashilp.in/">
+<!-- Open Graph (Facebook/WhatsApp link previews) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Jagashilp">
+<meta property="og:title" content="Jagashilp — Handmade Doodle Gifts">
+<meta property="og:description" content="Custom hand-painted keychains, mugs, tote bags & more. Personalised gifts for every person, feeling & occasion.">
+<meta property="og:url" content="https://jagashilp.in/">
+<!-- TODO: admin -> Site Images -> Branding se logo upload karne ke baad, uska public URL yahan daal do
+     (abhi Site Images ke URLs JS se dynamically load hote hain, isliye crawler ko static tag mein nahi dikhte) -->
+<meta property="og:image" content="https://jagashilp.in/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jagashilp — Handmade Doodle Gifts">
+<meta name="twitter:description" content="Custom hand-painted keychains, mugs, tote bags & more — personalised gifts for every occasion.">
+<meta name="twitter:image" content="https://jagashilp.in/og-image.jpg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "OnlineStore",
+  "name": "Jagashilp",
+  "url": "https://jagashilp.in/",
+  "description": "Handmade, hand-painted personalised gifts — keychains, mugs, tote bags, T-shirts & fridge magnets.",
+  "email": "v8xmedia@gmail.com",
+  "telephone": "+91-70614-59730",
+  "address": { "@type": "PostalAddress", "addressLocality": "New Delhi", "addressCountry": "IN" },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://jagashilp.in/?search={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rozha+One&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -321,6 +355,13 @@
   .hp-congrats .hpc-sub{font-size:11px; color:var(--ink-soft); margin-top:1px;}
   .discount-row{display:flex; justify-content:space-between; font-size:12.5px; color:var(--marigold-deep); font-weight:700; margin-bottom:6px;}
   .checkout-btn{width:100%; background:var(--c-red); color:#fff; padding:15px; border-radius:16px; font-weight:700; font-size:14px;}
+  .checkout-btn.ghost{background:none; border:1.5px solid var(--line-strong, #E5DDDC); color:var(--ink);}
+  .upi-app-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .upi-app-btn{display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 6px; border-radius:16px; border:1.5px solid #EEE6E5; background:#FBF8F7; cursor:pointer; transition:border-color .15s, background .15s;}
+  .upi-app-btn:active{background:#F5EEED;}
+  .upi-app-btn .upi-app-icon{width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; font-family:'Syne',sans-serif;}
+  .upi-app-btn .upi-app-name{font-size:11.5px; font-weight:700; text-align:center; line-height:1.25;}
+  .upi-app-btn.loading{opacity:0.55; pointer-events:none;}
 
   /* ============ ACCOUNT (Phone OTP) ============ */
   .otp-box{width:100%; text-align:left;}
@@ -662,6 +703,19 @@
     <div class="subtotal-row"><span>Total</span><span id="review-total">₹0</span></div>
     <div id="review-status" class="chk-status"></div>
     <button class="checkout-btn" id="review-pay-btn" onclick="confirmAndPay()">Proceed to Payment</button>
+  </div>
+</div>
+
+<!-- ============ UPI APP PICKER (mobile only — custom UI; card/netbanking/wallet still open Razorpay's own screen) ============ -->
+<div class="drawer" id="upiPickerDrawer">
+  <div class="drawer-head"><h3>Pay via UPI</h3><button class="close-btn" onclick="closeUpiPicker()"></button></div>
+  <div class="drawer-body">
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Tumhare phone mein jo UPI app installed hai, uspe tap karo — payment seedha usi app mein khul jaayegi.</div>
+    <div class="upi-app-grid" id="upiAppGrid"></div>
+    <div id="upi-picker-status" class="chk-status"></div>
+  </div>
+  <div class="drawer-foot">
+    <button class="checkout-btn ghost" onclick="fallbackToStandardCheckout()">Card / Netbanking / Wallet / Other</button>
   </div>
 </div>
 
@@ -1606,7 +1660,7 @@ function productCardHtml(p){
   return `
     <div class="card" onclick="openProductDetail('${p.id}')">
       <div class="card-img">
-        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
         <div class="badge-stack">
           ${p.customisable ? `<span class="custom-badge">Customised</span>` : ''}
         </div>
@@ -1650,7 +1704,7 @@ function renderHighlightRow(containerId, predicate){
         const off = p.mrp && p.mrp > p.price ? Math.round((1 - p.price/p.mrp) * 100) : 0;
         return `
         <div class="hl-slide" onclick="openProductDetail('${p.id}')">
-          ${p.image_url ? `<img src="${p.image_url}" draggable="false" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" draggable="false" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
           <div class="hl-slide-scrim"></div>
           <span class="hl-badge">Highlight</span>
           <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button>
@@ -1840,7 +1894,7 @@ function renderBestsellers(){
     const off = Math.round((1 - p.price/p.mrp) * 100);
     return `
     <div class="scard" onclick="openProductDetail('${p.id}')">
-      <div class="scard-img"><span class="best-badge">Bestseller</span>${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}<button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button></div>
+      <div class="scard-img"><span class="best-badge">Bestseller</span>${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}<button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">${I.heart}</button></div>
       <div class="scard-name">${p.name}</div>
       <div class="scard-price"><span class="now">₹${p.price}</span><span class="was">₹${p.mrp}</span><span class="off">${off}% OFF</span></div>
     </div>`;
@@ -1950,7 +2004,7 @@ function handleSearchInput(query){
     ? matches.map(p => `
         <div onclick="clearSearch(); openProductDetail('${p.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid rgba(33,25,34,0.06);cursor:pointer;">
           <div style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--paper-deep);">
-            ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name)})'>` : phCircle()}
+            ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name)})'>` : phCircle()}
           </div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
@@ -2380,6 +2434,87 @@ async function confirmAndPay(){
   }
 }
 
+/* ---------------- Custom UPI app picker (mobile-only) ----------------
+   Razorpay ke Custom Checkout SDK (razorpay.js) se customer ke phone mein
+   jo UPI apps installed hain unki list milti hai — humara apna screen
+   unhi ko dikhata hai, tap karte hi seedha wahi app khulti hai payment ke
+   liye. Card/Netbanking/Wallet/Desktop UPI — sab abhi bhi Razorpay ke apne
+   (verified, secure) popup se hi hota hai — "fallbackToStandardCheckout()".
+   Kisi bhi wajah se UPI-apps list na mile (desktop, purana browser, koi
+   error) to seedha wahi purana standard popup khul jaata hai — payment
+   kabhi block nahi hota. */
+function isMobileDevice(){
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+const UPI_APP_STYLES = {
+  google_pay: { label: 'Google Pay', color: '#1a73e8', initial: 'G' },
+  gpay:       { label: 'Google Pay', color: '#1a73e8', initial: 'G' },
+  phonepe:    { label: 'PhonePe',    color: '#5f259f', initial: 'Pe' },
+  paytm:      { label: 'Paytm',      color: '#00baf2', initial: 'P' },
+  bhim:       { label: 'BHIM',       color: '#00a950', initial: 'B' },
+  amazon_pay: { label: 'Amazon Pay', color: '#ff9900', initial: 'A' },
+  whatsapp:   { label: 'WhatsApp',   color: '#25d366', initial: 'W' },
+};
+function upiAppStyleFor(app){
+  const rawKey = (app.package_name || app.name || '').toLowerCase().replace(/[^a-z]/g,'_');
+  const found = Object.keys(UPI_APP_STYLES).find(k => rawKey.includes(k));
+  if(found) return UPI_APP_STYLES[found];
+  const label = app.name || 'UPI App';
+  return { label, color: '#8B5CF6', initial: label.charAt(0).toUpperCase() };
+}
+let currentRzpInstance = null;
+let currentPaymentContext = null;
+let currentUpiApps = [];
+function showUpiPicker(apps){
+  currentUpiApps = apps;
+  document.getElementById('upiAppGrid').innerHTML = apps.map((app, idx) => {
+    const style = upiAppStyleFor(app);
+    return `<button class="upi-app-btn" onclick="payWithUpiApp(${idx})">
+      <div class="upi-app-icon" style="background:${style.color};">${style.initial}</div>
+      <div class="upi-app-name">${style.label}</div>
+    </button>`;
+  }).join('');
+  document.getElementById('upi-picker-status').style.display = 'none';
+  closeAllPanels();
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('upiPickerDrawer').classList.add('show');
+}
+function closeUpiPicker(){
+  document.getElementById('upiPickerDrawer').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('orderReviewDrawer').classList.add('show');
+}
+function payWithUpiApp(idx){
+  const app = currentUpiApps[idx];
+  if(!app || !currentRzpInstance || !currentPaymentContext) return;
+  document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.add('loading'));
+  const { orderId, razorpayOrderId, amountRupees, customer } = currentPaymentContext;
+  try{
+    currentRzpInstance.createPayment({
+      amount: Math.round(amountRupees * 100),
+      currency: 'INR',
+      order_id: razorpayOrderId,
+      email: customer.email,
+      contact: customer.phone,
+      method: 'upi',
+      '_[flow]': 'intent',
+      upi_app_package_name: app.package_name || app.name,
+      notes: { order_id: orderId },
+    });
+  }catch(err){
+    console.error('UPI intent payment failed to start:', err);
+    document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('loading'));
+    const statusEl = document.getElementById('upi-picker-status');
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--rose)';
+    statusEl.textContent = 'Ye app abhi open nahi ho payi — neeche "Card / Netbanking / Wallet / Other" try karo.';
+  }
+}
+function fallbackToStandardCheckout(){
+  document.getElementById('upiPickerDrawer').classList.remove('show');
+  if(currentRzpInstance) currentRzpInstance.open();
+}
+
 function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
   const statusEl = document.getElementById('review-status');
   const btn = document.getElementById('review-pay-btn');
@@ -2393,8 +2528,9 @@ function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
     order_id: razorpayOrderId, // Razorpay-side order — amount ab tamper-proof hai
     name: 'Jagashilp',
     description: 'Order #' + orderId.slice(0,8),
+    image: SITE_IMAGES.logo || undefined, // admin.html -> Site Images -> Branding se aata hai; na ho to Razorpay apna default icon dikha dega
     prefill: { name: customer.name, email: customer.email, contact: customer.phone },
-    theme: { color: '#E60023' },
+    theme: { color: '#E60023', backdrop_color: 'rgba(23,19,19,0.72)' },
     notes: { order_id: orderId },
     handler: function(response){
       verifyAndCompletePayment(orderId, response);
@@ -2418,7 +2554,28 @@ function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
     btn.disabled = false;
     btn.dataset.retryOrderId = orderId;
   });
-  rzp.open();
+  // Custom UPI-app-picker flow (createPayment) bhi isi 'rzp' object se payment
+  // karta hai, isliye uska success bhi yahin 'payment.success' event se pakadte hain.
+  rzp.on('payment.success', function(response){
+    verifyAndCompletePayment(orderId, response);
+  });
+
+  currentRzpInstance = rzp;
+  currentPaymentContext = { orderId, razorpayOrderId, amountRupees, customer };
+
+  // Mobile pe pehle apna custom "kis UPI app se pay karna hai" screen dikhate
+  // hain. Desktop pe (ya UPI app detect na ho to) seedha Razorpay ka standard
+  // popup khulta hai — usme UPI QR/Card/Netbanking/Wallet sab already hai.
+  if(isMobileDevice() && typeof rzp.getSupportedUpiIntentApps === 'function'){
+    rzp.getSupportedUpiIntentApps().then(apps => {
+      if(apps && apps.length) showUpiPicker(apps);
+      else rzp.open();
+    }).catch(() => {
+      rzp.open(); // koi bhi dikkat aaye to seedha standard popup — payment kabhi block nahi hona chahiye
+    });
+  }else{
+    rzp.open();
+  }
 }
 
 /* Checkout ne "success" bola — lekin ye seedha maan lena unsafe hai (browser
@@ -2547,7 +2704,7 @@ function renderWishlistDrawer(){
   }
   body.innerHTML = items.map(p => `
     <div class="wish-item">
-      <div class="wish-item-img">${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name)}</div>
+      <div class="wish-item-img">${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name)}</div>
       <div class="wish-item-info">
         <div class="ci-name">${p.name}</div>
         <div class="ci-price">₹${p.price}</div>
@@ -2960,10 +3117,52 @@ async function checkCustomerAuth(){
   });
 }
 
+const DEFAULT_TITLE = document.title;
+const DEFAULT_META_DESC = document.querySelector('meta[name="description"]').content;
+function updatePageSeoForProduct(p){
+  document.title = `${p.name} — Buy Online | Jagashilp`;
+  const descEl = document.querySelector('meta[name="description"]');
+  if(descEl) descEl.setAttribute('content', (p.description || (p.name + ' — handmade personalised gift from Jagashilp.')).slice(0,160));
+  injectProductSchema(p);
+}
+function resetPageSeoToDefault(){
+  document.title = DEFAULT_TITLE;
+  const descEl = document.querySelector('meta[name="description"]');
+  if(descEl) descEl.setAttribute('content', DEFAULT_META_DESC);
+  removeProductSchema();
+}
+function injectProductSchema(p){
+  removeProductSchema();
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.id = 'productSchema';
+  script.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": p.name,
+    "image": p.image_url ? [p.image_url] : [],
+    "description": p.description || p.name,
+    "sku": p.id,
+    "brand": { "@type": "Brand", "name": "Jagashilp" },
+    "offers": {
+      "@type": "Offer",
+      "url": "https://jagashilp.in/",
+      "priceCurrency": "INR",
+      "price": p.price,
+      "availability": "https://schema.org/InStock"
+    }
+  });
+  document.head.appendChild(script);
+}
+function removeProductSchema(){
+  const el = document.getElementById('productSchema');
+  if(el) el.remove();
+}
 function closeAllPanels(){
   document.getElementById('overlay').classList.remove('show');
   clearSearch();
-  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderReviewDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','productDetailDrawer'].forEach(id=>{
+  resetPageSeoToDefault();
+  ['cartDrawer','hamperDrawer','customiseDrawer','checkoutDrawer','orderReviewDrawer','upiPickerDrawer','orderConfirmedDrawer','accountDrawer','wishlistDrawer','helpCenterDrawer','orderDetailDrawer','productDetailDrawer'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.classList.remove('show');
   });
@@ -2983,6 +3182,7 @@ function openProductDetail(id){
   pdPhotoState = [];
   document.getElementById('overlay').classList.add('show');
   document.getElementById('productDetailDrawer').classList.add('show');
+  updatePageSeoForProduct(p); // browser tab title + JSON-LD product schema (JS-rendering crawlers ke liye)
   const off = p.mrp && p.mrp > p.price ? Math.round((1 - p.price/p.mrp) * 100) : 0;
   const showPhoto = p.customisable && p.photo_upload_enabled;
   const showNote = p.customisable && p.note_enabled;
@@ -3012,7 +3212,7 @@ function openProductDetail(id){
 
   document.getElementById('pdBody').innerHTML = `
     <div class="pd-img">
-      ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
+      ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror='imgFallback(this, ${JSON.stringify(p.name + " photo")})'>` : phBox(p.name + ' photo')}
       <button class="wish-toggle ${isWishlisted(p.id)?'active':''}" onclick="toggleWishlist('${p.id}'); this.classList.toggle('active');">${I.heart}</button>
     </div>
     <div class="card-cat">${p.type}</div>
@@ -3299,6 +3499,10 @@ function renderRestOfPage(){
     // se add/remove/reorder ho sakti hain — isliye poori chip strip ko ek
     // baar refresh kar dete hain taaki sab turant dikh jaaye.
     renderAllCatChips();
+    // Static SEO product pages (product/<slug>/) ke "Buy on Jagashilp" button
+    // se ?p=<id> ke saath yahan aata hai — us product ka detail seedha khol dete hain.
+    const openProductId = new URLSearchParams(window.location.search).get('p');
+    if(openProductId && PRODUCTS.some(p => p.id === openProductId)) openProductDetail(openProductId);
   }catch(err){
     console.error('Page failed to load fully:', err);
   }finally{
