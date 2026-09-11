@@ -2548,6 +2548,10 @@ function payWithUpiApp(idx){
   document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.add('loading'));
   const { orderId, razorpayOrderId, amountRupees, customer } = currentPaymentContext;
   try{
+    // Web JS SDK ka sahi tareeka: PSP-specific fields (jaise upi_app_package_name,
+    // _[flow]) sirf Android/iOS native SDK ke liye hain — website ke liye Razorpay
+    // ek DOOSRA argument leta hai jisme jis app se pay karna hai wahi key 'true'
+    // set hoti hai, e.g. createPayment(paymentData, { gpay: true }).
     currentCustomRzp.createPayment({
       amount: Math.round(amountRupees * 100),
       currency: 'INR',
@@ -2555,10 +2559,8 @@ function payWithUpiApp(idx){
       email: customer.email,
       contact: customer.phone,
       method: 'upi',
-      '_[flow]': 'intent',
-      upi_app_package_name: app, // ab plain string hai (e.g. "gpay"), object nahi
       notes: { order_id: orderId },
-    });
+    }, { [app]: true });
   }catch(err){
     console.error('UPI intent payment failed to start:', err);
     document.querySelectorAll('.upi-app-btn').forEach(b => b.classList.remove('loading'));
