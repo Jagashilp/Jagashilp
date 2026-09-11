@@ -502,6 +502,8 @@
   .nav-item{display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10.5px; font-weight:600; color:var(--ink-soft);}
   .nav-item.active{color:var(--rose);}
   .nav-item svg{margin:0 auto;}
+  .nav-item .nav-icon-img{width:18px; height:18px; object-fit:contain; margin:0 auto; display:block; filter:grayscale(1) opacity(0.55);}
+  .nav-item.active .nav-icon-img{filter:none;}
 
   /* ============ DESKTOP APP FRAME (must stay last to win cascade) ============ */
   @media(min-width:701px){
@@ -1614,7 +1616,7 @@ document.getElementById('bottomNav').innerHTML = `
   <div class="nav-item active" id="navHome">${I.home}<span>Home</span></div>
   <div class="nav-item" id="navProducts">${I.package}<span>Products</span></div>
   <div class="nav-item" id="navCustomised">${I.sparkle}<span>Customised</span></div>
-  <div class="nav-item" id="navCategory">${I.grid}<span>Category</span></div>
+  <div class="nav-item" id="navCategory"><img class="nav-icon-img" src="assets/icon-category.png?v=1" alt="Category"><span>Category</span></div>
   <div class="nav-item" id="accountNavItem"><span id="accountNavIcon">${I.user}</span><span>Account</span></div>
 `;
 document.getElementById('accountNavItem').addEventListener('click', openAccountDrawer);
