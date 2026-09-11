@@ -3003,7 +3003,7 @@ async function loadMyOrders(){
         </div>
         <div class="my-order-items">${items}</div>
         <span class="my-order-status">${o.order_status}</span>
-        <button class="view-detail-btn" onclick="openOrderDetail('${o.id}')">${I.package}<span>View details</span></button>
+        <button class="view-detail-btn" onclick="openOrderDetail('${o.id}')"><span>View details</span></button>
       </div>`;
     }).join('');
   }catch(err){
