@@ -359,6 +359,7 @@
   .upi-app-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
   .upi-app-btn{display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 6px; border-radius:16px; border:1.5px solid #EEE6E5; background:#FBF8F7; cursor:pointer; transition:border-color .15s, background .15s;}
   .upi-app-btn:active{background:#F5EEED;}
+  .upi-app-btn .upi-app-icon-wrap{width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.08); padding:6px;}
   .upi-app-btn .upi-app-icon{width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; color:#fff; font-family:'Syne',sans-serif;}
   .upi-app-btn .upi-app-name{font-size:11.5px; font-weight:700; text-align:center; line-height:1.25;}
   .upi-app-btn.loading{opacity:0.55; pointer-events:none;}
@@ -710,7 +711,7 @@
 <div class="drawer" id="upiPickerDrawer">
   <div class="drawer-head"><h3>Pay via UPI</h3><button class="close-btn" onclick="closeUpiPicker()"></button></div>
   <div class="drawer-body">
-    <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Tumhare phone mein jo UPI app installed hai, uspe tap karo — payment seedha usi app mein khul jaayegi.</div>
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">Select your preferred UPI app to complete the payment securely.</div>
     <div class="upi-app-grid" id="upiAppGrid"></div>
     <div id="upi-picker-status" class="chk-status"></div>
   </div>
@@ -2471,25 +2472,29 @@ function loadCustomCheckoutScript(){
 function isMobileDevice(){
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
+// Real app icons — Cashfree ki publicly available payments-icon CDN se
+// (yahi companies apne merchants ko UPI app logos legally dikhane ke liye
+// deti hain). 64px PNG use kar rahe hain, crisp dikhega 44px ke box mein.
+const CASHFREE_ICON_BASE = 'https://cashfreelogo.cashfree.com/assets_images/pg/upi/64';
 const UPI_APP_STYLES = {
-  gpay:        { label: 'Google Pay',  color: '#1a73e8', initial: 'G' },
-  google_pay:  { label: 'Google Pay',  color: '#1a73e8', initial: 'G' },
-  phonepe:     { label: 'PhonePe',     color: '#5f259f', initial: 'Pe' },
-  paytm:       { label: 'Paytm',       color: '#00baf2', initial: 'P' },
-  cred:        { label: 'CRED',        color: '#1c1c1c', initial: 'C' },
-  bhim:        { label: 'BHIM',        color: '#00a950', initial: 'B' },
-  popclubapp:  { label: 'Pop',         color: '#ff5a5f', initial: 'Po' },
-  mobikwik:    { label: 'MobiKwik',    color: '#e6273f', initial: 'M' },
-  super_money: { label: 'Super Money', color: '#7c3aed', initial: 'S' },
-  moneyview:   { label: 'MoneyView',   color: '#00a8a8', initial: 'MV' },
-  icici:       { label: 'iMobile Pay', color: '#ee6c2f', initial: 'i' },
-  navi:        { label: 'Navi',        color: '#f47820', initial: 'N' },
-  payzapp:     { label: 'PayZapp',     color: '#5c2d91', initial: 'Pz' },
-  jupiter:     { label: 'Jupiter',     color: '#6f42c1', initial: 'J' },
-  amazon:      { label: 'Amazon Pay',  color: '#ff9900', initial: 'A' },
-  slice:       { label: 'Slice',       color: '#6f42c1', initial: 'Sl' },
-  bharatpe:    { label: 'BharatPe',    color: '#f5821f', initial: 'Bp' },
-  whatsapp:    { label: 'WhatsApp',    color: '#25d366', initial: 'W' },
+  gpay:        { label: 'Google Pay',  icon: `${CASHFREE_ICON_BASE}/gpay.png` },
+  google_pay:  { label: 'Google Pay',  icon: `${CASHFREE_ICON_BASE}/gpay.png` },
+  phonepe:     { label: 'PhonePe',     icon: `${CASHFREE_ICON_BASE}/phonepe.png` },
+  paytm:       { label: 'Paytm',       icon: `${CASHFREE_ICON_BASE}/paytm.png` },
+  cred:        { label: 'CRED',        icon: `${CASHFREE_ICON_BASE}/credpay.png` },
+  bhim:        { label: 'BHIM',        icon: `${CASHFREE_ICON_BASE}/bhim.png` },
+  popclubapp:  { label: 'Pop',         icon: `${CASHFREE_ICON_BASE}/popclub.png` },
+  mobikwik:    { label: 'MobiKwik',    icon: `${CASHFREE_ICON_BASE}/mobikwik.png` },
+  super_money: { label: 'Super Money', icon: `${CASHFREE_ICON_BASE}/supermoney.png` },
+  moneyview:   { label: 'MoneyView',   icon: `${CASHFREE_ICON_BASE}/moneyview.png` },
+  icici:       { label: 'iMobile Pay', icon: `${CASHFREE_ICON_BASE}/icici.png` },
+  navi:        { label: 'Navi',        icon: `${CASHFREE_ICON_BASE}/navi.png` },
+  payzapp:     { label: 'PayZapp',     icon: `${CASHFREE_ICON_BASE}/payzapp.png` },
+  jupiter:     { label: 'Jupiter',     icon: `${CASHFREE_ICON_BASE}/jupiter.png` },
+  amazon:      { label: 'Amazon Pay',  icon: `${CASHFREE_ICON_BASE}/amazon.png` },
+  slice:       { label: 'Slice',       icon: `${CASHFREE_ICON_BASE}/slice.png` },
+  bharatpe:    { label: 'BharatPe',    icon: `${CASHFREE_ICON_BASE}/bharatpe.png` },
+  whatsapp:    { label: 'WhatsApp',    icon: `${CASHFREE_ICON_BASE}/whatsapp.png` },
 };
 // Sirf ye apps UPI-picker mein dikhani hain — baaki (CRED, MobiKwik, PayZapp,
 // Jupiter, Amazon Pay, Slice, etc.) hide kar denge, chahe Razorpay unhe
@@ -2508,9 +2513,9 @@ function upiAppStyleFor(app){
   const found = Object.keys(UPI_APP_STYLES).find(k => rawKey.includes(k));
   if(found) return UPI_APP_STYLES[found];
   // Koi naya/anjaan app aaye (Razorpay list badalte rehte hain) to bhi crash
-  // na ho — uska naam capitalize karke generic purple icon dikha denge.
+  // na ho — uska naam capitalize karke generic icon dikha denge.
   const niceLabel = rawKey.split('_').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'UPI App';
-  return { label: niceLabel, color: '#8B5CF6', initial: niceLabel.charAt(0).toUpperCase() };
+  return { label: niceLabel, icon: null, initial: niceLabel.charAt(0).toUpperCase() };
 }
 let currentCustomRzp = null;      // Custom Checkout instance — sirf UPI-app-tap ke liye
 let currentPaymentContext = null; // {orderId, razorpayOrderId, amountRupees, customer, statusEl, btn}
@@ -2519,8 +2524,11 @@ function showUpiPicker(apps){
   currentUpiApps = apps;
   document.getElementById('upiAppGrid').innerHTML = apps.map((app, idx) => {
     const style = upiAppStyleFor(app);
+    const iconHtml = style.icon
+      ? `<img src="${style.icon}" alt="${style.label}" style="width:100%;height:100%;object-fit:contain;border-radius:12px;">`
+      : `<div class="upi-app-icon" style="background:#8B5CF6;">${style.initial}</div>`;
     return `<button class="upi-app-btn" onclick="payWithUpiApp(${idx})">
-      <div class="upi-app-icon" style="background:${style.color};">${style.initial}</div>
+      <div class="upi-app-icon-wrap">${iconHtml}</div>
       <div class="upi-app-name">${style.label}</div>
     </button>`;
   }).join('');
