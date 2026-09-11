@@ -2472,28 +2472,50 @@ function isMobileDevice(){
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 }
 const UPI_APP_STYLES = {
-  google_pay: { label: 'Google Pay', color: '#1a73e8', initial: 'G' },
-  gpay:       { label: 'Google Pay', color: '#1a73e8', initial: 'G' },
-  phonepe:    { label: 'PhonePe',    color: '#5f259f', initial: 'Pe' },
-  paytm:      { label: 'Paytm',      color: '#00baf2', initial: 'P' },
-  bhim:       { label: 'BHIM',       color: '#00a950', initial: 'B' },
-  amazon_pay: { label: 'Amazon Pay', color: '#ff9900', initial: 'A' },
-  whatsapp:   { label: 'WhatsApp',   color: '#25d366', initial: 'W' },
+  gpay:        { label: 'Google Pay',  color: '#1a73e8', initial: 'G' },
+  google_pay:  { label: 'Google Pay',  color: '#1a73e8', initial: 'G' },
+  phonepe:     { label: 'PhonePe',     color: '#5f259f', initial: 'Pe' },
+  paytm:       { label: 'Paytm',       color: '#00baf2', initial: 'P' },
+  cred:        { label: 'CRED',        color: '#1c1c1c', initial: 'C' },
+  bhim:        { label: 'BHIM',        color: '#00a950', initial: 'B' },
+  popclubapp:  { label: 'Pop',         color: '#ff5a5f', initial: 'Po' },
+  mobikwik:    { label: 'MobiKwik',    color: '#e6273f', initial: 'M' },
+  super_money: { label: 'Super Money', color: '#7c3aed', initial: 'S' },
+  moneyview:   { label: 'MoneyView',   color: '#00a8a8', initial: 'MV' },
+  icici:       { label: 'iMobile Pay', color: '#ee6c2f', initial: 'i' },
+  navi:        { label: 'Navi',        color: '#f47820', initial: 'N' },
+  payzapp:     { label: 'PayZapp',     color: '#5c2d91', initial: 'Pz' },
+  jupiter:     { label: 'Jupiter',     color: '#6f42c1', initial: 'J' },
+  amazon:      { label: 'Amazon Pay',  color: '#ff9900', initial: 'A' },
+  slice:       { label: 'Slice',       color: '#6f42c1', initial: 'Sl' },
+  bharatpe:    { label: 'BharatPe',    color: '#f5821f', initial: 'Bp' },
+  whatsapp:    { label: 'WhatsApp',    color: '#25d366', initial: 'W' },
 };
+// Sirf ye apps UPI-picker mein dikhani hain — baaki (CRED, MobiKwik, PayZapp,
+// Jupiter, Amazon Pay, Slice, etc.) hide kar denge, chahe Razorpay unhe
+// supported list mein bheje.
+const ALLOWED_UPI_APPS = ['gpay', 'phonepe', 'paytm', 'navi', 'bhim', 'bharatpe'];
+function filterAllowedUpiApps(apps){
+  return (apps || []).filter(app => {
+    const rawKey = String(app || '').toLowerCase().replace(/[^a-z]/g, '_');
+    return ALLOWED_UPI_APPS.some(k => rawKey.includes(k));
+  });
+}
 function upiAppStyleFor(app){
-  const rawKey = (app.package_name || app.name || app.application_name || app.app_name || '').toLowerCase().replace(/[^a-z]/g,'_');
+  // Razorpay ye list plain strings ke roop mein deta hai (e.g. "gpay",
+  // "phonepe"), object ke roop mein nahi — isliye app khud hi uska key hai.
+  const rawKey = String(app || '').toLowerCase().replace(/[^a-z]/g, '_');
   const found = Object.keys(UPI_APP_STYLES).find(k => rawKey.includes(k));
   if(found) return UPI_APP_STYLES[found];
-  // TEMP DEBUG: asli field names screenshot mein dikhane ke liye — jab tak
-  // sahi field confirm nahi ho jaata. Isse hata denge sahi field pata chalte hi.
-  const label = app.name || app.application_name || app.app_name || app.package_name || JSON.stringify(app).slice(0, 40) || 'UPI App';
-  return { label, color: '#8B5CF6', initial: (label || 'U').charAt(0).toUpperCase() };
+  // Koi naya/anjaan app aaye (Razorpay list badalte rehte hain) to bhi crash
+  // na ho — uska naam capitalize karke generic purple icon dikha denge.
+  const niceLabel = rawKey.split('_').filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') || 'UPI App';
+  return { label: niceLabel, color: '#8B5CF6', initial: niceLabel.charAt(0).toUpperCase() };
 }
 let currentCustomRzp = null;      // Custom Checkout instance — sirf UPI-app-tap ke liye
 let currentPaymentContext = null; // {orderId, razorpayOrderId, amountRupees, customer, statusEl, btn}
 let currentUpiApps = [];
 function showUpiPicker(apps){
-  console.log('Razorpay getSupportedUpiIntentApps() raw response:', apps); // TEMP DEBUG
   currentUpiApps = apps;
   document.getElementById('upiAppGrid').innerHTML = apps.map((app, idx) => {
     const style = upiAppStyleFor(app);
@@ -2526,7 +2548,7 @@ function payWithUpiApp(idx){
       contact: customer.phone,
       method: 'upi',
       '_[flow]': 'intent',
-      upi_app_package_name: app.package_name || app.name,
+      upi_app_package_name: app, // ab plain string hai (e.g. "gpay"), object nahi
       notes: { order_id: orderId },
     });
   }catch(err){
@@ -2615,7 +2637,8 @@ function openRazorpayForOrder(orderId, razorpayOrderId, amountRupees, customer){
       });
       currentCustomRzp = customRzp;
       customRzp.getSupportedUpiIntentApps().then(apps => {
-        if(apps && apps.length) showUpiPicker(apps);
+        const filtered = filterAllowedUpiApps(apps);
+        if(filtered.length) showUpiPicker(filtered);
         else openStandardCheckoutPopup(currentPaymentContext);
       }).catch(() => {
         openStandardCheckoutPopup(currentPaymentContext); // koi bhi dikkat aaye to seedha standard popup — payment kabhi block nahi hona chahiye
