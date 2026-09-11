@@ -2481,16 +2481,19 @@ const UPI_APP_STYLES = {
   whatsapp:   { label: 'WhatsApp',   color: '#25d366', initial: 'W' },
 };
 function upiAppStyleFor(app){
-  const rawKey = (app.package_name || app.name || '').toLowerCase().replace(/[^a-z]/g,'_');
+  const rawKey = (app.package_name || app.name || app.application_name || app.app_name || '').toLowerCase().replace(/[^a-z]/g,'_');
   const found = Object.keys(UPI_APP_STYLES).find(k => rawKey.includes(k));
   if(found) return UPI_APP_STYLES[found];
-  const label = app.name || 'UPI App';
-  return { label, color: '#8B5CF6', initial: label.charAt(0).toUpperCase() };
+  // TEMP DEBUG: asli field names screenshot mein dikhane ke liye — jab tak
+  // sahi field confirm nahi ho jaata. Isse hata denge sahi field pata chalte hi.
+  const label = app.name || app.application_name || app.app_name || app.package_name || JSON.stringify(app).slice(0, 40) || 'UPI App';
+  return { label, color: '#8B5CF6', initial: (label || 'U').charAt(0).toUpperCase() };
 }
 let currentCustomRzp = null;      // Custom Checkout instance — sirf UPI-app-tap ke liye
 let currentPaymentContext = null; // {orderId, razorpayOrderId, amountRupees, customer, statusEl, btn}
 let currentUpiApps = [];
 function showUpiPicker(apps){
+  console.log('Razorpay getSupportedUpiIntentApps() raw response:', apps); // TEMP DEBUG
   currentUpiApps = apps;
   document.getElementById('upiAppGrid').innerHTML = apps.map((app, idx) => {
     const style = upiAppStyleFor(app);
