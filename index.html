@@ -79,7 +79,7 @@
   @keyframes tickerScroll{from{transform:translateX(0);} to{transform:translateX(-100%);}}
 
   /* ============ TOP BAR ============ */
-  .topbar{position:sticky; top:0; z-index:50; background:var(--c-cream); border-bottom:1px solid rgba(33,25,34,0.08); box-shadow:0 2px 10px rgba(33,25,34,0.05);}
+  .topbar{position:sticky; top:0; z-index:50; background:var(--c-cream); background-size:cover; background-position:center; background-repeat:no-repeat; border-bottom:1px solid rgba(33,25,34,0.08); box-shadow:0 2px 10px rgba(33,25,34,0.05);}
   .topbar-row{display:flex; align-items:center; justify-content:space-between; padding:14px 18px 10px;}
   .logo{font-family:'Momo Trust Display', sans-serif; font-weight:600; font-size:20px; color:var(--ink);}
   .logo span{color:var(--c-red);}
@@ -507,9 +507,9 @@
 
   /* ============ DESKTOP APP FRAME (must stay last to win cascade) — applied via JS device detection, not just window width ============ */
   html.is-desktop body{background:#EAE1D6; padding-top:32px; padding-bottom:108px;}
-  html.is-desktop .page-wrap{max-width:480px; margin:0 auto; background:var(--bg); min-height:calc(100vh - 32px); box-shadow:0 0 0 1px rgba(23,19,19,0.06), 0 30px 70px rgba(23,19,19,0.18); position:relative;}
+  html.is-desktop .page-wrap{max-width:420px; margin:0 auto; background:var(--bg); min-height:calc(100vh - 32px); box-shadow:0 0 0 1px rgba(23,19,19,0.06), 0 30px 70px rgba(23,19,19,0.18); position:relative;}
   html.is-desktop .topbar{border-radius:0;}
-  html.is-desktop .bottom-nav{left:50%; right:auto; transform:translateX(-50%); width:100%; max-width:480px; box-shadow:0 -4px 20px rgba(23,19,19,0.12);}
+  html.is-desktop .bottom-nav{left:50%; right:auto; transform:translateX(-50%); width:100%; max-width:420px; box-shadow:0 -4px 20px rgba(23,19,19,0.12);}
   html.is-desktop .drawer{right:auto; left:50%; top:50%; height:auto; max-height:82vh; width:92vw; max-width:420px; border-radius:20px; transform:translate(-50%,-45%); opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; box-shadow:0 30px 70px rgba(23,19,19,0.35);}
   html.is-desktop .drawer.show{transform:translate(-50%,-50%); opacity:1; pointer-events:auto;}
   html.is-desktop .drawer-body{overflow-y:auto; min-height:0;}
