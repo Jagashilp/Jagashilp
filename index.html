@@ -518,6 +518,26 @@
 </style>
 </head>
 <body>
+
+<div id="desktopNotice" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(33,25,34,0.55); align-items:center; justify-content:center; padding:20px;">
+  <div style="background:var(--card); border-radius:18px; max-width:340px; width:100%; padding:26px 22px 22px; text-align:center; box-shadow:0 30px 70px rgba(23,19,19,0.35);">
+    <div style="font-size:34px; margin-bottom:10px;">📱</div>
+    <div style="font-size:16px; font-weight:800; color:var(--ink); margin-bottom:8px;">Best experience on Mobile</div>
+    <div style="font-size:12.5px; color:var(--ink-soft); line-height:1.6; margin-bottom:18px;">This site is designed for mobile phones. Please open it on your mobile phone for the best experience.</div>
+    <button onclick="document.getElementById('desktopNotice').style.display='none'; try{sessionStorage.setItem('desktopNoticeSeen','1');}catch(e){}" style="background:var(--c-red); color:#fff; border:none; border-radius:12px; padding:11px 22px; font-size:13px; font-weight:800; cursor:pointer;">Continue Anyway</button>
+  </div>
+</div>
+<script>
+(function(){
+  try{
+    var isDesktop = window.innerWidth > 700;
+    var alreadySeen = sessionStorage.getItem('desktopNoticeSeen') === '1';
+    if(isDesktop && !alreadySeen){
+      document.getElementById('desktopNotice').style.display = 'flex';
+    }
+  }catch(e){}
+})();
+</script>
 <div class="toast" id="appToast"></div>
 <div id="pageLoader" style="position:fixed;inset:0;z-index:300;background:#F6F6F6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
   <div style="width:38px;height:38px;border-radius:50%;border:3px solid rgba(33,25,34,0.12);border-top-color:#E60023;animation:pageLoaderSpin .8s linear infinite;"></div>
