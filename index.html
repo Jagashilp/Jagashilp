@@ -1650,7 +1650,7 @@ document.getElementById('bottomNav').innerHTML = `
 document.getElementById('accountNavItem').addEventListener('click', openAccountDrawer);
 
 /* ---------------- View switching (Home / Products / Customised / Category) ---------------- */
-function showView(view){
+function applyView(view){
   ['homeView','productsView','customisedView','categoryView'].forEach(id=>{
     document.getElementById(id).style.display = (id === view) ? '' : 'none';
   });
@@ -1664,6 +1664,38 @@ function showView(view){
   if(activeNav) activeNav.classList.add('active');
   window.scrollTo({top:0, behavior:'instant'});
 }
+
+/* ---- Back-button support for tabs ----
+   Home se kisi bhi dusre tab (Products/Customised/Category) pe jaate hi ek
+   history entry push hoti hai. Back dabane par wo entry pop hoti hai aur
+   Home dikh jaata hai (page/site se bahar nahi jaata). Tabs ke beech switch
+   karne par naya entry nahi banta. Drawer (cart/account) ka apna entry upar
+   rehta hai, isliye pehle drawer band hota hai, fir tab. */
+let viewEntryPushed = false;
+function showView(view){
+  const pe = window.__panelEntry;               // drawer history helper (neeche IIFE me)
+  if(view !== 'homeView'){
+    if(!viewEntryPushed){
+      if(pe && pe.pending()){                   // drawer band hua hi hai, uska entry tab-entry bana do
+        pe.cancel();
+        history.replaceState({ jagashilView: true }, '');
+      }else{
+        history.pushState({ jagashilView: true }, '');
+      }
+      viewEntryPushed = true;
+    }
+  }else if(viewEntryPushed){
+    viewEntryPushed = false;
+    if(pe && pe.pending()){ pe.cancel(); history.go(-2); }   // [home, tab, drawer] -> [home]
+    else history.back();                                      // [home, tab] -> [home]
+  }
+  applyView(view);
+}
+window.addEventListener('popstate', () => {
+  const ov = document.getElementById('overlay');
+  if(ov && ov.classList.contains('show')) return;   // pehle drawer band hone do
+  if(viewEntryPushed){ viewEntryPushed = false; applyView('homeView'); }
+});
 document.getElementById('navHome').addEventListener('click', ()=> showView('homeView'));
 document.getElementById('navProducts').addEventListener('click', ()=>{ showView('productsView'); renderProducts(); });
 document.getElementById('navCustomised').addEventListener('click', ()=>{ showView('customisedView'); renderCustomisedView(); });
@@ -3645,6 +3677,7 @@ function renderRestOfPage(){
   if(!overlayEl) return;
   let panelHistoryPushed = false;
   let closingViaPopstate = false;
+  window.__panelEntry = { pending: () => panelHistoryPushed, cancel: () => { panelHistoryPushed = false; } };
 
   new MutationObserver(() => {
     const isOpen = overlayEl.classList.contains('show');
