@@ -26,7 +26,9 @@
   "@context": "https://schema.org",
   "@type": "OnlineStore",
   "name": "Jagashilp",
+  "alternateName": ["Jagashilp.in", "Jagashilp Gifts"],
   "url": "https://jagashilp.in/",
+  "logo": "https://jagashilp.in/og-image.jpg",
   "description": "Handmade, hand-painted personalised gifts — keychains, mugs, tote bags, T-shirts & fridge magnets.",
   "email": "v8xmedia@gmail.com",
   "telephone": "+91-70614-59730",
@@ -57,6 +59,8 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   body{background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:76px;}
   h1,h2,h3,.serif{font-family:'Momo Trust Display', sans-serif; font-weight:600;}
+  .seo-h1{position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+  .footer-cats{margin-top:10px;}
   .eyebrow{font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; letter-spacing:.1em; text-transform:uppercase; font-size:11.5px;}
   .pill-tabs, .quicklinks, .gifts-grid, .occasion-scroll, .customise-scroll, .scroll-row, .cat-strip, .addon-scroll, .banner-carousel{cursor:grab; -webkit-overflow-scrolling:touch;}
   .pill-tabs.dragging, .quicklinks.dragging, .gifts-grid.dragging, .occasion-scroll.dragging, .customise-scroll.dragging, .scroll-row.dragging, .cat-strip.dragging, .addon-scroll.dragging, .banner-carousel.dragging{cursor:grabbing; scroll-behavior:auto;}
@@ -595,6 +599,7 @@
 <div id="searchOverlay" onclick="clearSearch()" style="display:none;position:fixed;inset:0;background:rgba(33,25,34,0.25);z-index:40;"></div>
 
 <div id="homeView">
+<h1 class="seo-h1">Jagashilp — Personalised &amp; Customised Gifting: Hand-painted Keychains, Mugs, Tote Bags &amp; More</h1>
 
 <!-- ============ PROMO BANNER GRID (admin-managed, top of homepage) ============ -->
 <div class="promo-section" id="promoSection" style="display:none;">
@@ -650,6 +655,18 @@
     <a href="shipping-policy/">Shipping Policy</a>
     <a href="contact-us/">Contact Us</a>
   </div>
+  <!-- SEO-CATEGORY-NAV:START -->
+  <nav class="footer-links footer-cats" aria-label="Shop by category">
+    <a href="category/keychain/">Keychain</a>
+    <a href="category/mug/">Mug</a>
+    <a href="category/tote-bag/">Tote Bag</a>
+    <a href="category/t-shirt/">T-Shirt</a>
+    <a href="category/fridge-magnet/">Fridge Magnet</a>
+    <a href="category/hamper/">Hamper</a>
+    <a href="category/mouse-pad/">Mouse Pad</a>
+    <a href="category/jagannath-ji/">Jagannath Ji</a>
+  </nav>
+  <!-- SEO-CATEGORY-NAV:END -->
 </footer>
 
 </div>
@@ -3673,6 +3690,8 @@ function renderRestOfPage(){
     // se ?p=<id> ke saath yahan aata hai — us product ka detail seedha khol dete hain.
     const openProductId = new URLSearchParams(window.location.search).get('p');
     if(openProductId && PRODUCTS.some(p => p.id === openProductId)) openProductDetail(openProductId);
+    const openType = new URLSearchParams(window.location.search).get('type');
+    if(openType && openType !== 'Hamper' && CATEGORIES.some(c => c.type === openType)) filterByType(openType);
   }catch(err){
     console.error('Page failed to load fully:', err);
   }finally{
