@@ -356,6 +356,22 @@
   .discount-row{display:flex; justify-content:space-between; font-size:12.5px; color:var(--marigold-deep); font-weight:700; margin-bottom:6px;}
   .checkout-btn{width:100%; background:var(--c-red); color:#fff; padding:15px; border-radius:16px; font-weight:700; font-size:14px;}
   .checkout-btn.ghost{background:none; border:1.5px solid var(--line-strong, #E5DDDC); color:var(--ink);}
+
+  /* ---------- Alpona (Bengali rice-paste art) dotted border on primary red buttons ----------
+     Layers (top -> bottom): inner fill, thin inner line, ring of dots, base fill.
+     Layout/size change nahi hota — ring button ke andar hi bani hai. Ghost, Google sign-in,
+     ink-coloured (hamper/order) aur banner ke white buttons pe ye nahi lagta. */
+  .checkout-btn:not(.ghost):not(#googleSignInBtn), .add-btn{
+    --ring:7px; --dot:1.5px; --al-fill:var(--c-red); --al-dot:#fff; --al-line:#fff;
+    background:
+      linear-gradient(var(--al-fill),var(--al-fill)) center / calc(100% - 2*var(--ring) - 3px) calc(100% - 2*var(--ring) - 3px) no-repeat,
+      linear-gradient(var(--al-line),var(--al-line)) center / calc(100% - 2*var(--ring)) calc(100% - 2*var(--ring)) no-repeat,
+      radial-gradient(circle,var(--al-dot) var(--dot),transparent calc(var(--dot) + .6px)) 0 0 / var(--ring) var(--ring) round,
+      var(--al-fill);
+    border-radius:8px;
+  }
+  .checkout-btn:not(.ghost):not(#googleSignInBtn){ padding-left:calc(var(--ring) + 8px); padding-right:calc(var(--ring) + 8px); }
+  .add-btn{ --ring:5px; --dot:1.1px; padding:10px 10px; }
   .upi-app-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
   .upi-app-btn{display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px 6px; border-radius:16px; border:1.5px solid #EEE6E5; background:#FBF8F7; cursor:pointer; transition:border-color .15s, background .15s;}
   .upi-app-btn:active{background:#F5EEED;}
@@ -851,7 +867,7 @@
   <div class="drawer-body" id="pdBody"></div>
   <div class="drawer-foot" style="display:flex; gap:10px;">
     <button class="checkout-btn" id="pdAddBtn" style="flex:1;">Add to Cart</button>
-    <button class="checkout-btn" id="pdBuyNowBtn" style="flex:1; background:#FFC107; color:#211922;">Buy Now</button>
+    <button class="checkout-btn" id="pdBuyNowBtn" style="flex:1; --al-fill:#FFC107; --al-dot:#211922; --al-line:#211922; color:#211922;">Buy Now</button>
   </div>
 </div>
 
@@ -1650,7 +1666,7 @@ document.getElementById('bottomNav').innerHTML = `
 document.getElementById('accountNavItem').addEventListener('click', openAccountDrawer);
 
 /* ---------------- View switching (Home / Products / Customised / Category) ---------------- */
-function showView(view){
+function applyView(view){
   ['homeView','productsView','customisedView','categoryView'].forEach(id=>{
     document.getElementById(id).style.display = (id === view) ? '' : 'none';
   });
@@ -1664,6 +1680,38 @@ function showView(view){
   if(activeNav) activeNav.classList.add('active');
   window.scrollTo({top:0, behavior:'instant'});
 }
+
+/* ---- Back-button support for tabs ----
+   Home se kisi bhi dusre tab (Products/Customised/Category) pe jaate hi ek
+   history entry push hoti hai. Back dabane par wo entry pop hoti hai aur
+   Home dikh jaata hai (page/site se bahar nahi jaata). Tabs ke beech switch
+   karne par naya entry nahi banta. Drawer (cart/account) ka apna entry upar
+   rehta hai, isliye pehle drawer band hota hai, fir tab. */
+let viewEntryPushed = false;
+function showView(view){
+  const pe = window.__panelEntry;               // drawer history helper (neeche IIFE me)
+  if(view !== 'homeView'){
+    if(!viewEntryPushed){
+      if(pe && pe.pending()){                   // drawer band hua hi hai, uska entry tab-entry bana do
+        pe.cancel();
+        history.replaceState({ jagashilView: true }, '');
+      }else{
+        history.pushState({ jagashilView: true }, '');
+      }
+      viewEntryPushed = true;
+    }
+  }else if(viewEntryPushed){
+    viewEntryPushed = false;
+    if(pe && pe.pending()){ pe.cancel(); history.go(-2); }   // [home, tab, drawer] -> [home]
+    else history.back();                                      // [home, tab] -> [home]
+  }
+  applyView(view);
+}
+window.addEventListener('popstate', () => {
+  const ov = document.getElementById('overlay');
+  if(ov && ov.classList.contains('show')) return;   // pehle drawer band hone do
+  if(viewEntryPushed){ viewEntryPushed = false; applyView('homeView'); }
+});
 document.getElementById('navHome').addEventListener('click', ()=> showView('homeView'));
 document.getElementById('navProducts').addEventListener('click', ()=>{ showView('productsView'); renderProducts(); });
 document.getElementById('navCustomised').addEventListener('click', ()=>{ showView('customisedView'); renderCustomisedView(); });
@@ -3645,6 +3693,7 @@ function renderRestOfPage(){
   if(!overlayEl) return;
   let panelHistoryPushed = false;
   let closingViaPopstate = false;
+  window.__panelEntry = { pending: () => panelHistoryPushed, cancel: () => { panelHistoryPushed = false; } };
 
   new MutationObserver(() => {
     const isOpen = overlayEl.classList.contains('show');
